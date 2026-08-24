@@ -14,3 +14,12 @@ export function getDifficultyColor(difficulty: string): string {
             return "#000000"
     }
 }
+
+export function getTextSize(title: string): string {
+    const length = title.length
+    if (length <= 12) return "text-base"
+    else if (length <= 20) return "text-sm"
+    else if (length <= 26) return "text-xs"
+    else return "text-[10px]"
+}  
+

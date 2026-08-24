@@ -1,6 +1,6 @@
 export function getGrade(score: number, noteCount: number, pure: number | null, far: number | null, lost: number | null): string {
     if (score >= 10000000) {
-        if (isPM(score, noteCount, far, lost) || noteCount < 2237) return "PM (" + getPmRating(score, noteCount, pure) + ")"
+        if (isPM(score, noteCount, far, lost) || noteCount < 2237) return "PM"
         else return "EX+"
     }
     else if (score >= 9900000) return "EX+"
