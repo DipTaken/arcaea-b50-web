@@ -15,9 +15,12 @@ export default async function Page() {
     .select('*, charts(title, difficulty, chart_constant, note_count)')
     .eq('user_id', guestId)
 
-  const sortedScores = scores?.slice().sort(
-    (a, b) => (b.charts?.chart_constant ?? 0) - (a.charts?.chart_constant ?? 0)
-  )
+  const sortedScores = scores?.slice()
+    .sort((a, b) => 
+      getPlayRating(b.score, b.charts?.chart_constant ?? 0) - 
+      getPlayRating(a.score, a.charts?.chart_constant ?? 0)
+    )
+    .slice(0,50)
 
   return (
     <div>

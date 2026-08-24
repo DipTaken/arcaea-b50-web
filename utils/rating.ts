@@ -25,7 +25,7 @@ export function getPlayRating(score: number, chartConstant: number): number {
 
 export function getPmRating(score: number, noteCount: number, pure: number | null): string {
     if (score < 10000000) return "N/A"
-    else if (pure === null) return "MAX Unknown"
+    else if (pure === null) return "? MAX"
     else if (noteCount === pure) return "MAX"
     else return "MAX - " + (noteCount - pure)
 }
