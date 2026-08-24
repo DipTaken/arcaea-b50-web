@@ -22,7 +22,7 @@ export default function ChartSearch({ charts }: { charts: Chart[] }) {
             
             {selectedId && (
                 <p>
-                    Selected: {charts.find((c) => c.id === selectedId)?.title + ' — ' + charts.find((c) => c.id === selectedId)?.difficulty}
+                    Selected: {charts.find((c) => c.id === selectedId)?.title} — {charts.find((c) => c.id === selectedId)?.difficulty}
                 </p>
             )}
 
