@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { getGuestIdReadOnly } from '@/utils/guest'
-import { getGrade, getPlayRating } from '@/utils/rating'
+import { getPlayRating } from '@/utils/rating'
+import ScoreCard from '@/app/ScoreCard'
 import AddScoreButton from './AddScoreButton'
 
 export default async function Page() {
@@ -25,13 +26,9 @@ export default async function Page() {
   return (
     <div>
       <AddScoreButton charts={charts ?? []} />
-    <ul>
-        {sortedScores?.map((score) => (
-          <li 
-            key = {score.id}>{score.charts?.title} {score.charts?.difficulty} — {score.score}  
-              {' '} {getGrade(score.score, score.charts?.note_count ?? 0, score.pure, score.far, score.lost)} 
-              {' '}({score.charts?.chart_constant ?? 0} {'->'} {getPlayRating(score.score, score.charts?.chart_constant ?? 0).toFixed(2)}) 
-          </li>
+    <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
+        {sortedScores?.map((score, index) => (
+          <ScoreCard key={score.id} score={score} index={index} />
         ))}
       </ul>
     </div>

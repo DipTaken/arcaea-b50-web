@@ -57,30 +57,42 @@ Both tables have RLS enabled (project-wide "automatic RLS on new tables" setting
 
 ```
 app/
-├── page.tsx                  — homepage; fetches charts + scores, intended to show user's B30/B50-style list
-├── AddScoreButton.tsx         — client component, toggle button + form (WIP, shell only — form contents not yet moved in)
+├── page.tsx                  — homepage; fetches charts + scores, sorts by Play Rating (not chart_constant), slices to top 50,
+│                                 renders <AddScoreButton> + a <ul> grid of <ScoreCard>
+├── ScoreCard.tsx              — client component, one B50 grid cell: rank badge (#N, from .map's index), grade + Play Rating,
+│                                 jacket art with a gradient-faded score overlay, difficulty-colored title bar (chart_constant
+│                                 bottom-right). Fully styled with Tailwind. Jacket art is currently a single hardcoded
+│                                 placeholder URL for every card (see "Not yet built" — song jacket art).
+├── AddScoreButton.tsx         — client component: button + native <dialog> (opened/closed via useRef + showModal()/close())
+│                                 wrapping the add-score form. Functionally complete — submits via a client-side handleSubmit
+│                                 that awaits the addScore Server Action then closes the dialog. NOT yet styled (plain HTML).
 ├── scores/
-│   ├── page.tsx               — original scores page (fetch charts + scores, form, list) — may be redundant with app/page.tsx now that "add score" is moving to a homepage button+modal pattern; needs reconciling
-│   ├── actions.ts             — `addScore` server action (inserts a score row, handles optional pure/far/lost as null)
-│   └── ChartSearch.tsx        — client component: searchable/filterable chart picker (replaces a plain <select>), used inside the add-score form
+│   ├── actions.ts             — `addScore` server action (inserts a score row, handles optional pure/far/lost as null);
+│   │                              revalidates `/` (the add-score form now lives on the homepage, not `/scores`)
+│   └── ChartSearch.tsx        — client component: searchable/filterable chart picker, used inside AddScoreButton's form.
+│                                  NOT yet styled (plain HTML).
 ├── utils/
 │   ├── supabase/
 │   │   ├── client.ts          — browser Supabase client
 │   │   ├── server.ts          — server Supabase client (takes cookieStore param)
 │   │   └── middleware.ts      — used by root middleware.ts, refreshes Supabase auth session cookies
-│   ├── guest.ts               — `getGuestId()` (Server Action use only — reads/creates/refreshes the guest_id cookie)
-│   │                              NOTE: a read-only variant (`getGuestIdReadOnly`) is also needed for Server Components,
-│   │                              since Server Components cannot set cookies. Confirm this got added.
-│   └── rating.ts              — COMPLETE. See below.
+│   ├── guest.ts               — `getGuestId()` (Server Action use only) + `getGuestIdReadOnly()` (Server Components —
+│   │                              added and in use on the homepage)
+│   ├── rating.ts              — COMPLETE. See below.
+│   └── style.ts                — `getDifficultyColor(difficulty)` → hex color string per difficulty (applied via inline
+│                                   `style`, not `className` — Tailwind can't statically pick up a computed/dynamic value);
+│                                   `getTextSize(title)` → Tailwind text-size class, bucketed by title length
 middleware.ts                  — root middleware, refreshes Supabase session via utils/supabase/middleware.ts
 ```
+
+`app/scores/page.tsx` (the old standalone add-score page) has been deleted — the homepage + `AddScoreButton` + `<dialog>` pattern won out; that reconciliation is done.
 
 ## `utils/rating.ts` — complete, verified against real Sheets data
 
 ```ts
 export function getGrade(score: number, noteCount: number, pure: number | null, far: number | null, lost: number | null): string {
     if (score >= 10000000) {
-        if (isPM(score, noteCount, far, lost) || noteCount < 2237) return "PM (" + getPmRating(score, noteCount, pure) + ")"
+        if (isPM(score, noteCount, far, lost) || noteCount < 2237) return "PM"
         else return "EX+"
     }
     else if (score >= 9900000) return "EX+"
@@ -103,11 +115,11 @@ export function getPlayRating(score: number, chartConstant: number): number {
     return Math.max(rating + chartConstant, 0)
 }
 
-export function getPmRating(score: number, noteCount: number, pures: number | null): string {
+export function getPmRating(score: number, noteCount: number, pure: number | null): string {
     if (score < 10000000) return "N/A"
-    else if (pures === null) return "MAX Unknown"
-    else if (noteCount === pures) return "MAX"
-    else return "MAX - " + (noteCount - pures)
+    else if (pure === null) return "? MAX"
+    else if (noteCount === pure) return "MAX"
+    else return "MAX - " + (noteCount - pure)
 }
 
 function isPM(score: number, noteCount: number, far: number | null, lost: number | null): boolean {
@@ -122,18 +134,20 @@ Verified against real data: Testify (chart_constant 12.0, score 9,438,838) → P
 
 Naming note (unresolved, cosmetic only): `getPlayRating`/`getScoreModifier` names don't perfectly match the Sheets' own column labels ("Play Rating" = delta alone, "Play Potential" = constant+delta in the Sheets) — functionally correct either way, just a possible future rename for clarity.
 
+Note: `getGrade`'s PM branch now returns a bare `"PM"` instead of `"PM (" + getPmRating(...) + ")"` — simplified so it fits the small `ScoreCard` grid cell (there's no room for "PM (MAX-3)" at that size). `getPmRating` is still exported/available if the fuller detail is ever needed elsewhere (e.g. a per-chart detail view).
+
 ## Not yet built
 
-- Wiring `rating.ts` into any actual UI (currently unused by any component)
-- Finishing `AddScoreButton.tsx` (move the form/ChartSearch into the conditionally-rendered block)
-- Reconciling `app/scores/page.tsx` vs the newer `app/page.tsx` + `AddScoreButton` approach — pick one pattern
-- Sorting/rendering the scores list (join `scores` + `charts`, sort by chart_constant or play potential, render with rating.ts applied)
-- Any Tailwind styling pass (everything is currently unstyled/plain HTML)
+- **Styling `AddScoreButton.tsx` and `ChartSearch.tsx`** — both still plain unstyled HTML (button, `<dialog>`, inputs, search list). The immediate next task; stands out now that `ScoreCard`/the homepage grid is fully styled.
+- **Real song jacket art.** Architecture decided: a public Supabase Storage bucket (`jackets`) plus a `jacket_url` column on `charts` (not yet added — deliberately deferred until real art assets exist). `ScoreCard.tsx` currently hardcodes one placeholder image URL for every card, purely so layout work had something to render against. One test image (`Testify.webp`) is already uploaded to the bucket.
 - Stage 2 (OCR) — not started. Candidate library: `arcaea-offline-ocr` on PyPI (KNN + SIFT-based, extracts score/pure/far/lost/song_id from a screenshot)
 - Stage 3 (Google login, public deployment, real RLS policies for UPDATE/DELETE)
 
+Done since the previous version of this doc (kept here for history, remove once stale): `rating.ts` is wired into the UI; `AddScoreButton.tsx` + `app/scores/page.tsx` were reconciled in favor of a single homepage + modal `<dialog>` pattern (`app/scores/page.tsx` deleted); the score list is sorted by Play Rating and sliced to top 50; the homepage grid has a full Tailwind styling pass.
+
 ## Working style notes
 
-- User is learning — prefers being walked through concepts and writing code themselves over being handed finished files, especially for new concepts (Server Actions, useState, destructuring, RLS, etc.)
+- User is learning — prefers being walked through concepts and writing code themselves over being handed finished files, especially for new concepts (Server Actions, useState, useRef, destructuring, RLS, etc.)
 - User is a Waterloo CS student, comfortable with general programming/CS concepts, genuinely new to this specific web stack
+- **CSS/Tailwind specifically: user had never done CSS before this project.** For new-to-them CSS concepts, explain thoroughly with illustrative (non-literal) examples rather than inserting large code blocks directly — let the user write the real implementation and review it after. Small mechanical fixes (typos, misplaced tags, dead/invalid classes, one-line corrections to code the user already wrote) are fine to edit directly. Once a concept is understood, the user wants direct, concrete answers (real class names, real prop names) rather than re-explaining from scratch each time.
 - A friend (also Waterloo CS, also plays Arcaea) may join as a second contributor — repo should assume a `.env.example` + shared Supabase project workflow, not a single-owner setup
