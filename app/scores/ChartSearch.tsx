@@ -22,7 +22,7 @@ export default function ChartSearch({ charts }: { charts: Chart[] }) {
             
             {selectedId && (
                 <p>
-                    Selected: {charts.find((c) => c.id === selectedId)?.title + ' — ' + charts.find((c) => c.id === selectedId)?.difficulty}
+                    Selected: {charts.find((c) => c.id === selectedId)?.title} — {charts.find((c) => c.id === selectedId)?.difficulty}
                 </p>
             )}
 
@@ -43,8 +43,9 @@ export default function ChartSearch({ charts }: { charts: Chart[] }) {
                         onClick={() => {
                             {/* for debugging */}
                             console.log('clicked', chart.id, chart.title) 
-                            setSelectedId(chart.id)}
-                        }
+                            setSelectedId(chart.id)
+                            setSearch('')
+                        }}
                         style={{
                             fontWeight: chart.id === selectedId ? 'bold' : 'normal',
                             cursor: 'pointer',

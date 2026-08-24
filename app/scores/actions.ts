@@ -27,7 +27,7 @@ export async function addScore(formData: FormData) {
         lost: lost
     })
 
-    revalidatePath('/scores')
+    revalidatePath('/')
 }
 
 function parseOptionalNumber(value: FormDataEntryValue | null) {

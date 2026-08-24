@@ -15,3 +15,8 @@ export async function getGuestId() {
 
     return guestId
 }
+
+export async function getGuestIdReadOnly() {
+    const cookieStore = await cookies()
+    return cookieStore.get('guest_id')?.value ?? null
+}
