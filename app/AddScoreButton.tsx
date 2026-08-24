@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef } from 'react'
 import ChartSearch from './scores/ChartSearch'
 import { addScore } from './scores/actions'
 
@@ -11,13 +11,18 @@ type Chart = {
 }
 
 export default function AddScoreButton({ charts }: { charts: Chart[] }) {
-    const [open, setOpen] = useState(false)
+    const dialogRef = useRef<HTMLDialogElement>(null)
+
+    async function handleSubmit(formData: FormData) {
+        await addScore(formData)
+        dialogRef.current?.close()
+    }
 
     return (
         <div>
-            <button onClick={() => setOpen(!open)}> Add Score </button>
-            {open && (
-                <form action={addScore}>
+            <button onClick={() => dialogRef.current?.showModal()}>Add Score</button>
+            <dialog ref={dialogRef}>
+                <form action={handleSubmit}>
                     <ChartSearch charts={charts ?? []} />
     
                     <input type="number" name="score" placeholder="Score" required />
@@ -26,7 +31,9 @@ export default function AddScoreButton({ charts }: { charts: Chart[] }) {
                     <input type="number" name="lost" placeholder="Lost" />
     
                     <button type="submit">Add Score</button>
-                </form>)}
+                    <button type="button" onClick={() => dialogRef.current?.close()}>Cancel</button>
+                </form>
+            </dialog>
         </div>
     )
 }

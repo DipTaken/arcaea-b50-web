@@ -43,8 +43,9 @@ export default function ChartSearch({ charts }: { charts: Chart[] }) {
                         onClick={() => {
                             {/* for debugging */}
                             console.log('clicked', chart.id, chart.title) 
-                            setSelectedId(chart.id)}
-                        }
+                            setSelectedId(chart.id)
+                            setSearch('')
+                        }}
                         style={{
                             fontWeight: chart.id === selectedId ? 'bold' : 'normal',
                             cursor: 'pointer',
