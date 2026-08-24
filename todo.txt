@@ -1,0 +1,22 @@
+Landing Page
+
+Browse Page
+- A catalog of songs, user can search and sort
+- Clickable song jackets, will bring up a window/redirect with song info, difficulty info, notes, cc, etc. 
+- Info will also include user's own data
+
+Scores page
+- Each score needs to be clickable to bring up a window
+- Window will display more info (time imported, play/import history, MAX PM stats, etc)
+
+Google auth
+- use Supabase GAuth
+
+Import Scores
+- OCR python script
+- Manual score import (needs CSS done)
+
+Leaderboard page
+- Click to see other people's scores
+
+
