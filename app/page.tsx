@@ -11,7 +11,7 @@ export default async function Page() {
   const guestId = await getGuestIdReadOnly()
 
   const { data: charts } = await supabase.from('charts').select().order('title')
-  const { data: scores} = await supabase
+  const { data: scores } = await supabase
     .from('scores')
     .select('*, charts(title, difficulty, chart_constant, note_count)')
     .eq('user_id', guestId)
