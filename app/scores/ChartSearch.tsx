@@ -1,21 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-
-type Chart = {
-    id: number
-    title: string
-    difficulty: string
-}
+import { filterCharts } from '@/utils/search'
+import { Chart } from '@/utils/types'
 
 export default function ChartSearch({ charts }: { charts: Chart[] }) {
     const [search, setSearch] = useState('')
     //track the selected chart
     const [selectedId, setSelectedId] = useState<number | null>(null)
     //filter charts based on search input, ignoring case and using partial matches
-    const filteredCharts = charts.filter((chart) =>
-        chart.title.toLowerCase().includes(search.toLowerCase())
-    )
+    const filteredCharts = filterCharts(charts, search)
     
     return (
         <div>

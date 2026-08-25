@@ -1,0 +1,25 @@
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
+import { getGuestIdReadOnly } from '@/utils/guest'
+import BrowseCard from '@/app/browse/BrowseCard'
+import BrowseSearch from '@/app/browse/BrowseSearch'
+
+export default async function BrowsePage() {
+    const cookieStore = await cookies()
+    const supabase = createClient(cookieStore)
+    const guestId = await getGuestIdReadOnly()
+
+    const { data: charts } = await supabase.from('charts').select().order('title').limit(5000)
+    
+    return (
+        <div className="flex flex-col items-center justify-center gap-10 py-10">
+            <h1 className="text-3xl font-bold">Browse Charts</h1>
+            <h2 className="text-xl font-light">Click on a chart to view scores</h2>
+
+            <div>
+                <BrowseSearch charts={charts ?? []} />
+            </div>
+            
+        </div>
+    )
+}

@@ -3,12 +3,7 @@
 import { useRef } from 'react'
 import ChartSearch from './scores/ChartSearch'
 import { addScore } from './scores/actions'
-
-type Chart = {
-    id: number
-    title: string
-    difficulty: string
-}
+import { Chart } from '@/utils/types'
 
 export default function AddScoreButton({ charts }: { charts: Chart[] }) {
     const dialogRef = useRef<HTMLDialogElement>(null)
