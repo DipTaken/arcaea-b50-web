@@ -6,6 +6,7 @@ Browse Page
 - Info will also include user's own data
 
 Scores page
+- 
 - Each score needs to be clickable to bring up a window
 - Window will display more info (time imported, play/import history, MAX PM stats, etc)
 
@@ -14,7 +15,7 @@ Google auth
 
 Import Scores
 - OCR python script
-- Manual score import (needs CSS done)
+- Input validation and errors
 
 Leaderboard page
 - Click to see other people's scores
