@@ -7,9 +7,11 @@ export default function ScoreCard({ score, index }: { score: any, index: number 
     const bgColor = "bg-[#16222d]"
     
     return (
-        <li key={score.id} className={`relative flex flex-col justify-between w-[200px] h-[150px] ${bgColor} rounded-md border-2`}>
+        <li key={score.id} className={`relative flex flex-col justify-between w-[200px] h-[150px] ${bgColor} rounded-md border-2`}
+          style={{ borderColor: getDifficultyColor(score.charts?.difficulty ?? "") }}>
            
-          <div className={`absolute z-20 -top-3 -left-3 w-[40px] h-[30px] flex items-center justify-center ${bgColor} text-[15px] p-1 rounded-sm border-2`}>
+          <div className={`absolute z-20 -top-3 -left-3 w-[40px] h-[30px] flex items-center justify-center ${bgColor} text-[15px] p-1 rounded-sm border-2`}
+            style={{ borderColor: getDifficultyColor(score.charts?.difficulty ?? "") }}>
             {'#' + (index + 1)}
           </div>  
 
@@ -28,7 +30,7 @@ export default function ScoreCard({ score, index }: { score: any, index: number 
             </div>
           </div>
            
-          <div style={{backgroundColor:getDifficultyColor(score.charts?.difficulty ?? "")}} className="absolute z-10 bottom-0 left-0 w-full h-10 border-1">
+          <div style={{backgroundColor:getDifficultyColor(score.charts?.difficulty ?? "")}} className="absolute z-10 bottom-0 left-0 w-full h-10">
             <div className={`flex flex-col justify-center line-clamp-2 w-3/4 h-full p-1 ${getTextSize(score.charts?.title ?? "")}`}> {score.charts?.title} </div>
             <div className="absolute bottom-0 right-1 text-right"> {score.charts?.chart_constant.toFixed(2)} </div>               
           </div>
