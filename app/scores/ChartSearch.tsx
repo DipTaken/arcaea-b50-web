@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { filterByTitle } from '@/utils/search'
+import { filterCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
 
 export default function ChartSearch({ charts }: { charts: Chart[] }) {
@@ -9,7 +9,7 @@ export default function ChartSearch({ charts }: { charts: Chart[] }) {
     //track the selected chart
     const [selectedId, setSelectedId] = useState<number | null>(null)
     //filter charts based on search input, ignoring case and using partial matches
-    const filteredCharts = filterByTitle(charts, search)
+    const filteredCharts = filterCharts(charts, search)
     
     return (
         <div>

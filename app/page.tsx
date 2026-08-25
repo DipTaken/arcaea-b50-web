@@ -10,11 +10,12 @@ export default async function Page() {
   const supabase = createClient(cookieStore)
   const guestId = await getGuestIdReadOnly()
 
-  const { data: charts } = await supabase.from('charts').select().order('title')
+  const { data: charts } = await supabase.from('charts').select().order('title').limit(5000)
   const { data: scores } = await supabase
     .from('scores')
     .select('*, charts(title, difficulty, chart_constant, note_count, song_id, jacket_override)')
     .eq('user_id', guestId)
+    .limit(5000)
 
   const sortedScores = scores?.slice()
     .sort((a, b) => 
@@ -25,6 +26,8 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col items-center justify-center gap-10 py-10">
+      <h1 className="text-3xl font-bold">B50 View</h1>
+      <h2 className="text-xl font-light">Click on a score for more info</h2>
       <AddScoreButton charts={charts ?? []} />
       <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
           {sortedScores?.map((score, index) => (

@@ -1,5 +1,9 @@
 import { Chart } from '@/utils/types'
 
-export function filterByTitle(charts: Chart[], search: string) {
-    return charts.filter((chart) => chart.title.toLowerCase().includes(search.toLowerCase()))      
+export function filterCharts(charts: Chart[], search: string) {
+    const query = search.toLowerCase()
+    return charts.filter((chart) =>
+        chart.title.toLowerCase().includes(query) ||
+        chart.song_id.toLowerCase().includes(query)
+    )
 }
