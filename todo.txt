@@ -6,7 +6,6 @@ Browse Page
 - Info will also include user's own data
 
 Scores page
-- 
 - Each score needs to be clickable to bring up a window
 - Window will display more info (time imported, play/import history, MAX PM stats, etc)
 

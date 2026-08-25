@@ -23,16 +23,25 @@ export function getPlayRating(score: number, chartConstant: number): number {
     return Math.max(rating + chartConstant, 0)
 }
 
-export function getPmRating(score: number, noteCount: number, pure: number | null): string {
-    if (score < 10000000) return "N/A"
-    else if (pure === null) return "? MAX"
-    else if (noteCount === pure) return "MAX"
-    else return "MAX - " + (noteCount - pure)
+export function getShinyPureCount(score: number, noteCount: number): number {
+    const noteScore = Math.floor(2 * (score / 10000000) * noteCount)
+    const shiny = score - (noteScore * 5000000) / noteCount
+    return Math.round(shiny)
 }
+
+export function getPmRating(score: number, noteCount: number, far: number | null, lost: number | null): string {
+    if (!isPM(score, noteCount, far, lost)) return "N/A"
+    else {
+        const shiny = getShinyPureCount(score, noteCount)
+        return shiny === noteCount ? "MAX" : `MAX - ${shiny}`
+    }
+}
+
+const MAX_NOTES_SAFE_PM_THRESHOLD = 2237  //theorically if there is a chart with >2237 notes its possible to get a score >= 10M without getting no fars/losts
 
 function isPM(score: number, noteCount: number, far: number | null, lost: number | null): boolean {
     if (score < 10000000) return false
-    else if (noteCount < 2237) return true //theorically if there is a chart with >2237 notes its possible to get a score >= 10M without getting no fars/losts
+    else if (noteCount < MAX_NOTES_SAFE_PM_THRESHOLD) return true
     else if (far === null || lost === null) return false
     else return far === 0 && lost === 0
 }
