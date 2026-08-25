@@ -9,12 +9,14 @@ export default async function Page() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
   const guestId = await getGuestIdReadOnly()
-
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id ?? guestId
+  
   const { data: charts } = await supabase.from('charts').select().order('title').limit(5000)
   const { data: scores } = await supabase
     .from('scores')
     .select('*, charts(title, difficulty, chart_constant, note_count, song_id, jacket_override)')
-    .eq('user_id', guestId)
+    .eq('user_id', userId)
     .limit(5000)
 
   const sortedScores = scores?.slice()

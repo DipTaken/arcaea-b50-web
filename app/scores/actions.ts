@@ -18,9 +18,12 @@ export async function addScore(formData: FormData) {
 
     const guestId = await getGuestId()
 
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id ?? guestId
+
     await supabase.from('scores').insert({
         chart_id: chartId,
-        user_id: guestId,
+        user_id: userId,
         score: score,
         pure: pure,
         far: far,
