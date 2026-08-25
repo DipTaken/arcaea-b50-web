@@ -1,14 +1,17 @@
 'use client'
 
-import { getGrade, getPlayRating } from '@/utils/rating'
-import { getDifficultyColor, getTextSize, getGradeColor } from '@/utils/style'
+import { getDifficultyColor, getTextSize } from '@/utils/style'
+import { Chart } from '@/utils/types'
+import { bgColor } from '@/utils/style'
+import { getJacketUrl } from '@/utils/jacket'
 
-export default function BrowseCard({ chart }: { chart: any }) {
-    const bgColor = "bg-[#16222d]"
-    
+export default function BrowseCard({ chart }: { chart: Chart }) {
     return (
-        <li key={chart.id} className={`relative flex flex-col justify-between w-[200px] h-[150px] ${bgColor} rounded-md border-2 bg-[url('https://jkdyzmjuiojlitzvslmx.supabase.co/storage/v1/object/public/jackets/Testify.webp')] bg-cover bg-center bg-linear-to-t from-black/70 from-60% to-transparent`}
-            style={{ borderColor: getDifficultyColor(chart.difficulty ?? "") }}>
+        <li key={chart.id} className={`relative flex flex-col justify-between w-[200px] h-[150px] ${bgColor} rounded-md border-2 bg-cover bg-center`}
+            style={{
+                backgroundImage: `url(${getJacketUrl(chart.song_id, chart.difficulty, chart.jacket_override)})`,
+                borderColor: getDifficultyColor(chart.difficulty ?? "")
+            }}>
 
             <div className="absolute inset-0 z-0"
                 style={{ backgroundImage: `linear-gradient(to top, ${getDifficultyColor(chart.difficulty ?? "")}b3 10%, transparent)` }}>

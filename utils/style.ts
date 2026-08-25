@@ -46,3 +46,4 @@ export function getTextSize(title: string): string {
     else return "text-[10px]"
 }  
 
+export const bgColor = "bg-[#16222d]"

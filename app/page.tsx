@@ -13,7 +13,7 @@ export default async function Page() {
   const { data: charts } = await supabase.from('charts').select().order('title')
   const { data: scores } = await supabase
     .from('scores')
-    .select('*, charts(title, difficulty, chart_constant, note_count)')
+    .select('*, charts(title, difficulty, chart_constant, note_count, song_id, jacket_override)')
     .eq('user_id', guestId)
 
   const sortedScores = scores?.slice()
