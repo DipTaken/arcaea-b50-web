@@ -1,7 +1,7 @@
 'use client'
 
 import { getGrade, getPlayRating } from '@/utils/rating'
-import { getDifficultyColor, getTextSize } from '@/utils/style copy'
+import { getDifficultyColor, getTextSize } from '@/alt/utils/style copy'
 
 export default function ScoreCard({ score, index }: { score: any, index: number }) {
     const bgColor = "bg-[#16222d]"
