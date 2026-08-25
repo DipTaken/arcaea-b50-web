@@ -5,8 +5,8 @@ import LoginButton from '@/app/landing/LoginButton'
 
 export default async function LandingPage() {
     const cookieStore = await cookies()
-    const supabase = createClient(cookieStore)
-    const guestId = await getGuestIdReadOnly()
+    //const supabase = createClient(cookieStore)
+    //const guestId = await getGuestIdReadOnly()
     
     return (
         <div className="flex flex-col items-center justify-center gap-10 py-10">
