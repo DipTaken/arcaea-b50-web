@@ -15,6 +15,29 @@ export function getDifficultyColor(difficulty: string): string {
     }
 }
 
+export function getGradeColor(grade: string): string {
+    switch (grade) {
+        case "PM":
+            return "#bbdbea"
+        case "EX+":
+            return "#d6c3fa"
+        case "EX":
+            return "#d6c3fa"
+        case "AA":
+            return "#5c3e68"
+        case "A":
+            return "#5c3e68"
+        case "B":
+            return "#3d4523"
+        case "C":
+            return "#433d23"
+        case "D":
+            return "#8b4759"
+        default:
+            return "#000000"
+    }
+}
+
 export function getTextSize(title: string): string {
     const length = title.length
     if (length <= 12) return "text-base"
