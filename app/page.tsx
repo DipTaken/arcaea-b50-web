@@ -24,12 +24,12 @@ export default async function Page() {
     .slice(0,50)
 
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center gap-10 py-10">
       <AddScoreButton charts={charts ?? []} />
-    <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
-        {sortedScores?.map((score, index) => (
-          <ScoreCard key={score.id} score={score} index={index} />
-        ))}
+      <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
+          {sortedScores?.map((score, index) => (
+            <ScoreCard key={score.id} score={score} index={index} />
+          ))}
       </ul>
     </div>
   )

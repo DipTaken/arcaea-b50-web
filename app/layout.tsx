@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Exo } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,6 +12,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const exo = Exo({
+  variable: "--font-exo",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Arcaea B50 Web",
   description: "View your Arcaea B50 scores",
@@ -21,9 +26,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${exo.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-linear-to-r from-[#0f1014] to-[#191621]">{children}</body>
     </html>
   );
 }
