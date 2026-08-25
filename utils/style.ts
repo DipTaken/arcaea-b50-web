@@ -24,15 +24,15 @@ export function getGradeColor(grade: string): string {
         case "EX":
             return "#d6c3fa"
         case "AA":
-            return "#5c3e68"
+            return "#a175b3"
         case "A":
-            return "#5c3e68"
+            return "#8c649c"
         case "B":
-            return "#3d4523"
+            return "#879167"
         case "C":
-            return "#433d23"
+            return "#aa9b59"
         case "D":
-            return "#8b4759"
+            return "#965151"
         default:
             return "#000000"
     }
