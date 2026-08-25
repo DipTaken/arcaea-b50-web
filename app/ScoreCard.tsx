@@ -34,7 +34,7 @@ export default function ScoreCard({ score, index }: { score: any, index: number 
            
       <div style={{backgroundColor:getDifficultyColor(score.charts?.difficulty ?? "")}} className="absolute z-10 bottom-0 left-0 w-full h-10">
         <div className={`flex flex-col justify-center line-clamp-2 w-3/4 h-full p-2 ${getTextSize(score.charts?.title ?? "")}`}> {score.charts?.title} </div>
-        <div className="absolute bottom-0 right-1 text-right"> {score.charts?.chart_constant.toFixed(2)} </div>               
+        <div className="absolute bottom-0 right-1 text-right"> {score.charts?.chart_constant.toFixed(1)} </div>               
       </div>
     </li>
   )
