@@ -16,8 +16,8 @@ export default async function Page() {
   const { data: charts } = await supabase.from('charts').select().order('title').limit(5000)
   const { data: scores } = await supabase
     .from('scores')
-    .select('*, charts(title, difficulty, chart_constant, note_count, song_id, jacket_override)')
-    .eq('user_id', userId)
+    .select('*, charts(title, difficulty, chart_constant, note_count, song_id, jacket_override, artist, length, version)')
+    .eq('user_id', guestId)
     .limit(5000)
 
   const sortedScores = scores?.slice()
