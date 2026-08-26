@@ -14,3 +14,17 @@ export type Chart = {
     jacket_designer: string | null
     jacket_override: boolean
 }
+
+export type Score = {
+    id: number
+    chart_id: number
+    user_id: string
+    score: number
+    pure: number | null
+    far: number | null
+    lost: number | null
+    created_at: string
+}
+
+// a score with its associated chart data
+export type ScoreWithChart = Score & { charts: Chart }
