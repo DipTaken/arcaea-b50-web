@@ -61,6 +61,11 @@ ARCAEA B50 WEB — TODO
 [ ] /auth/auth-code-error is an empty anonymous default export.
     This is the repo's only ESLint error (react/display-name).
 
+[] import scores can import duplicate scores
+    we need score handling
+
+[] style: importing scores adds success text, which messes up the flex container so add button is bigger
+
 
 === NEXT UP ===
 [ ] Decide what happens after a score is added from inside a modal.
@@ -75,6 +80,8 @@ ARCAEA B50 WEB — TODO
 [ ] Play / import history in ScoreModal
     There's no history table — each play is just another scores row. Needs a
     schema decision before it can be built.
+
+[] Style: Make the browse features cleaner
 
 
 === IMPORT SCORES (Stage 2) ===
