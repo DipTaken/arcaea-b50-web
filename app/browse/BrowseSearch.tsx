@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { filterCharts, getSortDisplayValue, sortCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
 import BrowseCard from './BrowseCard'
+import BrowseModal from './BrowseModal'
 
 export default function BrowseSearch({ charts }: { charts: Chart[] }) {
     const [search, setSearch] = useState('')
@@ -12,6 +13,14 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
     const [filterComparison, setFilterComparison] = useState<string | null>('eq')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
     const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null)
+
+    const [selectedChart, setSelectedChart] = useState<Chart | null>(null)
+    const dialogRef = useRef<HTMLDialogElement>(null)
+
+    // Open the shared dialog once the newly selected chart has rendered into it.
+    useEffect(() => {
+        if (selectedChart) dialogRef.current?.showModal()
+    }, [selectedChart])
 
     //filter charts based on search input, ignoring case and using partial matches
     const filteredCharts = sortCharts(filterCharts(charts, search, levelFilter, filterComparison, difficultyFilter), sortOption, sortDirection)
@@ -102,9 +111,12 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
             {/* Chart List */}
             <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
                 {filteredCharts.map((chart) => (
-                    <BrowseCard key={chart.id} info={getSortDisplayValue(chart, sortOption)} chart={chart} />
+                    <BrowseCard key={chart.id} info={getSortDisplayValue(chart, sortOption)} chart={chart} onSelect={setSelectedChart} />
                 ))}
             </ul>
+
+            {/* The single modal shared by every card in the grid */}
+            <BrowseModal chart={selectedChart} ref={dialogRef} onClose={() => setSelectedChart(null)} />
         </div>
     )
 }
