@@ -8,18 +8,17 @@ import BrowseCard from './BrowseCard'
 export default function BrowseSearch({ charts }: { charts: Chart[] }) {
     const [search, setSearch] = useState('')
     const [levelFilter, setLevelFilter] = useState<string | null>(null)
-    const [sortOption, setSortOption] = useState<string | null>('cc')
-    const [filterComparison, setFilterComparison] = useState<string | null>('ge')
+    const [sortOption, setSortOption] = useState<string | null>('chartConstant')
+    const [filterComparison, setFilterComparison] = useState<string | null>('eq')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
     const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null)
-    
     
     //filter charts based on search input, ignoring case and using partial matches
     const filteredCharts = sortCharts(filterCharts(charts, search, levelFilter, filterComparison, difficultyFilter), sortOption, sortDirection)
     
-    
     return (
         <div className="flex flex-col items-center justify-center gap-10 py-5">
+            {/* Search Input */}
             <input 
                 type="text" 
                 placeholder="Search charts..." 
@@ -27,28 +26,33 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                 className="w-full h-10 text-center"
                 onChange={(e) => setSearch(e.target.value)}
             />
+            {/* Sort and Filter Options */}
             <div className="flex items-center justify-between gap-6 h-30 border-1 p-4 rounded-lg"> 
+                {/* Sort Options */}
                 <div className="flex items-center justify-center gap-0">
                     <select className="bg-gray-700 text-white text-center p-6 py-4 rounded-md border-2 "
                         onChange={(e) => setSortOption(e.target.value)}>
                         <option value="" hidden >Sort by...</option>
-                        <option value="t">Title</option>
-                        <option value="cc">Chart Constant</option>
-                        <option value="dif">Difficulty</option>
-                        <option value="art">Artist</option>
+                        <option value="title">Title</option>
+                        <option value="chartConstant">Chart Constant</option>
+                        <option value="difficulty">Difficulty</option>
+                        <option value="artist">Artist</option>
                         <option value="bpm">BPM</option>
-                        <option value="len">Length</option>
-                        <option value="nc">Note Count</option>
-                        <option value="ver">Version</option>
+                        <option value="length">Length</option>
+                        <option value="noteCount">Note Count</option>
+                        <option value="version">Version</option>
                     </select>
-                
+
+                    {/* Sort Direction Button */}
                     <button className="bg-gray-700 text-white text-center p-6 py-4 rounded-md border-2"
                         onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}>
                         {sortDirection === 'asc' ? '↑' : '↓'}
                     </button>
                 </div>
 
+                {/* Filter Options */}
                 <div className="flex items-center justify-center gap-0">
+                    {/* Filter Comparison */}
                     <select className="bg-gray-700 text-white text-center p-2 py-4 rounded-md border-2"
                         onChange={(e) => setFilterComparison(e.target.value)}>
                         <option value="eq" hidden >=</option>
@@ -59,6 +63,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         <option value="gt">{'>'}</option>
                     </select>
 
+                    {/* Level Filter */}
                     <select className="bg-gray-700 text-white text-center p-6 py-4 rounded-md border-2"
                         onChange={(e) => setLevelFilter(e.target.value)}>
                         <option value="" >Level</option>
@@ -81,7 +86,8 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         <option value="12">12</option>
                     </select>
                 </div>
-
+            
+                {/* Difficulty Filter */}
                 <select className="bg-gray-700 text-white text-center p-6 py-4 rounded-md border-2"
                     onChange={(e) => setDifficultyFilter(Number(e.target.value))}>
                     <option value="" >Difficulty</option>
@@ -92,6 +98,8 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     <option value="5">BYD</option>
                 </select>
             </div>
+            
+            {/* Chart List */}
             <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
                 {filteredCharts.map((chart) => (
                 <BrowseCard key={chart.id} info={getSortDisplayValue(chart, sortOption)} chart={chart}/>
