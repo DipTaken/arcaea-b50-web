@@ -1,5 +1,3 @@
-'use client'
-
 import { getGrade, getPlayRating } from '@/utils/rating'
 import { getDifficultyColor, getTextSize, getGradeColor } from '@/utils/style'
 import { bgColor } from '@/utils/style'

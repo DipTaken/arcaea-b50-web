@@ -12,6 +12,7 @@ export default function LoginButton() {
             provider: 'google',
             options:{
                 redirectTo: `${window.location.origin}/auth/callback`,
+                scopes: 'profile email',
             },
         })
     }
@@ -21,7 +22,7 @@ export default function LoginButton() {
                 onClick={login}
                 className="text-base font-light border-2 p-2 rounded-md"
             >
-                Sign in With Google
+                Sign in
             </button>
         </div>
     )

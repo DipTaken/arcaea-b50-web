@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Exo } from "next/font/google";
+import NavBar from "./components/NavBar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${exo.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-linear-to-r from-[#0f1014] to-[#191621]">{children}</body>
+      <body className="min-h-full flex flex-col bg-linear-to-r from-[#0f1014] to-[#191621]">
+        <NavBar />{children}
+      </body>
     </html>
   );
 }
