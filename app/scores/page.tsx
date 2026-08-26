@@ -32,6 +32,8 @@ export default async function Page() {
         <div className="flex flex-col items-center justify-center gap-10 py-10">
             <h1 className="text-3xl font-bold">B50 View</h1>
             <h2 className="text-xl font-light">Click on a score for more info</h2>
+            
+            {/* Display the Add Score and import buttons */}
             <div className="flex">
                 <AddScoreButton>
                     <div className={`bg-gray-500 text-white text-center rounded-md w-full border-2`}>
@@ -40,6 +42,8 @@ export default async function Page() {
                 </AddScoreButton>
                 <ImportFromBrowserButton />
             </div>
+            
+            {/* Display the scores in a grid */}
             <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
                 {sortedScores?.map((score, index) => (
                     <ScoreCard key={score.id} score={score} index={index} />

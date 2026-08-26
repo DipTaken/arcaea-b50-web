@@ -46,69 +46,75 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
 
     return (
         <SelectedChartContext.Provider value={setSelectedChart}>
-            <div>
-                <button
-                    onClick={() => dialogRef.current?.showModal()}
-                    className={`${bgColor} hover:bg-gray-700 text-white font-bold ${sizeClasses} ${textClasses} ${borderClasses} rounded-md`
-                    }>Add Score</button>
-                <Modal ref={dialogRef}>
-                    <form
-                        action={handleSubmit}
-                        className={`flex flex-col h-100 gap-4 gap-y-7 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl`}>
+            {/* Button to open the add score modal */}
+            <button
+                onClick={() => dialogRef.current?.showModal()}
+                className={`${bgColor} hover:bg-gray-700 text-white font-bold ${sizeClasses} ${textClasses} ${borderClasses} rounded-md`}
+                >Add Score
+            </button>
 
-                        {children}
+            <Modal ref={dialogRef}>
+                <form action={handleSubmit}
+                    className={`flex flex-col h-100 gap-4 gap-y-7 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl`}
+                >
+                    {/*Hidden input for chart id*/}
+                    {children}
 
+                    {/* Score input field */}
+                    <input
+                        type="number"
+                        name="score"
+                        placeholder="Score"
+                        required
+                        min={0}
+                        max={max}
+                        onChange={handleInput}
+                        className={`bg-gray-500 h-10 text-white text-center rounded-md w-full border-2`}
+                    />
+
+                    {/* Input fields for Pure, Far, and Lost */}
+                    <div className="flex gap-2">
                         <input
                             type="number"
-                            name="score"
-                            placeholder="Score"
-                            required
+                            name="pure"
+                            placeholder="Pure"
                             min={0}
-                            max={max}
-                            onChange={handleInput}
-                            className={`bg-gray-500 h-10 text-white text-center rounded-md w-full border-2`}
+                            className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
                         />
+                        <input
+                            type="number"
+                            name="far"
+                            placeholder="Far"
+                            min={0}
+                            className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
+                        />
+                        <input
+                            type="number"
+                            name="lost"
+                            placeholder="Lost"
+                            min={0}
+                            className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
+                        />
+                    </div>
 
-                        <div className="flex gap-2">
-                            <input
-                                type="number"
-                                name="pure"
-                                placeholder="Pure"
-                                min={0}
-                                className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
-                            />
-                            <input
-                                type="number"
-                                name="far"
-                                placeholder="Far"
-                                min={0}
-                                className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
-                            />
-                            <input
-                                type="number"
-                                name="lost"
-                                placeholder="Lost"
-                                min={0}
-                                className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
-                            />
-                        </div>
-
-                        <div className="flex gap-4 w-full justify-center items-center h-15">
-                            <button
-                                type="submit"
-                                className={`flex-1 h-full bg-blue-500 font-bold text-white rounded-md border-2`}
-                            >Add Score
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => dialogRef.current?.close()}
-                                className={`flex-1 h-full bg-red-400 font-bold text-white rounded-md border-2`}
-                            >Cancel
-                            </button>
-                        </div>
-                    </form>
-                </Modal>
-            </div>
+                    {/* Submit and Cancel buttons */}
+                    <div className="flex gap-4 w-full justify-center items-center h-15">
+                        <button
+                            type="submit"
+                            className={`flex-1 h-full bg-blue-500 font-bold text-white rounded-md border-2`}
+                        >
+                            Add Score
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => dialogRef.current?.close()}
+                            className={`flex-1 h-full bg-red-400 font-bold text-white rounded-md border-2`}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </SelectedChartContext.Provider>
     )
 }

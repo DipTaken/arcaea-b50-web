@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { filterCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
 import { useSetSelectedChart } from './AddScoreButton'
+
 interface ChartSearchProps {
     charts: Chart[]
-    onSelect?: (chart: Chart | null) => void
 }
-export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
+
+export default function ChartSearch({ charts }: ChartSearchProps) {
     const [search, setSearch] = useState('')
     //track the selected chart
     const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -18,12 +19,14 @@ export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
 
     return (
         <div>
+            {/* Display the selected chart */}
             {selectedId && (
                 <p>
                     Selected: {charts.find((c) => c.id === selectedId)?.title} — {charts.find((c) => c.id === selectedId)?.difficulty}
                 </p>
             )}
 
+            {/* Input field for searching charts */}
             <input
                 type="text"
                 placeholder="Search charts..."
@@ -54,6 +57,8 @@ export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
                     ))}
                 </ul>
             )}
+            
+            {/* Hidden input for chart id */}
             <input type="hidden" name="chart_id" value={selectedId ?? ''} />
         </div>
     )
