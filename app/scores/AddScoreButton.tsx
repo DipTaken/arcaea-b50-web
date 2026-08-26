@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef } from 'react'
-import ChartSearch from './scores/ChartSearch'
-import { addScore } from './scores/actions'
+import ChartSearch from './ChartSearch'
+import { addScore } from './actions'
 import { Chart } from '@/utils/types'
 
 export default function AddScoreButton({ charts }: { charts: Chart[] }) {

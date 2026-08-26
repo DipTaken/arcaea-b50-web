@@ -1,5 +1,3 @@
-'use client'
-
 import { getDifficultyColor, getTextSize } from '@/utils/style'
 import { Chart } from '@/utils/types'
 import { bgColor } from '@/utils/style'
@@ -28,8 +26,6 @@ export default function BrowseCard({ chart, info }: { chart: Chart, info: string
                 </div>
             </div>
             
-
-           
             <div style={{backgroundColor:getDifficultyColor(chart.difficulty ?? "")}} className="absolute z-10 bottom-0 left-0 w-full h-10">
                 <div className={`flex flex-col justify-center line-clamp-2 w-3/4 h-full p-2 ${getTextSize(chart.title ?? "")}`}> {chart.title} </div>
                 <div className="absolute bottom-0 right-1 text-right"> {chart.chart_constant?.toFixed(1)} </div>               
