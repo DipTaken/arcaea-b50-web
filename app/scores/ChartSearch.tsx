@@ -3,8 +3,11 @@
 import { useState } from 'react'
 import { filterCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
-
-export default function ChartSearch({ charts }: { charts: Chart[] }) {
+interface ChartSearchProps {
+    charts: Chart[]
+    onSelect?: (chart: Chart | null) => void
+}
+export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
     const [search, setSearch] = useState('')
     //track the selected chart
     const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -37,6 +40,7 @@ export default function ChartSearch({ charts }: { charts: Chart[] }) {
                         onClick={() => {
                             setSelectedId(chart.id)
                             setSearch('')
+                            onSelect?.(chart)
                         }}
                         style={{
                             fontWeight: chart.id === selectedId ? 'bold' : 'normal',
