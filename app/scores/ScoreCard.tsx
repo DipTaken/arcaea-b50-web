@@ -1,12 +1,18 @@
+'use client'
+
 import { getGrade, getPlayRating } from '@/utils/rating'
 import { getDifficultyColor, getTextSize, getGradeColor } from '@/utils/style'
 import { bgColor } from '@/utils/style'
 import { getJacketUrl } from '@/utils/jacket'
+import { ScoreWithChart } from '@/utils/types'
 
-export default function ScoreCard({ score, index }: { score: any, index: number }) {
+//A single score card
+export default function ScoreCard({ score, index, onSelect }: { score: ScoreWithChart, index: number, onSelect: (score: ScoreWithChart) => void }) {
     return (
-        <li key={score.id} className={`relative flex flex-col z-10 justify-between w-[200px] h-[150px] ${bgColor} rounded-md border-2`}
-            style={{ borderColor: getDifficultyColor(score.charts?.difficulty ?? "") }}>
+        <li className={`relative flex flex-col z-10 justify-between w-[200px] h-[150px] ${bgColor} rounded-md border-2 cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out`}
+            style={{ borderColor: getDifficultyColor(score.charts?.difficulty ?? "") }}
+            onClick={() => onSelect(score)}
+        >
 
             {/* Rank number (top left) */}
             <div className={`absolute z-20 -top-3 -left-3 w-[40px] h-[30px] flex items-center justify-center ${bgColor} text-[15px] p-1 rounded-sm border-2`}
