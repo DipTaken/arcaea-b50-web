@@ -4,7 +4,7 @@ import { Chart } from '@/utils/types'
 export function filterCharts(charts: Chart[], search: string, levelFilter?: string | null, filterComparison: string | null = "ge", difficultyFilter?: number | null): Chart[] {
     const query = search.toLowerCase()
     //using this to compare levels since they are strings 
-    const levelOrder = ['1', '2', '3', '4', '5', '6', '7', '7+', '8', '8+', '9', '9+', '10', '10+', '11', '11+', '12'] 
+    const levelOrder = ['1', '2', '3', '4', '5', '6', '7', '7+', '8', '8+', '9', '9+', '10', '10+', '11', '11+', '12']
     const levelIndex = levelFilter ? levelOrder.indexOf(levelFilter) : -1
     const comparisonOp = filterComparison ? getComparisonOp(filterComparison) : null
 
@@ -110,7 +110,7 @@ function getDifficultyValue(difficulty: string): number {
         case "ETR":
             return 4
         case "BYD":
-            return 5 
+            return 5
         default:
             return 0
     }

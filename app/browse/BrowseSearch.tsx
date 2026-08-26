@@ -12,22 +12,22 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
     const [filterComparison, setFilterComparison] = useState<string | null>('eq')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
     const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null)
-    
+
     //filter charts based on search input, ignoring case and using partial matches
     const filteredCharts = sortCharts(filterCharts(charts, search, levelFilter, filterComparison, difficultyFilter), sortOption, sortDirection)
-    
+
     return (
         <div className="flex flex-col items-center justify-center gap-10 py-5">
             {/* Search Input */}
-            <input 
-                type="text" 
-                placeholder="Search charts..." 
-                value={search} 
+            <input
+                type="text"
+                placeholder="Search charts..."
+                value={search}
                 className="w-full h-10 text-center"
                 onChange={(e) => setSearch(e.target.value)}
             />
             {/* Sort and Filter Options */}
-            <div className="flex items-center justify-between gap-6 h-30 border-1 p-4 rounded-lg"> 
+            <div className="flex items-center justify-between gap-6 h-30 border-1 p-4 rounded-lg">
                 {/* Sort Options */}
                 <div className="flex items-center justify-center gap-0">
                     <select className="bg-gray-700 text-white text-center p-6 py-4 rounded-md border-2 "
@@ -86,7 +86,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         <option value="12">12</option>
                     </select>
                 </div>
-            
+
                 {/* Difficulty Filter */}
                 <select className="bg-gray-700 text-white text-center p-6 py-4 rounded-md border-2"
                     onChange={(e) => setDifficultyFilter(Number(e.target.value))}>
@@ -98,12 +98,12 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     <option value="5">BYD</option>
                 </select>
             </div>
-            
+
             {/* Chart List */}
             <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
                 {filteredCharts.map((chart) => (
-                <BrowseCard key={chart.id} info={getSortDisplayValue(chart, sortOption)} chart={chart}/>
-              ))}
+                    <BrowseCard key={chart.id} info={getSortDisplayValue(chart, sortOption)} chart={chart} />
+                ))}
             </ul>
         </div>
     )

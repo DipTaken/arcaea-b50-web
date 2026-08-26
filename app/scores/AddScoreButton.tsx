@@ -5,59 +5,67 @@ import { addScore } from './actions'
 import { Chart } from '@/utils/types'
 import Modal from '@/app/components/Modal'
 
-
-const SelectedChartContext = createContext<(chart: Chart | null) => void>(() => {})
+const SelectedChartContext = createContext<(chart: Chart | null) => void>(() => { })
 export const useSetSelectedChart = () => useContext(SelectedChartContext)
 
 interface AddScoreButtonProps {
     children?: React.ReactNode
     defaultChart?: Chart | null
+    sizeClasses?: string
+    textClasses?: string
+    borderClasses?: string
 }
 
-export default function AddScoreButton({ children, defaultChart = null }: AddScoreButtonProps) {
+export default function AddScoreButton({ children, defaultChart = null, sizeClasses = "p-2", textClasses = "text-white", borderClasses = "border-white" }: AddScoreButtonProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
     const bgColor = "bg-[#16222d]"
+
+    // submit the form data to the server and close the modal
     async function handleSubmit(formData: FormData) {
         await addScore(formData)
         dialogRef.current?.close()
     }
+
+    // Handle input validation for the score input field
     const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
         const input = e.currentTarget;
 
         if (input.validity.rangeUnderflow) {
             input.setCustomValidity("Please select a value that is no less than 0");
-        } else if (input.validity.rangeOverflow) {
+        }
+        else if (input.validity.rangeOverflow) {
             const formattedMax = Number(input.max).toLocaleString()
             input.setCustomValidity(`Please select a value that is no greater than ${formattedMax}`);
-        } else {
+        }
+        else {
             input.setCustomValidity("");
         }
     };
-    
+
     return (
         <SelectedChartContext.Provider value={setSelectedChart}>
             <div>
                 <button
                     onClick={() => dialogRef.current?.showModal()}
-                    className={`${bgColor} hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md`
+                    className={`${bgColor} hover:bg-gray-700 text-white font-bold ${sizeClasses} ${textClasses} ${borderClasses} rounded-md`
                     }>Add Score</button>
                 <Modal ref={dialogRef}>
-                    <form 
+                    <form
                         action={handleSubmit}
                         className={`flex flex-col h-100 gap-4 gap-y-7 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl`}>
-                        
+
                         {children}
-        
-                        <input 
-                            type="number" 
-                            name="score" 
-                            placeholder="Score" 
-                            required 
+
+                        <input
+                            type="number"
+                            name="score"
+                            placeholder="Score"
+                            required
                             min={0}
                             max={max}
-                            onChange={handleInput}  
+                            onChange={handleInput}
                             className={`bg-gray-500 h-10 text-white text-center rounded-md w-full border-2`}
                         />
 

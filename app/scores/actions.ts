@@ -16,25 +16,28 @@ export async function addScore(formData: FormData) {
     const far = parseOptionalNumber(formData.get('far'))
     const lost = parseOptionalNumber(formData.get('lost'))
 
+    // Validate the form data
     const { data: chart, error: chartError } = await supabase
         .from('charts')
         .select('note_count')
         .eq('id', chartId)
         .single()
-    
-        if (chartError || !chart) {
+
+    if (chartError || !chart) {
         throw new Error("Chart not found")
     }
-    const maxScore = 10000000 + (chart?.note_count ?? 0)
 
+    // Validate the score
+    const maxScore = 10000000 + (chart?.note_count ?? 0)
     if (score < 0 || score > maxScore) {
-            throw new Error(`Invalid score. Must be between 0 and ${maxScore}`)
+        throw new Error(`Invalid score. Must be between 0 and ${maxScore}`)
     }
 
     const guestId = await getGuestId()
     const { data: { user } } = await supabase.auth.getUser()
     const userId = user?.id ?? guestId
 
+    // Insert the score into the database
     await supabase.from('scores').insert({
         chart_id: chartId,
         user_id: userId,
@@ -43,10 +46,10 @@ export async function addScore(formData: FormData) {
         far: far,
         lost: lost
     })
-
     revalidatePath('/')
 }
 
+// Helper function to parse optional number values from FormData
 function parseOptionalNumber(value: FormDataEntryValue | null) {
     if (!value) return null
     return Number(value)

@@ -47,6 +47,6 @@ export function getTextSize(title: string): string {
     else if (length <= 20) return "text-sm"
     else if (length <= 26) return "text-xs"
     else return "text-[10px]"
-}  
+}
 
 export const bgColor = "bg-[#16222d]"

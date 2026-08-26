@@ -11,7 +11,7 @@ export default function LoginButton() {
     const login = async () => {
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options:{
+            options: {
                 redirectTo: `${window.location.origin}/auth/callback`,
                 scopes: 'profile email',
             },

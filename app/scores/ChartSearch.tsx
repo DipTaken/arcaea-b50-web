@@ -15,7 +15,7 @@ export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
     //filter charts based on search input, ignoring case and using partial matches
     const filteredCharts = filterCharts(charts, search)
     const setSelectedChart = useSetSelectedChart()
-    
+
     return (
         <div>
             {selectedId && (
@@ -24,35 +24,35 @@ export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
                 </p>
             )}
 
-            <input 
-                type="text" 
-                placeholder="Search charts..." 
-                value={search} 
+            <input
+                type="text"
+                placeholder="Search charts..."
+                value={search}
                 className="w-full h-10 text-center"
                 onChange={(e) => setSearch(e.target.value)}
             />
 
             {/* this displays the charts, but we also need to map it to the chart id in the database
                 also only displays if there are results and if user has typed anything */}
-            { search && filteredCharts.length > 0  && (
-            <ul className="absolute left-10 right-10 z-50 max-h-55 overflow-y-auto bg-gray-600 rounded-md p-2 mt-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700">
-                {filteredCharts.map((chart) => (
-                    <li 
-                        key={chart.id}
-                        onClick={() => {
-                            setSelectedId(chart.id)
-                            setSearch('')
-                            setSelectedChart(chart)
-                        }}
-                        style={{
-                            fontWeight: chart.id === selectedId ? 'bold' : 'normal',
-                            cursor: 'pointer',
-                        }}
-                        className="p-2 hover:bg-gray-700 rounded-md text-left"
-                    > {chart.title} — {chart.difficulty}  
-                    </li>
-                ))}
-            </ul>
+            {search && filteredCharts.length > 0 && (
+                <ul className="absolute left-10 right-10 z-50 max-h-55 overflow-y-auto bg-gray-600 rounded-md p-2 mt-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700">
+                    {filteredCharts.map((chart) => (
+                        <li
+                            key={chart.id}
+                            onClick={() => {
+                                setSelectedId(chart.id)
+                                setSearch('')
+                                setSelectedChart(chart)
+                            }}
+                            style={{
+                                fontWeight: chart.id === selectedId ? 'bold' : 'normal',
+                                cursor: 'pointer',
+                            }}
+                            className="p-2 hover:bg-gray-700 rounded-md text-left"
+                        > {chart.title} — {chart.difficulty}
+                        </li>
+                    ))}
+                </ul>
             )}
             <input type="hidden" name="chart_id" value={selectedId ?? ''} />
         </div>

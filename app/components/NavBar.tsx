@@ -22,7 +22,7 @@ export default async function NavBar() {
                 <Link href="/browse">Browse Charts</Link>
                 <Link href="/leaderboard">Leaderboard</Link>
             </div>
-            
+
             {/* Profile/Login Button */}
             <div className="justify-self-end">
                 {user ? (

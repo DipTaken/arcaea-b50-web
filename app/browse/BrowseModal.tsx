@@ -7,12 +7,12 @@ import AddScoreButton from '../scores/AddScoreButton';
 export default function BrowseModal({ chart, ref }: { chart: Chart; ref: React.RefObject<HTMLDialogElement | null> }) {
     return (
         <div>
-            <Modal ref={ref}>   
+            <Modal ref={ref}>
                 {/* Modal content */}
                 <div className="flex flex-col gap-4 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl">
                     <SongInfo chart={chart} />
                 </div>
-                
+
                 {/* Add Score Button */}
                 <div className="flex justify-center">
                     <AddScoreButton defaultChart={chart} sizeClasses="py-5 px-15" textClasses="text-white text-xl" borderClasses="border-2 border-white">
