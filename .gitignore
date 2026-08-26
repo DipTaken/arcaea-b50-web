@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the template, which holds only empty keys and must be committed
+# so a new contributor knows which vars to set.
+!.env.example
 
 # vercel
 .vercel
