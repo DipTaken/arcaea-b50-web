@@ -53,7 +53,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                 >Add Score
             </button>
 
-            <Modal ref={dialogRef}>
+            <Modal ref={dialogRef} width="w-[min(40vw,40rem)]">
                 <form action={handleSubmit}
                     className={`flex flex-col h-100 gap-4 gap-y-7 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl`}
                 >
@@ -69,11 +69,11 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                         min={0}
                         max={max}
                         onChange={handleInput}
-                        className={`bg-gray-500 h-10 text-white text-center rounded-md w-full border-2`}
+                        className={`bg-gray-500 h-20 text-white text-center text-4xl rounded-md w-full border-2`}
                     />
 
                     {/* Input fields for Pure, Far, and Lost */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 h-15 w-full">
                         <input
                             type="number"
                             name="pure"
@@ -81,7 +81,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             min={0}
                             max={selectedChart?.note_count ?? 0}
                             onChange={handleInput}
-                            className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
+                            className="flex-auto bg-gray-500 text-xl text-center text-white rounded-md border-2"
                         />
                         <input
                             type="number"
@@ -90,7 +90,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             min={0}
                             max={selectedChart?.note_count ?? 0}
                             onChange={handleInput}
-                            className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
+                            className="flex-auto bg-gray-500 text-xl text-center text-white rounded-md border-2"
                         />
                         <input
                             type="number"
@@ -99,7 +99,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             min={0}
                             max={selectedChart?.note_count ?? 0}
                             onChange={handleInput}
-                            className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
+                            className="flex-auto bg-gray-500 text-xl text-center text-white rounded-md border-2"
                         />
                     </div>
 
@@ -107,14 +107,14 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                     <div className="flex gap-4 w-full justify-center items-center h-15">
                         <button
                             type="submit"
-                            className={`flex-1 h-full bg-blue-500 font-bold text-white rounded-md border-2`}
+                            className={`flex-1 h-full bg-blue-500 font-bold text-2xl text-white rounded-md border-2`}
                         >
                             Add Score
                         </button>
                         <button
                             type="button"
                             onClick={() => dialogRef.current?.close()}
-                            className={`flex-1 h-full bg-red-400 font-bold text-white rounded-md border-2`}
+                            className={`flex-1 h-full bg-red-400 font-bold text-2xl text-white rounded-md border-2`}
                         >
                             Cancel
                         </button>
