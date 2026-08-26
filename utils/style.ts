@@ -1,3 +1,4 @@
+// returns a color based on the difficulty
 export function getDifficultyColor(difficulty: string): string {
     switch (difficulty) {
         case "PST":
@@ -15,6 +16,7 @@ export function getDifficultyColor(difficulty: string): string {
     }
 }
 
+// returns a color based on the grade
 export function getGradeColor(grade: string): string {
     switch (grade) {
         case "PM":
@@ -38,6 +40,7 @@ export function getGradeColor(grade: string): string {
     }
 }
 
+// text size based on title length for cards
 export function getTextSize(title: string): string {
     const length = title.length
     if (length <= 12) return "text-base"
