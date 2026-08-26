@@ -28,7 +28,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
         dialogRef.current?.close()
     }
 
-    // Handle input validation for the score input field
+    // Handle input validation for the input fields
     const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
         const input = e.currentTarget;
 
@@ -79,6 +79,8 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             name="pure"
                             placeholder="Pure"
                             min={0}
+                            max={selectedChart?.note_count ?? 0}
+                            onChange={handleInput}
                             className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
                         />
                         <input
@@ -86,6 +88,8 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             name="far"
                             placeholder="Far"
                             min={0}
+                            max={selectedChart?.note_count ?? 0}
+                            onChange={handleInput}
                             className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
                         />
                         <input
@@ -93,6 +97,8 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             name="lost"
                             placeholder="Lost"
                             min={0}
+                            max={selectedChart?.note_count ?? 0}
+                            onChange={handleInput}
                             className="flex-auto bg-gray-500 text-center text-white rounded-md border-2"
                         />
                     </div>
