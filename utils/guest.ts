@@ -3,8 +3,8 @@ import { randomUUID } from 'crypto'
 
 export async function getGuestId() {
     const cookieStore = await cookies()
-    let guestId = cookieStore.get('guest_id')?.value  
-    
+    let guestId = cookieStore.get('guest_id')?.value
+
     if (!guestId) guestId = randomUUID() //If the guest_id cookie doesn't exist, generate a new UUID and set it as the guest_id cookie
 
     //refresh the guest_id cookie to extend its expiration time

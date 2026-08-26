@@ -1,18 +1,13 @@
+// Modal component used for the backdrop and dialog box when clicking cards and the add score button
 export default function Modal({ ref, children }: { ref: React.RefObject<HTMLDialogElement | null>; children: React.ReactNode }) {
     return (
         <dialog ref={ref}
-            className="m-auto backdrop:bg-black/50 backdrop:backdrop-blur-sm bg-transparent" 
+            className="m-auto backdrop:bg-black/50 backdrop:backdrop-blur-sm bg-transparent"
+            // clicking on the backdrop closes the modal
             onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect()
-                const clickedOutside =
-                    e.clientX < rect.left || e.clientX > rect.right ||
-                    e.clientY < rect.top || e.clientY > rect.bottom
-                console.log(`rect: top=${rect.top} left=${rect.left} right=${rect.right} bottom=${rect.bottom} | click: x=${e.clientX} y=${e.clientY} | clickedOutside=${clickedOutside}`)
-                if (clickedOutside) {
-                    ref.current?.close()
-                }
+                if (e.target === e.currentTarget) e.currentTarget.close()
             }}
-            >
+        >
             {children}
         </dialog>
     )

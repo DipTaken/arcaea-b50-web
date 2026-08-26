@@ -7,10 +7,11 @@ export default function LoginButton() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
     )
+    // google auth login button
     const login = async () => {
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options:{
+            options: {
                 redirectTo: `${window.location.origin}/auth/callback`,
                 scopes: 'profile email',
             },
