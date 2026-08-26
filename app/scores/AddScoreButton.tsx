@@ -1,12 +1,12 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import ChartSearch from './ChartSearch'
 import { addScore } from './actions'
 import { Chart } from '@/utils/types'
 import { ChangeEvent } from 'react';
+import Modal from '@/app/components/Modal'
 
-export default function AddScoreButton({ charts }: { charts: Chart[] }) {
+export default function AddScoreButton({children }: { children: React.ReactNode  }) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(null)
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
@@ -33,26 +33,21 @@ export default function AddScoreButton({ charts }: { charts: Chart[] }) {
                 onClick={() => dialogRef.current?.showModal()}
                 className={`${bgColor} hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md`
                 }>Add Score</button>
-            <dialog
-                ref={dialogRef}
-                className="m-auto backdrop:bg-black/50 backdrop:backdrop-blur-sm bg-transparent">
-
-                <form
+            <Modal ref={dialogRef}>
+                <form 
                     action={handleSubmit}
                     className={`flex flex-col h-100 gap-4 gap-y-7 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl`}>
-
-                    <div className={`bg-gray-500 text-white text-center rounded-md w-full border-2`}>
-                        <ChartSearch charts={charts ?? []} onSelect={setSelectedChart} />
-                    </div>
-
-                    <input
-                        type="number"
-                        name="score"
-                        placeholder="Score"
-                        required
+                    
+                    {children}
+    
+                    <input 
+                        type="number" 
+                        name="score" 
+                        placeholder="Score" 
+                        required 
                         min={0}
                         max={max}
-                        onChange={handleInput}
+                        onChange={handleInput}  
                         className={`bg-gray-500 h-10 text-white text-center rounded-md w-full border-2`}
                     />
 
@@ -94,7 +89,7 @@ export default function AddScoreButton({ charts }: { charts: Chart[] }) {
                         </button>
                     </div>
                 </form>
-            </dialog>
+            </Modal>
         </div>
     )
 }
