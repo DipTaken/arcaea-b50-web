@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { filterCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
+import { useSetSelectedChart } from './AddScoreButton'
 interface ChartSearchProps {
     charts: Chart[]
     onSelect?: (chart: Chart | null) => void
@@ -13,6 +14,7 @@ export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
     const [selectedId, setSelectedId] = useState<number | null>(null)
     //filter charts based on search input, ignoring case and using partial matches
     const filteredCharts = filterCharts(charts, search)
+    const setSelectedChart = useSetSelectedChart()
     
     return (
         <div>
@@ -40,7 +42,7 @@ export default function ChartSearch({ charts, onSelect }: ChartSearchProps) {
                         onClick={() => {
                             setSelectedId(chart.id)
                             setSearch('')
-                            onSelect?.(chart)
+                            setSelectedChart(chart)
                         }}
                         style={{
                             fontWeight: chart.id === selectedId ? 'bold' : 'normal',
