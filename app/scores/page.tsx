@@ -5,6 +5,7 @@ import { getPlayRating } from '@/utils/rating'
 import ScoreCard from './ScoreCard'
 import AddScoreButton from './AddScoreButton'
 import ImportFromBrowserButton from '@/app/scores/ImportFromBrowserButton'
+import ChartSearch from './ChartSearch'
 
 export default async function Page() {
   const cookieStore = await cookies()
@@ -32,7 +33,11 @@ export default async function Page() {
       <h1 className="text-3xl font-bold">B50 View</h1>
       <h2 className="text-xl font-light">Click on a score for more info</h2>
       <div className="flex">
-        <AddScoreButton charts={charts ?? []} />
+        <AddScoreButton>
+          <div className={`bg-gray-500 text-white text-center rounded-md w-full border-2`}>
+            <ChartSearch charts={charts ?? []} />
+          </div>
+        </AddScoreButton>
         <ImportFromBrowserButton/>
       </div>
       <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
