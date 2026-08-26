@@ -38,7 +38,7 @@ export default function ChartSearch({ charts }: ChartSearchProps) {
             {/* this displays the charts, but we also need to map it to the chart id in the database
                 also only displays if there are results and if user has typed anything */}
             {search && filteredCharts.length > 0 && (
-                <ul className="absolute left-10 right-10 z-50 max-h-55 overflow-y-auto bg-gray-600 rounded-md p-2 mt-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700">
+                <ul className="absolute left-10 right-10 z-50 max-h-70 overflow-y-auto bg-gray-600 rounded-md p-2 mt-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700">
                     {filteredCharts.map((chart) => (
                         <li
                             key={chart.id}

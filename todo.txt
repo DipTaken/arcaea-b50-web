@@ -1,22 +1,121 @@
-Landing Page
+ARCAEA B50 WEB — TODO
 
-Browse Page
-- A catalog of songs, user can search and sort
-- Clickable song jackets, will bring up a window/redirect with song info, difficulty info, notes, cc, etc. 
-- Info will also include user's own data
+=== DONE ===
+[x] Landing page (/)
+[x] NavBar with links + profile/login
+[x] Browse page: catalog, search, sort, level + difficulty filters
+[x] Browse card -> modal with full song info
+[x] Real jacket art (Supabase Storage 'jackets' bucket, song_id + jacket_override)
+[x] Google auth via Supabase OAuth
+[x] Import guest scores to a logged-in account
+[x] Server-side validation in addScore (chart exists, score in range)
+[x] Commenting pass over app/ and utils/
+[x] Score detail modal (ScoreModal -> SongInfo + ScoreInfo)
+[x] Real types for the score join (Score / ScoreWithChart, no more `any`)
+[x] Perf: one shared modal per grid instead of one per card
+    Was ~3600 <dialog> elements + ~1800 forms on /browse. Now 1.
+[x] Perf: cap the browse grid at 100 cards with a Load More button
+[x] .env.example
+    Note: .gitignore's `.env*` was swallowing it, so it would never have been
+    committed. Added `!.env.example` to un-ignore it. .env.local stays ignored.
 
-Scores page
-- Each score needs to be clickable to bring up a window
-- Window will display more info (time imported, play/import history, MAX PM stats, etc)
 
-Google auth
-- use Supabase GAuth
+=== BUGS (in priority order) ===
+[ ] A failed addScore leaves the modal and backdrop stuck open.
+    handleSubmit is `await addScore(...)` then `dialogRef.current?.close()`.
+    addScore THROWS on "Chart not found" / bad score range, so close() never
+    runs. No error is shown either — the user just sees a frozen backdrop.
+    Easiest repro: on /scores, hit Add Score without picking a chart.
+    ChartSearch sends value='' -> Number('') -> 0 -> lookup fails -> throw.
+    Fix: return { error } from the action instead of throwing, show it, and
+    only close on success. Also require a chart to be selected.
 
-Import Scores
-- OCR python script
-- Input validation and errors
+[ ] Every modal is a different size.
+    Modal sets no width, so <dialog> keeps the UA default width: fit-content
+    and shrink-wraps its content. The `w-full max-w-5xl` on the children is
+    inert — w-full is 100% of a parent that's sized FROM those children.
+    Fix: put a real width on the <dialog> in Modal.tsx.
+    Also: ScoreModal/BrowseModal pass 2 children to a non-flex dialog, so the
+    Add Score button lands in its own full-width block below the card.
 
-Leaderboard page
-- Click to see other people's scores
+[ ] Proxy never refreshes the session.
+    utils/supabase/middleware.ts creates the supabase client but never calls
+    `await supabase.auth.getUser()`, so the setAll cookie callback never fires
+    and tokens never roll over. ESLint flags the client as unused — that IS
+    the bug. Fix: make createClient async, call getUser() before returning.
+
+[ ] getPmRating prints the wrong distance.
+    Returns `MAX - ${shiny}` but should be `MAX - ${noteCount - shiny}`.
+    One note off max on a 1000-note chart currently shows "MAX - 999".
+    Now user-visible: ScoreInfo displays it.
+
+[ ] revalidatePath('/') is stale in addScore and ImportFromBrowser.
+    The score grid lives at /scores now, so adding a score doesn't refresh it.
+
+[ ] ImportFromBrowser duplicates on re-run.
+    Guest rows aren't cleared or flagged, so a second click doubles everything.
+
+[ ] filterCharts: unknown levels leak through < and <= filters.
+    A level not in levelOrder gives indexOf -> -1, which passes those comparisons.
+
+[ ] /auth/auth-code-error is an empty anonymous default export.
+    This is the repo's only ESLint error (react/display-name).
+
+[] import scores can import duplicate scores
+    we need score handling
+
+[] style: importing scores adds success text, which messes up the flex container so add button is bigger
 
 
+=== NEXT UP ===
+[ ] Decide what happens after a score is added from inside a modal.
+    Right now close() only closes the inner add-score dialog; the outer
+    ScoreModal/BrowseModal stays open, so the backdrop is still there.
+    If it should dismiss everything, AddScoreButton needs an onSuccess
+    callback so the parent can clear selectedScore / selectedChart.
+
+[ ] Leaderboard page
+    Route + heading exist, nothing else. Click through to other users' scores.
+
+[ ] Play / import history in ScoreModal
+    There's no history table — each play is just another scores row. Needs a
+    schema decision before it can be built.
+
+[] Style: Make the browse features cleaner
+
+
+=== IMPORT SCORES (Stage 2) ===
+[ ] OCR python script
+    Candidate: arcaea-offline-ocr on PyPI (KNN + SIFT).
+    Extracts score/pure/far/lost/song_id from a screenshot.
+    Already speaks the same song_id system used for jackets.
+[ ] Client-side input validation + error display on the add-score form
+
+
+=== STAGE 3 / DEPLOY ===
+[ ] Replace the guest_id cookie with Supabase signInAnonymously()
+    Prerequisite for everything below it — RLS can't trust a self-issued cookie.
+[ ] UPDATE / DELETE RLS policies on scores (edit + delete a score)
+[ ] Public deployment
+
+
+=== PERF (remaining, lower priority) ===
+[ ] getJacketUrl builds a Supabase client on every call.
+    Free in the browser (createBrowserClient caches a singleton), but during
+    SSR isBrowser() is false so each call builds a whole client. The public
+    URL is deterministic — just template it.
+[ ] Apply the same card cap to /scores if the B50 limit ever rises above 50.
+[ ] React.memo on the cards — only worth it if CARDS_PER_PAGE goes way up.
+
+
+=== MAYBE / LOW PRIORITY ===
+[ ] Generated Supabase types (supabase gen types typescript)
+    ScoreWithChart types the components, but the query still returns `any`,
+    so narrowing a select() again wouldn't be caught at compile time.
+[ ] Rename getPlayRating/getScoreModifier to match the Sheets labels
+    ("Play Rating" = delta alone, "Play Potential" = constant + delta)
+[ ] Decide whether alt/ stays or gets deleted
+[ ] Consolidate the inline Supabase clients in auth/callback/route.ts and
+    LoginButton.tsx onto utils/supabase/{server,client}.ts
+[ ] Rename utils/supabase/middleware.ts -> proxy.ts to match Next 16
+[ ] Drop the now-unnecessary `score.charts?.` optional chaining in ScoreCard

@@ -33,7 +33,7 @@ export function getPmRating(score: number, noteCount: number, far: number | null
     if (!isPM(score, noteCount, far, lost)) return "N/A"
     else {
         const shiny = getShinyPureCount(score, noteCount)
-        return shiny === noteCount ? "MAX" : `MAX - ${shiny}`
+        return shiny === noteCount ? "MAX" : `MAX - ${noteCount - shiny}`
     }
 }
 
