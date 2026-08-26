@@ -1,11 +1,11 @@
 'use client'
 
 import { useRef } from 'react'
-import ChartSearch from './ChartSearch'
 import { addScore } from './actions'
 import { Chart } from '@/utils/types'
+import Modal from '@/app/components/Modal'
 
-export default function AddScoreButton({ charts }: { charts: Chart[] }) {
+export default function AddScoreButton({children }: { children: React.ReactNode  }) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const bgColor = "bg-[#16222d]"
     async function handleSubmit(formData: FormData) {
@@ -19,17 +19,12 @@ export default function AddScoreButton({ charts }: { charts: Chart[] }) {
                 onClick={() => dialogRef.current?.showModal()}
                 className={`${bgColor} hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md`
                 }>Add Score</button>
-            <dialog 
-                ref={dialogRef}
-                className="m-auto backdrop:bg-black/50 backdrop:backdrop-blur-sm bg-transparent">
-                
+            <Modal ref={dialogRef}>
                 <form 
                     action={handleSubmit}
                     className={`flex flex-col h-100 gap-4 gap-y-7 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl`}>
                     
-                    <div className={`bg-gray-500 text-white text-center rounded-md w-full border-2`}>
-                        <ChartSearch charts={charts ?? []} />
-                    </div>
+                    {children}
     
                     <input 
                         type="number" 
@@ -74,7 +69,7 @@ export default function AddScoreButton({ charts }: { charts: Chart[] }) {
                         </button>
                     </div>
                 </form>
-            </dialog>
+            </Modal>
         </div>
     )
 }
