@@ -47,14 +47,14 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     type="text"
                     placeholder="Search charts..."
                     value={search}
-                    className="w-full h-15 text-center text-xl border-2 rounded-md"
+                    className="w-full h-15 text-center text-xl border-2 border-gray-400 rounded-md"
                     onChange={(e) => setSearch(e.target.value)}
                 />
                 {/* Sort and Filter Options */}
                 <div className="flex items-center justify-center gap-6 h-20 w-full rounded-lg">
                     {/* Sort Options */}
-                    <div className="flex bg-gray-800 items-center justify-center gap-0">
-                        <select className=" bg-gray-800 text-white text-center p-6 py-3 rounded-md border-2 "
+                    <div className="flex  items-center justify-center gap-1">
+                        <select className=" bg-gray-800 text-white text-center p-6 py-3 border-gray-400 rounded-md border-2  "
                             onChange={(e) => setSortOption(e.target.value)}>
                             <option value="" hidden >Sort by...</option>
                             <option value="title">Title</option>
@@ -68,16 +68,16 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         </select>
 
                         {/* Sort Direction Button */}
-                        <button className="bg-gray-800 text-white text-center p-5 py-3 rounded-md border-2"
+                        <button className="bg-gray-800 text-white text-center p-5 py-3 border-gray-400 rounded-md border-2 "
                             onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}>
                             {sortDirection === 'asc' ? '↑' : '↓'}
                         </button>
                     </div>
 
                     {/* Filter Options */}
-                    <div className="flex items-center justify-center gap-0">
+                    <div className="flex items-center justify-center gap-1">
                         {/* Filter Comparison */}
-                        <select className="bg-gray-800 text-white text-center p-2 py-3 rounded-md border-2"
+                        <select className="bg-gray-800 text-white text-center p-2 py-3 border-gray-400 rounded-md border-2 "
                             onChange={(e) => setFilterComparison(e.target.value)}>
                             <option value="eq" hidden >=</option>
                             <option value="lt"> {'<'} </option>
@@ -88,7 +88,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         </select>
 
                         {/* Level Filter */}
-                        <select className="bg-gray-800 text-white text-center p-6 py-3 rounded-md border-2"
+                        <select className="bg-gray-800 text-white text-center p-6 py-3 border-gray-400 rounded-md border-2 "
                             onChange={(e) => setLevelFilter(e.target.value)}>
                             <option value="" >Level</option>
                             <option value="1">1</option>
@@ -112,7 +112,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     </div>
 
                     {/* Difficulty Filter */}
-                    <select className="bg-gray-800 text-white text-center p-6 py-3 rounded-md border-2"
+                    <select className="bg-gray-800 text-white text-center p-6 py-3 border-gray-400 rounded-md border-2 "
                         onChange={(e) => setDifficultyFilter(Number(e.target.value))}>
                         <option value="" >Difficulty</option>
                         <option value="1">PST</option>

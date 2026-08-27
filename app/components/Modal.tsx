@@ -6,7 +6,7 @@ interface ModalProps {
     width?: string
 }
 
-export default function Modal({ ref, children, onClose, width  = "w-[min(60vw,60rem)]" }:  ModalProps) {
+export default function Modal({ ref, children, onClose, width = "w-[min(60vw,60rem)]" }:  ModalProps) {
     return (
         <dialog ref={ref}
             className={`m-auto ${width} backdrop:bg-black/50 backdrop:backdrop-blur-sm bg-transparent`}

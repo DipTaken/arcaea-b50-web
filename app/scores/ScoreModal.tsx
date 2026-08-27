@@ -12,14 +12,14 @@ export default function ScoreModal({ score, ref, onClose }: { score: ScoreWithCh
             {score && (
                 <>
                     {/* Modal content */}
-                    <div className="flex flex-col gap-4 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl">
+                    <div className="flex flex-col gap-4 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-gray-400 w-full max-w-5xl">
                         <SongInfo chart={score.charts} />
                         <ScoreInfo score={score} />
                     </div>
 
                     {/* Add Score Button. */}
                     <div className="flex justify-center">
-                        <AddScoreButton key={score.charts.id} defaultChart={score.charts} sizeClasses="py-5 px-15" textClasses="text-white text-xl" borderClasses="border-2 border-white">
+                        <AddScoreButton key={score.charts.id} defaultChart={score.charts} sizeClasses="py-5 px-15" textClasses="text-white text-xl" borderClasses="border-2 border-gray-400">
                             <input type="hidden" name="chart_id" value={score.charts.id} />
                         </AddScoreButton>
                     </div>

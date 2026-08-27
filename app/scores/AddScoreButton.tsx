@@ -4,6 +4,8 @@ import { useRef, useState, createContext, useContext, ChangeEvent } from 'react'
 import { addScore } from './actions'
 import { Chart } from '@/utils/types'
 import Modal from '@/app/components/Modal'
+import { getJacketUrl } from '@/utils/jacket'
+import { getDifficultyColor } from '@/utils/style'
 
 const SelectedChartContext = createContext<(chart: Chart | null) => void>(() => { })
 export const useSetSelectedChart = () => useContext(SelectedChartContext)
@@ -16,11 +18,10 @@ interface AddScoreButtonProps {
     borderClasses?: string
 }
 
-export default function AddScoreButton({ children, defaultChart = null, sizeClasses = "p-2", textClasses = "text-white", borderClasses = "border-white" }: AddScoreButtonProps) {
+export default function AddScoreButton({ children, defaultChart = null, sizeClasses = "p-2", textClasses = "text-white", borderClasses = "border-gray-400" }: AddScoreButtonProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
-    const bgColor = "bg-[#16222d]"
 
     // submit the form data to the server and close the modal
     async function handleSubmit(formData: FormData) {
@@ -44,19 +45,38 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
         }
     };
 
+    const chartInfoElement = (
+        <div className="flex items-center justify-start gap-4 ">
+            <img src={getJacketUrl(defaultChart?.song_id || "", defaultChart?.difficulty || "", defaultChart?.jacket_override || false)} 
+                alt="Song Jacket" 
+                className="w-32 h-32 rounded-lg" />
+            
+            <div className="flex flex-col items-start gap-1">
+                <span className="text-white text-2xl font-bold">{defaultChart?.title}</span>
+                <span className="text-white text-lg font-bold p-2 rounded-md"
+                    style={{backgroundColor: getDifficultyColor(defaultChart?.difficulty ?? "") }}
+                >
+                    {defaultChart?.difficulty}  {defaultChart?.level}</span>
+            </div>
+        </div>               
+    );
+
     return (
         <SelectedChartContext.Provider value={setSelectedChart}>
             {/* Button to open the add score modal */}
             <button
                 onClick={() => dialogRef.current?.showModal()}
-                className={`${bgColor} hover:bg-gray-700 text-white font-bold ${sizeClasses} ${textClasses} ${borderClasses} rounded-md`}
+                className={`bg-gray-800 hover:bg-gray-700 text-white font-bold ${sizeClasses} ${textClasses} ${borderClasses} rounded-md`}
                 >Add Score
             </button>
 
             <Modal ref={dialogRef} width="w-[min(40vw,40rem)]">
                 <form action={handleSubmit}
-                    className={`flex flex-col h-100 gap-4 gap-y-7 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-white w-full max-w-5xl`}
+                    className={`flex flex-col gap-4 gap-y-7 p-10 justify-center rounded-lg bg-gray-800 border-2 border-gray-400 w-full max-w-5xl`}
                 >
+                    <h1 className="text-left text-white text-3xl font-bold w-full">Add Score</h1>
+                    {chartInfoElement}
+                    
                     {/*Hidden input for chart id*/}
                     {children}
 
@@ -69,7 +89,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                         min={0}
                         max={max}
                         onChange={handleInput}
-                        className={`bg-gray-500 h-20 text-white text-center text-4xl rounded-md w-full border-2`}
+                        className={`no-spinner bg-gray-700 h-20 text-white text-center text-4xl rounded-md w-full border-2 border-gray-400`}
                     />
 
                     {/* Input fields for Pure, Far, and Lost */}
@@ -81,7 +101,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             min={0}
                             max={selectedChart?.note_count ?? 0}
                             onChange={handleInput}
-                            className="flex-auto bg-gray-500 text-xl text-center text-white rounded-md border-2"
+                            className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
                         />
                         <input
                             type="number"
@@ -90,7 +110,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             min={0}
                             max={selectedChart?.note_count ?? 0}
                             onChange={handleInput}
-                            className="flex-auto bg-gray-500 text-xl text-center text-white rounded-md border-2"
+                            className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
                         />
                         <input
                             type="number"
@@ -99,7 +119,7 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                             min={0}
                             max={selectedChart?.note_count ?? 0}
                             onChange={handleInput}
-                            className="flex-auto bg-gray-500 text-xl text-center text-white rounded-md border-2"
+                            className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
                         />
                     </div>
 
@@ -107,14 +127,14 @@ export default function AddScoreButton({ children, defaultChart = null, sizeClas
                     <div className="flex gap-4 w-full justify-center items-center h-15">
                         <button
                             type="submit"
-                            className={`flex-1 h-full bg-blue-500 font-bold text-2xl text-white rounded-md border-2`}
+                            className={`flex-1 h-full bg-blue-600 font-bold text-2xl text-white rounded-md border-2 border-blue-400`}
                         >
                             Add Score
                         </button>
                         <button
                             type="button"
                             onClick={() => dialogRef.current?.close()}
-                            className={`flex-1 h-full bg-red-400 font-bold text-2xl text-white rounded-md border-2`}
+                            className={`flex-1 h-full bg-red-400 font-bold text-2xl text-white rounded-md border-2 border-red-200`}
                         >
                             Cancel
                         </button>
