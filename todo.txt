@@ -18,7 +18,26 @@ ARCAEA B50 WEB — TODO
 [x] .env.example
     Note: .gitignore's `.env*` was swallowing it, so it would never have been
     committed. Added `!.env.example` to un-ignore it. .env.local stays ignored.
-
+[x] Every modal is a different size.
+    Modal sets no width, so <dialog> keeps the UA default width: fit-content
+    and shrink-wraps its content. The `w-full max-w-5xl` on the children is
+    inert — w-full is 100% of a parent that's sized FROM those children.
+    Fix: put a real width on the <dialog> in Modal.tsx.
+    Also: ScoreModal/BrowseModal pass 2 children to a non-flex dialog, so the
+    Add Score button lands in its own full-width block below the card.
+[x] getPmRating prints the wrong distance.
+    Returns `MAX - ${shiny}` but should be `MAX - ${noteCount - shiny}`.
+    One note off max on a 1000-note chart currently shows "MAX - 999".
+    Now user-visible: ScoreInfo displays it.
+[x] ImportFromBrowser duplicates on re-run.
+    Guest rows aren't cleared or flagged, so a second click doubles everything.
+[x] /auth/auth-code-error is an empty anonymous default export.
+    This is the repo's only ESLint error (react/display-name).
+[x] style: importing scores adds success text, which messes up the flex container so add button is bigger
+[x] getJacketUrl builds a Supabase client on every call.
+    Free in the browser (createBrowserClient caches a singleton), but during
+    SSR isBrowser() is false so each call builds a whole client. The public
+    URL is deterministic — just template it.
 
 === BUGS (in priority order) ===
 [ ] A failed addScore leaves the modal and backdrop stuck open.
@@ -30,41 +49,15 @@ ARCAEA B50 WEB — TODO
     Fix: return { error } from the action instead of throwing, show it, and
     only close on success. Also require a chart to be selected.
 
-[ ] Every modal is a different size.
-    Modal sets no width, so <dialog> keeps the UA default width: fit-content
-    and shrink-wraps its content. The `w-full max-w-5xl` on the children is
-    inert — w-full is 100% of a parent that's sized FROM those children.
-    Fix: put a real width on the <dialog> in Modal.tsx.
-    Also: ScoreModal/BrowseModal pass 2 children to a non-flex dialog, so the
-    Add Score button lands in its own full-width block below the card.
-
 [ ] Proxy never refreshes the session.
     utils/supabase/middleware.ts creates the supabase client but never calls
     `await supabase.auth.getUser()`, so the setAll cookie callback never fires
     and tokens never roll over. ESLint flags the client as unused — that IS
     the bug. Fix: make createClient async, call getUser() before returning.
 
-[ ] getPmRating prints the wrong distance.
-    Returns `MAX - ${shiny}` but should be `MAX - ${noteCount - shiny}`.
-    One note off max on a 1000-note chart currently shows "MAX - 999".
-    Now user-visible: ScoreInfo displays it.
-
 [ ] revalidatePath('/') is stale in addScore and ImportFromBrowser.
     The score grid lives at /scores now, so adding a score doesn't refresh it.
 
-[ ] ImportFromBrowser duplicates on re-run.
-    Guest rows aren't cleared or flagged, so a second click doubles everything.
-
-[ ] filterCharts: unknown levels leak through < and <= filters.
-    A level not in levelOrder gives indexOf -> -1, which passes those comparisons.
-
-[ ] /auth/auth-code-error is an empty anonymous default export.
-    This is the repo's only ESLint error (react/display-name).
-
-[] import scores can import duplicate scores
-    we need score handling
-
-[] style: importing scores adds success text, which messes up the flex container so add button is bigger
 
 
 === NEXT UP ===
@@ -100,21 +93,11 @@ ARCAEA B50 WEB — TODO
 
 
 === PERF (remaining, lower priority) ===
-[ ] getJacketUrl builds a Supabase client on every call.
-    Free in the browser (createBrowserClient caches a singleton), but during
-    SSR isBrowser() is false so each call builds a whole client. The public
-    URL is deterministic — just template it.
-[ ] Apply the same card cap to /scores if the B50 limit ever rises above 50.
-[ ] React.memo on the cards — only worth it if CARDS_PER_PAGE goes way up.
-
 
 === MAYBE / LOW PRIORITY ===
 [ ] Generated Supabase types (supabase gen types typescript)
     ScoreWithChart types the components, but the query still returns `any`,
     so narrowing a select() again wouldn't be caught at compile time.
-[ ] Rename getPlayRating/getScoreModifier to match the Sheets labels
-    ("Play Rating" = delta alone, "Play Potential" = constant + delta)
-[ ] Decide whether alt/ stays or gets deleted
 [ ] Consolidate the inline Supabase clients in auth/callback/route.ts and
     LoginButton.tsx onto utils/supabase/{server,client}.ts
 [ ] Rename utils/supabase/middleware.ts -> proxy.ts to match Next 16
