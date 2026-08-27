@@ -2,10 +2,10 @@ import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { getGuestIdReadOnly } from '@/utils/guest'
 import { getPlayRating } from '@/utils/rating'
-import ScoreCard from './ScoreCard'
 import AddScoreButton from './AddScoreButton'
 import ImportFromBrowserButton from '@/app/scores/ImportFromBrowserButton'
 import ChartSearch from './ChartSearch'
+import ScoreGrid from './ScoreGrid'
 
 export default async function Page() {
   const cookieStore = await cookies()
@@ -17,7 +17,7 @@ export default async function Page() {
   const { data: charts } = await supabase.from('charts').select().order('title').limit(5000)
   const { data: scores } = await supabase
     .from('scores')
-    .select('*, charts(title, difficulty, chart_constant, note_count, song_id, jacket_override, artist, length, version)')
+    .select('*, charts(*)')
     .eq('user_id', userId)
     .limit(5000)
 
@@ -41,6 +41,7 @@ export default async function Page() {
           </AddScoreButton>
         </ImportFromBrowserButton>
       </div>
+      <ScoreGrid scores={sortedScores ?? []} />
     </div>
   )
 }
