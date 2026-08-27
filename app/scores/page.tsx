@@ -41,11 +41,6 @@ export default async function Page() {
           </AddScoreButton>
         </ImportFromBrowserButton>
       </div>
-      <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
-        {sortedScores?.map((score, index) => (
-          <ScoreCard key={score.id} score={score} index={index} />
-        ))}
-      </ul>
     </div>
   )
 }
