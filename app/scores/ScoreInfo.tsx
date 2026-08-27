@@ -5,7 +5,7 @@ import { getGradeColor } from '@/utils/style'
 export default function ScoreInfo({ score }: { score: ScoreWithChart }) {
     const flexClasses = "flex gap-4 items-center w-full text-white font-bold "    
     return (
-        <div className="flex flex-col gap-4 p-4 justify-start items-center rounded-lg bg-gray-900 border-2 border-white w-full">
+        <div className="flex flex-col gap-4 p-4 justify-start items-center rounded-lg bg-gray-900 border-2 border-gray-600 w-full">
             <div className={flexClasses + "text-2xl justify-start"}>
                 <p>Score: {score.score.toLocaleString()}
 

@@ -11,7 +11,8 @@ export default function SongInfo({ chart }: { chart: Chart }) {
                 {/* Difficulty */}
                 <p>
                     <span className="font-bold">Difficulty: </span>
-                    <span style={{ color: getDifficultyColor(chart.difficulty ?? "") }}>
+                    <span className="py-1 px-3 rounded-md font-bold"
+                        style={{ backgroundColor: getDifficultyColor(chart?.difficulty ?? "")}}>
                         {chart.difficulty ? chart.difficulty : 'Unknown'}
                     </span>
                 </p>

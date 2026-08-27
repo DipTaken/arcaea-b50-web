@@ -19,6 +19,15 @@
     }
 }
 
+@utility no-spinner {
+    appearance: textfield;   /* Firefox */
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        appearance: none;
+        margin: 0;            /* Chrome reserves a little space even when hidden */
+    }
+}
+
 body {
     color: var(--foreground);
     font-family: var(--font-sans), sans-serif;
