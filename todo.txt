@@ -38,9 +38,12 @@ ARCAEA B50 WEB — TODO
     Free in the browser (createBrowserClient caches a singleton), but during
     SSR isBrowser() is false so each call builds a whole client. The public
     URL is deterministic — just template it.
-
-=== BUGS (in priority order) ===
-[ ] A failed addScore leaves the modal and backdrop stuck open.
+[X] Decide what happens after a score is added from inside a modal.
+    Right now close() only closes the inner add-score dialog; the outer
+    ScoreModal/BrowseModal stays open, so the backdrop is still there.
+    If it should dismiss everything, AddScoreButton needs an onSuccess
+    callback so the parent can clear selectedScore / selectedChart. (Kept current system)
+[x] A failed addScore leaves the modal and backdrop stuck open.
     handleSubmit is `await addScore(...)` then `dialogRef.current?.close()`.
     addScore THROWS on "Chart not found" / bad score range, so close() never
     runs. No error is shown either — the user just sees a frozen backdrop.
@@ -48,6 +51,15 @@ ARCAEA B50 WEB — TODO
     ChartSearch sends value='' -> Number('') -> 0 -> lookup fails -> throw.
     Fix: return { error } from the action instead of throwing, show it, and
     only close on success. Also require a chart to be selected.
+[x] revalidatePath('/') is stale in addScore and ImportFromBrowser.
+    Both now revalidate '/scores', where the grid actually lives.
+    Note: /scores is dynamic (it reads cookies), so this isn't invalidating a
+    cached HTML page — it's clearing the CLIENT router cache, which is what
+    was actually serving the stale grid after a navigation.
+[x] Style: Make the browse features cleaner
+[X] Client-side input validation + error display on the add-score form
+
+=== BUGS (in priority order) ===
 
 [ ] Proxy never refreshes the session.
     utils/supabase/middleware.ts creates the supabase client but never calls
@@ -55,18 +67,7 @@ ARCAEA B50 WEB — TODO
     and tokens never roll over. ESLint flags the client as unused — that IS
     the bug. Fix: make createClient async, call getUser() before returning.
 
-[ ] revalidatePath('/') is stale in addScore and ImportFromBrowser.
-    The score grid lives at /scores now, so adding a score doesn't refresh it.
-
-
-
 === NEXT UP ===
-[ ] Decide what happens after a score is added from inside a modal.
-    Right now close() only closes the inner add-score dialog; the outer
-    ScoreModal/BrowseModal stays open, so the backdrop is still there.
-    If it should dismiss everything, AddScoreButton needs an onSuccess
-    callback so the parent can clear selectedScore / selectedChart.
-
 [ ] Leaderboard page
     Route + heading exist, nothing else. Click through to other users' scores.
 
@@ -74,15 +75,11 @@ ARCAEA B50 WEB — TODO
     There's no history table — each play is just another scores row. Needs a
     schema decision before it can be built.
 
-[] Style: Make the browse features cleaner
-
-
 === IMPORT SCORES (Stage 2) ===
 [ ] OCR python script
     Candidate: arcaea-offline-ocr on PyPI (KNN + SIFT).
     Extracts score/pure/far/lost/song_id from a screenshot.
     Already speaks the same song_id system used for jackets.
-[ ] Client-side input validation + error display on the add-score form
 
 
 === STAGE 3 / DEPLOY ===
@@ -91,14 +88,10 @@ ARCAEA B50 WEB — TODO
 [ ] UPDATE / DELETE RLS policies on scores (edit + delete a score)
 [ ] Public deployment
 
-
-=== PERF (remaining, lower priority) ===
-
 === MAYBE / LOW PRIORITY ===
 [ ] Generated Supabase types (supabase gen types typescript)
     ScoreWithChart types the components, but the query still returns `any`,
     so narrowing a select() again wouldn't be caught at compile time.
 [ ] Consolidate the inline Supabase clients in auth/callback/route.ts and
     LoginButton.tsx onto utils/supabase/{server,client}.ts
-[ ] Rename utils/supabase/middleware.ts -> proxy.ts to match Next 16
 [ ] Add next/prev buttons in Score/Browse Modal to go to next chart w/o clicking off

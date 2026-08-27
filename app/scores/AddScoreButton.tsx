@@ -19,7 +19,7 @@ interface AddScoreButtonProps {
     borderClasses?: string
 }
 
-export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, sizeClasses = "p-2", textClasses = "text-white", borderClasses = "border-gray-400" }: AddScoreButtonProps) {
+export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, sizeClasses = "p-2", textClasses = "text-white", borderClasses = "border-2 border-gray-400" }: AddScoreButtonProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -97,49 +97,54 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                     <div key={resetKey} className="contents">
                         {children}
 
-                        {/* Score input field */}
-                        <input
-                            type="number"
-                            name="score"
-                            placeholder="Score"
-                            required
-                            min={0}
-                            max={max}
-                            onChange={handleInput}
-                            className={`no-spinner bg-gray-700 h-20 text-white text-center text-4xl rounded-md w-full border-2 border-gray-400`}
-                        />
+                        <div key={selectedChart?.id ?? 'none'} className="contents">
+                            {/* Score input field */}
+                            <input
+                                type="number"
+                                name="score"
+                                placeholder="Score"
+                                required
+                                min={0}
+                                max={max}
+                                disabled={!selectedChart}
+                                onChange={handleInput}
+                                className={`no-spinner bg-gray-700 h-20 text-white text-center text-4xl rounded-md w-full border-2 border-gray-400`}
+                            />
 
-                        {/* Input fields for Pure, Far, and Lost */}
-                        <div className="flex gap-2 h-15 w-full">
-                            <input
-                                type="number"
-                                name="pure"
-                                placeholder="Pure"
-                                min={0}
-                                max={selectedChart?.note_count ?? 0}
-                                onChange={handleInput}
-                                className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                            />
-                            <input
-                                type="number"
-                                name="far"
-                                placeholder="Far"
-                                min={0}
-                                max={selectedChart?.note_count ?? 0}
-                                onChange={handleInput}
-                                className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                            />
-                            <input
-                                type="number"
-                                name="lost"
-                                placeholder="Lost"
-                                min={0}
-                                max={selectedChart?.note_count ?? 0}
-                                onChange={handleInput}
-                                className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                            />
+                            {/* Input fields for Pure, Far, and Lost */}
+                            <div className="flex gap-2 h-15 w-full">
+                                <input
+                                    type="number"
+                                    name="pure"
+                                    placeholder="Pure"
+                                    min={0}
+                                    max={selectedChart?.note_count ?? 0}
+                                    disabled={!selectedChart}
+                                    onChange={handleInput}
+                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
+                                />
+                                <input
+                                    type="number"
+                                    name="far"
+                                    placeholder="Far"
+                                    min={0}
+                                    max={selectedChart?.note_count ?? 0}
+                                    disabled={!selectedChart}
+                                    onChange={handleInput}
+                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
+                                />
+                                <input
+                                    type="number"
+                                    name="lost"
+                                    placeholder="Lost"
+                                    min={0}
+                                    max={selectedChart?.note_count ?? 0}
+                                    disabled={!selectedChart}
+                                    onChange={handleInput}
+                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
+                                />
+                            </div>
                         </div>
-
                         {/* Display error message if any */}
                         {errorMessage && (
                             <div className="text-red-500 text-center text-lg font-bold">
@@ -151,7 +156,8 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                         <div className="flex gap-4 w-full justify-center items-center h-15">
                             <button
                                 type="submit"
-                                className={`flex-1 h-full bg-blue-600 font-bold text-2xl text-white rounded-md border-2 border-blue-400`}
+                                disabled={!selectedChart}
+                                className={`flex-1 h-full bg-blue-600 font-bold text-2xl text-white disabled:bg-gray-900 disabled:text-gray-500 rounded-md border-2 border-blue-400`}
                             >
                                 Add Score
                             </button>

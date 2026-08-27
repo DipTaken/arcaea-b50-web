@@ -7,8 +7,6 @@ export default function ImportFromBrowserButton({ children }: { children?: React
     const [isPending, startTransition] = useTransition()
     const [message, setMessage] = useState<string | null>(null)
 
-    const bgColor = "bg-[#16222d]"
-
     // Handle the import process when the button is clicked
     const handleImport = () => {
         setMessage(null)
@@ -31,7 +29,7 @@ export default function ImportFromBrowserButton({ children }: { children?: React
                 <button
                     onClick={handleImport}
                     disabled={isPending}
-                    className={`${bgColor} hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md disabled:opacity-80`}
+                    className={`border-2 border-gray-400 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md disabled:opacity-80`}
                 >
                     Import Browser Scores to Account
                 </button>

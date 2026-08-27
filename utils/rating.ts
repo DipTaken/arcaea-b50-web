@@ -46,3 +46,18 @@ function isPM(score: number, noteCount: number, far: number | null, lost: number
     else if (far === null || lost === null) return false
     else return far === 0 && lost === 0
 }
+
+export function getB50Rating(sortedScores: { score: number, charts: { chart_constant: number } }[]): number {
+    let totalRating = 0.0
+    for (let i = 1; i <= sortedScores.length; i++) {
+        if (i <= 10) {
+            const playRating = getPlayRating(sortedScores[i - 1].score, sortedScores[i - 1].charts.chart_constant)
+            totalRating += playRating * 2.0
+        }
+        else {
+            const playRating = getPlayRating(sortedScores[i - 1].score, sortedScores[i - 1].charts.chart_constant)
+            totalRating += playRating
+        }
+    }
+    return totalRating / 60.0
+}
