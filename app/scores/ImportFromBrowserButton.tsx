@@ -16,13 +16,13 @@ export default function ImportFromBrowserButton() {
             const res = await ImportFromBrowser()
             if (res.error) {
                 setMessage(`${res.error}`)
-            } 
+            }
             else {
-                setMessage(`Successfully imported ${res.count} scores!`)
+                setMessage(`Imported ${res.count} scores`)
             }
         })
     }
-    
+
     return (
         // Button to trigger the import process
         <div className="flex flex-col items-start gap-2">
@@ -31,7 +31,7 @@ export default function ImportFromBrowserButton() {
                 disabled={isPending}
                 className={`${bgColor} hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md disabled:opacity-80`}
             >
-                {isPending ? 'Importing...' : 'Import Guest Scores to Account'}
+                Import Browser Scores to Account
             </button>
             {message && <p className="text-sm text-neutral-400">{message}</p>}
         </div>
