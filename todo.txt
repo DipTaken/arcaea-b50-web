@@ -118,4 +118,4 @@ ARCAEA B50 WEB — TODO
 [ ] Consolidate the inline Supabase clients in auth/callback/route.ts and
     LoginButton.tsx onto utils/supabase/{server,client}.ts
 [ ] Rename utils/supabase/middleware.ts -> proxy.ts to match Next 16
-[ ] Drop the now-unnecessary `score.charts?.` optional chaining in ScoreCard
+[ ] Add next/prev buttons in Score/Browse Modal to go to next chart w/o clicking off

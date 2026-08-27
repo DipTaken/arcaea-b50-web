@@ -62,7 +62,7 @@ export default function SongInfo({ chart }: { chart: Chart }) {
                 <img
                     src={getJacketUrl(chart.song_id, chart.difficulty, chart.jacket_override)}
                     alt={chart.title}
-                    className="w-64 h-64 object-cover rounded-lg"
+                    className="w-80 h-80 object-cover rounded-lg"
                 />
                 <h2 className="text-white text-xl font-bold ">{chart.title}</h2>
                 <p className="text-gray-400">{chart.artist}</p>
