@@ -52,6 +52,6 @@ export default async function ImportFromBrowser() {
         return { error: insertError.message }
     }
 
-    revalidatePath('/')
+    revalidatePath('/scores')
     return { success: true, count: data ? (data as any[]).length : 0 }
 }

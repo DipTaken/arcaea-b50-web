@@ -24,13 +24,27 @@ export async function addScore(formData: FormData) {
         .single()
 
     if (chartError || !chart) {
-        throw new Error("Chart not found")
+        return {error: "Chart not found"}
     }
 
     // Validate the score
     const maxScore = 10000000 + (chart?.note_count ?? 0)
     if (score < 0 || score > maxScore) {
-        throw new Error(`Invalid score. Must be between 0 and ${maxScore}`)
+        return {error: `Invalid score. Must be between 0 and ${maxScore}`}
+    }
+
+    //Validate pure, far, lost values
+    if (pure !== null && (pure < 0 || pure > chart.note_count)) {
+        return {error: `Invalid pure value. Must be between 0 and ${chart.note_count}`}
+    }
+    if (far !== null && (far < 0 || far > chart.note_count)) {
+        return {error: `Invalid far value. Must be between 0 and ${chart.note_count}`}
+    }
+    if (lost !== null && (lost < 0 || lost > chart.note_count)) {
+        return {error: `Invalid lost value. Must be between 0 and ${chart.note_count}`}
+    }
+    if (pure !== null && far !== null && lost !== null && (pure + far + lost > chart.note_count)) {
+        return {error: `Invalid values. The sum of pure, far, and lost must not exceed ${chart.note_count}`}
     }
 
     const guestId = await getGuestId()
@@ -46,7 +60,7 @@ export async function addScore(formData: FormData) {
         far: far,
         lost: lost
     })
-    revalidatePath('/')
+    revalidatePath('/scores')
 }
 
 // Helper function to parse optional number values from FormData
