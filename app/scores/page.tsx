@@ -34,7 +34,7 @@ export default async function Page() {
       <h2 className="text-xl font-light">Click on a score for more info</h2>
       <div className="flex">
         <ImportFromBrowserButton>
-          <AddScoreButton>
+          <AddScoreButton showSongInfo={false}>
             <div className={`bg-gray-500 text-white text-center rounded-md w-full border-2`}>
               <ChartSearch charts={charts ?? []} />
             </div>
