@@ -4,6 +4,14 @@
 
 Personal project + learning exercise (first time with TypeScript, Next.js, Supabase/SQL). Built incrementally with heavy explanation at each step — prioritize understanding over speed when helping on this project.
 
+## Docs
+
+| File | Contents |
+|---|---|
+| `docs/todo.txt` | The running project list — features, deploy blockers, stage planning. |
+| `docs/report.md` | Full codebase audit: bugs (with failure scenarios and fixes), the Tailwind de-duplication plan, responsive layout, code quality. |
+| `docs/report_todo.md` | The audit as an actionable checklist, each item with a concept note explaining the underlying bug class. |
+
 ## Stack
 
 - **Frontend/Backend:** Next.js 16 (App Router, TypeScript, Tailwind CSS v4)
@@ -26,7 +34,7 @@ Note the key is named `PUBLISHABLE_KEY`, not the older `ANON_KEY` convention —
 | `/scores` | The B50 view — top 50 scores by Play Rating, plus Add Score / Import buttons. |
 | `/browse` | Full chart catalog with search, sort, and level/difficulty filters. |
 | `/leaderboard` | Stub — heading only, no content yet. |
-| `/auth/callback` | OAuth code-exchange route handler; redirects to `/browse` on success. |
+| `/auth/callback` | OAuth code-exchange route handler; redirects to `/browse` on success — **and also on provider-side failure**, see known bug 6. |
 | `/auth/auth-code-error` | Stub — renders an empty `<div>`. |
 
 `NavBar` is rendered globally from `app/layout.tsx`, so it appears on every route.
@@ -43,7 +51,7 @@ Google OAuth via Supabase is **implemented and working**:
 **Guest → account model.** Both identities coexist:
 - Guest users get a UUID in an `httpOnly` `guest_id` cookie (`utils/guest.ts`), refreshed on write (~1yr maxAge).
 - Every read/write resolves identity the same way: `const userId = user?.id ?? guestId`. A logged-in user's real `auth.uid()` wins; otherwise the guest cookie is used.
-- `ImportFromBrowser` (server action) copies all rows with `user_id = guestId` to `user_id = user.id`. It **duplicates** rather than moves — the guest rows are left behind, so re-importing will create duplicates.
+- `ImportFromBrowser` (server action) copies all rows with `user_id = guestId` to `user_id = user.id`. It **copies** rather than moves — the guest rows are left behind. Re-running is now guarded by an `upsert` with `onConflict: 'user_id,chart_id,created_at'`, which requires a matching unique constraint on `scores`; if that constraint isn't in the live DB, every import fails with `42P10`.
 
 The guest UUID is still **not** cryptographically tied to auth — it's a self-issued cookie value. Before adding UPDATE/DELETE policies on `scores`, this needs replacing with Supabase anonymous auth (`signInAnonymously()`) so RLS can trust `auth.uid()`.
 
@@ -110,7 +118,8 @@ app/
 ├── auth/
 │   ├── callback/route.ts      — GET handler; exchangeCodeForSession(code) → redirect to /browse (or /auth/auth-code-error).
 │   │                             Builds its own createServerClient inline rather than reusing utils/supabase/server.ts.
-│   └── auth-code-error/page.tsx — STUB, renders an empty div. Also an anonymous default export.
+│   └── auth-code-error/page.tsx — STUB, renders an empty div. Named export, so no lint error — but the
+│                                 page is user-reachable on a failed code exchange and shows nothing.
 ├── components/
 │   ├── NavBar.tsx             — server component; 3-column grid (logo / links / profile). Calls getUser() to pick
 │   │                             ProfileButton vs LoginButton.
@@ -123,8 +132,9 @@ app/
 │   │                             `e.target === e.currentTarget` — a ::backdrop click targets the <dialog> itself,
 │   │                             while content clicks merely bubble. `onClose` is wired to the native `close` event,
 │   │                             so it fires on Esc too — required for any parent driving the modal from state.
-│   │                             NOTE: sets no width, so the dialog inherits the UA stylesheet's `width: fit-content`
-│   │                             and shrink-wraps its content. See the bug note below.
+│   │                             Takes a `width` prop (default `w-[min(60vw,60rem)]`) because a <dialog> otherwise
+│   │                             keeps the UA stylesheet's `width: fit-content` and shrink-wraps its own content —
+│   │                             which made `w-full max-w-5xl` on the children inert and every modal a different size.
 │   └── SongInfo.tsx           — shared 2-column chart detail panel (jacket + all metadata). Used by BrowseModal.
 ├── scores/
 │   ├── page.tsx               — B50 view. Server component. Fetches charts + scores (nested `charts(*)` join), sorts
@@ -143,10 +153,13 @@ app/
 │   │                             call site via `sizeClasses`/`textClasses`/`borderClasses` props (these REPLACE rather
 │   │                             than append, which avoids Tailwind conflicts — two same-property utilities in one
 │   │                             class attribute are resolved by stylesheet order, not attribute order).
+│   │                             Both modals pass the identical trio; docs/report.md §2.5 argues for collapsing
+│   │                             all three into one `size` union, which makes the conflict unrepresentable.
 │   │                             Exposes SelectedChartContext so ChartSearch can push the picked chart up.
 │   ├── ChartSearch.tsx        — client; searchable chart picker used inside AddScoreButton's form.
-│   ├── actions.ts             — `addScore` server action. Validates chart existence + score range server-side,
-│   │                             resolves user?.id ?? guestId, inserts. Calls revalidatePath('/').
+│   ├── actions.ts             — `addScore` server action. Validates chart existence + score range server-side and
+│   │                             returns `{ error }` rather than throwing, resolves user?.id ?? guestId, inserts.
+│   │                             Calls revalidatePath('/scores'). NOTE: the insert's own error is not checked.
 │   ├── ImportFromBrowser.ts   — `ImportFromBrowser` server action; copies guest scores onto the logged-in account.
 │   └── ImportFromBrowserButton.tsx — client; useTransition + inline result message.
 ├── browse/
@@ -184,13 +197,15 @@ utils/
 │                                 Also exports the shared `bgColor` constant.
 └── types.ts                   — `Chart` (mirrors the charts table), `Score` (mirrors scores), and
                                   `ScoreWithChart = Score & { charts: Chart }` for the joined query result.
+                                  Hand-written, NOT generated — so it can and does disagree with the DB.
 
 proxy.ts                       — root proxy (Next.js 16's rename of middleware.ts). Delegates to
                                   utils/supabase/middleware.ts. Matcher skips _next/static, _next/image, favicon, images.
 
-alt/                           — experimental/abandoned design variants, NOT wired into the app
-├── app/ScoreCardNew.tsx       — alternate ScoreCard layout
-└── utils/style copy.ts        — matching alt copy of style.ts used only by ScoreCardNew.tsx
+docs/
+├── todo.txt                   — the running project list (feature backlog, deploy blockers)
+├── report.md                  — full codebase audit: bugs, Tailwind de-duplication, code quality
+└── report_todo.md             — the audit as an actionable checklist, with a concept note per item
 ```
 
 ### The shared-modal pattern (both grids)
@@ -223,26 +238,32 @@ Next 16 deprecated the `middleware.js` file convention and renamed it to `proxy.
 - `getGrade(score, noteCount, pure, far, lost)` → "PM" | "EX+" | "EX" | "AA" | "A" | "B" | "C" | "D". Returns a bare `"PM"` (no "MAX-n" suffix) so it fits the small ScoreCard cell.
 - `getScoreModifier(score)` → the delta added to chart_constant.
 - `getPlayRating(score, chartConstant)` → `max(modifier + constant, 0)`.
-- `getShinyPureCount(score, noteCount)` → count of shiny (max-value) pure notes, derived from the score.
-- `getPmRating(score, noteCount, far, lost)` → "MAX" / "MAX - n" / "N/A". **See the bug note below.**
-- `isPM(...)` (private) → guarded by `MAX_NOTES_SAFE_PM_THRESHOLD = 2237`; below that note count, score ≥ 10M is only reachable via a true PM, so far/lost aren't needed.
+- `getShinyPureCount(score, noteCount)` → count of shiny (max-value) pure notes, derived from the score. **Currently wrong — see bug 2 below.**
+- `getPmRating(score, noteCount, far, lost)` → "MAX" / "MAX - n" / "N/A". The formula here is correct; it displays wrong distances only because `getShinyPureCount` feeds it a wrong `shiny`.
+- `isPM(...)` (private) → guarded by `MAX_NOTES_SAFE_PM_THRESHOLD = 2237`; below that note count, score ≥ 10M is only reachable via a true PM, so far/lost aren't needed. The same threshold is the point above which `getShinyPureCount` becomes genuinely undecidable: at >2237 notes each unit is worth <1 point, so shiny can't be recovered from the score alone.
 
 Naming note (unresolved, cosmetic): `getPlayRating`/`getScoreModifier` don't match the Sheets' own column labels ("Play Rating" = delta alone, "Play Potential" = constant + delta).
 
 ## Known bugs / rough edges
 
-These are live issues in the current tree, not speculation:
+Live issues in the current tree, verified — not speculation. Full reasoning, failure scenarios, and
+fixes are in `docs/report.md`; `docs/report_todo.md` is the same list as a checklist. Keep this
+section to the headline and a pointer rather than restating the analysis.
 
-1. **The proxy never refreshes the session.** `utils/supabase/middleware.ts` builds a `createServerClient` into a local `supabase` variable, then returns `supabaseResponse` without ever calling `await supabase.auth.getUser()`. The `setAll` cookie callback only fires during a token refresh, and a refresh only happens when something asks for the session — so `supabase` is dead code and the proxy is a passthrough. Sessions will expire instead of rolling over. Supabase's documented pattern calls `getUser()` before returning the response (which also means `createClient` has to become `async`).
-2. **`getPmRating` reports the wrong distance.** It returns `MAX - ${shiny}` where `shiny` is the count of shiny pures, but "MAX - n" means *n notes short of max*. It should be `MAX - ${noteCount - shiny}`. On a 1000-note chart one note off max currently prints "MAX - 999" instead of "MAX - 1".
-3. **Stale `revalidatePath('/')`.** Both `addScore` and `ImportFromBrowser` revalidate `/`, but the score grid moved to `/scores`. Adding or importing a score does not invalidate the page that displays it.
-4. **`ImportFromBrowser` duplicates on re-run.** It inserts copies without clearing or flagging the guest rows, so clicking Import twice doubles the scores.
-5. **A failed `addScore` leaves the modal (and backdrop) stuck open.** `AddScoreButton.handleSubmit` is `await addScore(formData)` followed by `dialogRef.current?.close()`. `addScore` *throws* on "Chart not found" and on an out-of-range score, so the `close()` line is simply never reached — the dialog stays open, the backdrop stays up, and no error is shown to the user. Easiest trigger: on `/scores`, submit the top-level Add Score form without picking a chart. `ChartSearch`'s hidden input is `value={selectedId ?? ''}`, so an unpicked chart sends `''` → `Number('')` → `0` → the `.eq('id', 0).single()` lookup fails → throw. The score field is `required`; the chart selection is not. Fix is to return an error object from the action instead of throwing (and surface it), or at minimum `try/finally` the close.
-6. **Every modal is a different size.** `Modal` sets no width, so the `<dialog>` keeps the UA stylesheet's `width: fit-content` (Preflight resets margin/padding/border, not width) and shrink-wraps its own content. The `w-full max-w-5xl` on the *children* is inert — `w-full` is 100% of a parent that is itself sized from those children, so intrinsic content width wins. `SongInfo`'s `grid-cols-[1fr_2fr]` with a 256px jacket is much wider than the add-score form's stack of inputs, hence the mismatch. Fix by putting a definite width on the `<dialog>` in `Modal.tsx`. Related: `ScoreModal`/`BrowseModal` pass two children to the dialog, which is not a flex container, so the Add Score button sits in its own full-width block below the card.
-7. **Unknown levels slip through `<`/`<=` filters.** In `filterCharts`, a `chart.level` not present in `levelOrder` yields `indexOf` → `-1`, which passes `lt`/`le` comparisons against any real level.
-8. **`/auth/auth-code-error` and `/leaderboard` are empty stubs.** The former is an anonymous default export, which is also the repo's only ESLint *error* (`react/display-name`).
-9. **Inline Supabase clients.** `app/auth/callback/route.ts` and `LoginButton.tsx` construct their own clients instead of importing `utils/supabase/server.ts` / `client.ts`.
-10. **`getJacketUrl` builds a Supabase client per call.** Harmless in the browser (`createBrowserClient` returns a cached singleton once `isBrowser()` is true), but during SSR that check fails and every call constructs a fresh client. The public URL is a deterministic string, so the client isn't needed at all.
+1. **The proxy never refreshes the session.** `utils/supabase/middleware.ts` builds a `createServerClient` into a local `supabase` variable, then returns `supabaseResponse` without ever calling `await supabase.auth.getUser()`. The `setAll` cookie callback only fires during a token refresh, and a refresh only happens when something asks for the session — so `supabase` is dead code and the proxy is a passthrough. Sessions expire instead of rolling over. Supabase's documented pattern calls `getUser()` before returning the response (which also means `createClient` has to become `async`). The ESLint "assigned but never used" warning on that variable *is* the bug.
+2. **`getShinyPureCount` is wrong on ~half of all real scores.** `utils/rating.ts:25-29` subtracts an *unfloored* term where the game floors it, so the result is `shiny − frac(...)` patched up with `Math.round` — which only works when that fraction is under 0.5. Measured: 1532 of 3000 realistic scores off by one, plus a worse failure mode when `shiny` is 0 (a 1024-note chart with 0 shiny displays 4883). This is also why `getPmRating` shows wrong "MAX − n" distances. `docs/report.md` §1.1 has a verified integer-arithmetic replacement.
+3. **`line-clamp-2` has never clamped.** `ScoreCard.tsx:46` and `BrowseCard.tsx:44` put `line-clamp-2` and `flex` on the same element. Both set `display`, and Tailwind emits `.flex` later in the stylesheet, so it wins — class-attribute order is irrelevant. Long titles are hard-cut instead of wrapping. The fix is structural: move the clamp to an inner element.
+4. **`addScore` discards its insert error.** `app/scores/actions.ts:55` doesn't destructure `{ error }` from the `insert`, so an RLS rejection, FK violation, or NOT NULL violation closes the modal as a success and the score silently isn't written. Every other Supabase call in that file checks its error.
+5. **`ScoreCard.tsx:50` can crash the whole grid.** `score.charts?.chart_constant.toFixed(1)` — the `?.` guards `charts`, not `chart_constant`. Every other consumer guards the constant (`BrowseCard.tsx:45`, `SongInfo.tsx:27`, `search.ts:34,82`). One score on a constant-less chart throws during render and takes down all of `/scores`.
+6. **Cancelling Google login reports success.** `app/auth/callback/route.ts` skips its `if (code)` block when the provider returns `?error=...` and falls through to the `/browse` success redirect. The `error` params are never read. Same file: `origin` comes from `new URL(request.url)`, which is the internal origin behind a proxy — this will redirect to `localhost` once deployed.
+7. **`NaN` passes every validation gate in `addScore`.** `Number('abc')` is `NaN`, and `NaN < 0 || NaN > max` is `false`, so all four range checks accept it. Server actions are public HTTP endpoints, so the form's `required` isn't a defense.
+8. **Unknown levels slip through `<`/`<=` filters.** In `filterCharts`, a `chart.level` not present in `levelOrder` yields `indexOf` → `-1`, which passes `lt`/`le` comparisons against any real level.
+9. **B50 double-counts repeat plays.** `addScore` always inserts, so multiple rows per chart coexist and nothing dedupes by `chart_id` before `.slice(0, 50)`. Three plays of one chart take three slots and inflate PTT.
+10. **`/scores` queries with `user_id = null` for a first-ever visitor**, and none of the three page queries destructure `error` — so a rejected query is indistinguishable from "no scores".
+11. **Inline Supabase clients.** `app/auth/callback/route.ts` and `LoginButton.tsx` construct their own clients instead of importing `utils/supabase/server.ts` / `client.ts`.
+12. **`/auth/auth-code-error` and `/leaderboard` are empty stubs.** Neither is an ESLint error any more (both are named exports), but bug 6 makes the former user-reachable.
+
+Lint baseline: `npx eslint .` is **1 error / 7 warnings**. The error is `ImportFromBrowser.ts:56`'s `as any[]`. Four warnings are `no-img-element` (blocked on adding `images.remotePatterns` to `next.config.ts`); the other three are the unused vars in `middleware.ts` (bug 1) and `ImportFromBrowser.ts`.
 
 ## Not yet built
 
@@ -252,8 +273,9 @@ These are live issues in the current tree, not speculation:
 - **Stage 3** — Google login is done. Still outstanding: public deployment, and real RLS policies for UPDATE/DELETE (blocked on replacing the guest cookie with `signInAnonymously()`).
 - **Leaderboard** — route exists, no implementation.
 - **Score detail modal** — built. Clicking a ScoreCard opens `ScoreModal` → `SongInfo` + `ScoreInfo`. Still missing from the original plan: play/import history (there is no history table — each play is just another `scores` row).
-- Client-side input validation on the add-score form. Server-side range/existence checks exist in `actions.ts`, but they `throw` rather than returning errors — see bug 5. Nothing requires a chart to be selected before submitting.
-- **Typed Supabase queries.** `ScoreWithChart` types the components, but the query itself still returns `any` (no generated database types), so a narrowed `select()` would not be caught at compile time. `supabase gen types typescript` + `createClient<Database>` would close that gap.
+- **Input validation** — done on both sides. `actions.ts` returns `{ error }` instead of throwing, and `AddScoreButton` surfaces it and disables submit until a chart is picked. Remaining gaps: `NaN` (bug 7), the unchecked insert error (bug 4), and no `try/catch` around `handleSubmit` for *thrown* rejections.
+- **Typed Supabase queries.** `ScoreWithChart` types the components, but the query itself still returns `any` (no generated database types), so a narrowed `select()` would not be caught at compile time. This is the root cause of bug 5 and of `utils/types.ts` disagreeing with the code in several places (`chart_constant` is declared non-nullable while three call sites guard it; `charts` is declared non-null while ~20 call sites write `charts?.`). `supabase gen types typescript` + `createClient<Database>` would close that gap.
+- **Responsive layout** — there are zero breakpoint prefixes anywhere in `app/`, and both card grids are a hard `repeat(5,230px)` = 1150px, so every page scrolls sideways on a phone. `docs/report.md` §3 has a drop-in replacement that's pixel-identical on desktop.
 
 ## Working style notes
 

@@ -2,6 +2,14 @@
 
 Browse charts and track your best scores for the mobile rhythm game [Arcaea](https://arcaea.lowiro.com/).
 
+## About
+
+A learning project — my first time with TypeScript, Next.js, Supabase, and CSS. It's built
+deliberately slowly, one concept at a time, and it is **not vibecoded**: I write the code. Where AI
+is involved it's used the way a tutor or a code reviewer would be — explaining a concept before I
+implement it, or auditing what I've already written — not generating features for me to paste in.
+The audit in [docs/report.md](docs/report.md) is an example of the latter.
+
 ## Stack
 
 - **Next.js 16** (App Router, TypeScript) + **Tailwind CSS v4**
@@ -32,10 +40,13 @@ utils/
 ├── jacket.ts      Jacket URL resolution
 ├── style.ts       Difficulty/grade colors, title text sizing
 ├── guest.ts       Guest cookie handling
-└── types.ts       The Chart type
-proxy.ts           Session refresh (Next 16's rename of middleware.ts)
-alt/               Abandoned design experiments, not wired into the app
+└── types.ts       Chart, Score, and ScoreWithChart
+proxy.ts           Proxy entry point (Next 16's rename of middleware.ts)
+docs/              Project list and codebase audit
 ```
 
 ## Status
-See [todo.txt](todo.txt)
+
+- [docs/todo.txt](docs/todo.txt) — what's built and what's next
+- [docs/report.md](docs/report.md) — codebase audit: bugs, Tailwind refactor, code quality
+- [docs/report_todo.md](docs/report_todo.md) — the audit as a checklist, with notes on each concept
