@@ -26,8 +26,7 @@ export function getShinyPureCount(score: number, noteCount: number): number {
     // a unit is 5,000,000 points / noteCount, so a pure is 2 units, and a far is 1 unit
     const unitsHit = Math.ceil(((score + 1) * noteCount) / 5000000) - 1
     const unitsHitClamped = Math.min(unitsHit, 2 * noteCount) // clamp to 2 * noteCount since you cannot get more than noteCount number of pure notes
-    const shiny = Math.floor((score - (unitsHitClamped * 5000000)) / noteCount)
-    return Math.round(shiny)
+    return score - Math.floor((unitsHitClamped * 5000000) / noteCount)
 }
 
 // returns PM rating if the score is a PM
