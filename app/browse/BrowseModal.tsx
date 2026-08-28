@@ -20,7 +20,7 @@ export default function BrowseModal({ chart, ref, onClose }: { chart: Chart | nu
                     {/* Add Score Button. Keyed on the chart so it remounts (and re-seeds its
                         defaultChart state) whenever a different chart is opened. */}
                     <div className="flex justify-center">
-                        <AddScoreButton key={chart.id} defaultChart={chart} sizeClasses="py-5 px-15" textClasses="text-white text-xl" borderClasses="border-2 border-gray-400">
+                        <AddScoreButton key={chart.id} defaultChart={chart}>
                             <input type="hidden" name="chart_id" value={chart.id} />
                         </AddScoreButton>
                     </div>

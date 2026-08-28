@@ -344,7 +344,7 @@ hatch entirely.
 
 ---
 
-### [ ] 2.5 Replace `AddScoreButton`'s three class props with a `size` union — `AddScoreButton.tsx:22`
+### [DONE] 2.5 Replace `AddScoreButton`'s three class props with a `size` union — `AddScoreButton.tsx:22`
 
 Delete `sizeClasses` / `textClasses` / `borderClasses`, add `size?: 'md' | 'lg'`. The compiler will
 point at every call site (`ScoreModal.tsx:22`, `BrowseModal.tsx:22`, `app/scores/page.tsx:39`).

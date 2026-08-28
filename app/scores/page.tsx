@@ -43,7 +43,7 @@ export default async function Page() {
       
       <div className="flex justify-center items-center gap-4 p-4 ">
         <ImportFromBrowserButton>
-          <AddScoreButton showSongInfo={false} sizeClasses="py-4 px-12">
+          <AddScoreButton showSongInfo={false} size='md'>
             <div className={`bg-gray-500 text-white text-center rounded-md w-full border-2`}>
               <ChartSearch charts={charts ?? []} />
             </div>

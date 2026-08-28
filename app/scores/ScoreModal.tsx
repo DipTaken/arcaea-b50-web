@@ -20,7 +20,7 @@ export default function ScoreModal({ score, ref, onClose }: { score: ScoreWithCh
 
                     {/* Add Score Button. */}
                     <div className="flex justify-center">
-                        <AddScoreButton key={score.charts.id} defaultChart={score.charts} sizeClasses="py-5 px-15" textClasses="text-white text-xl" borderClasses="border-2 border-gray-400">
+                        <AddScoreButton key={score.charts.id} defaultChart={score.charts}>
                             <input type="hidden" name="chart_id" value={score.charts.id} />
                         </AddScoreButton>
                     </div>

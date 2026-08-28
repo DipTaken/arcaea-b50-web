@@ -14,18 +14,19 @@ interface AddScoreButtonProps {
     children?: React.ReactNode
     showSongInfo?: boolean
     defaultChart?: Chart | null
-    sizeClasses?: string
-    textClasses?: string
-    borderClasses?: string
+    size?: 'md' | 'lg'
 }
 
-export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, sizeClasses = "p-2", textClasses = "text-white", borderClasses = "border-2 border-gray-400" }: AddScoreButtonProps) {
+export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, size = 'lg'  }: AddScoreButtonProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [resetKey, setResetKey] = useState<number>(0) // Used to reset the form after submission
 
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
+
+    const sizeClasses = size === 'md' ? 
+    "py-4 px-12 text-lg" : "py-5 px-15 text-xl"
 
     // submit the form data to the server and close the modal
     async function handleSubmit(formData: FormData) {
@@ -76,7 +77,7 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
             {/* Button to open the add score modal */}
             <button
                 onClick={() => dialogRef.current?.showModal()}
-                className={`bg-gray-800 hover:bg-gray-700 text-white font-bold ${sizeClasses} ${textClasses} ${borderClasses} rounded-md`}
+                className={`bg-gray-800 hover:bg-gray-700 text-white font-bold ${sizeClasses} border-2 border-gray-400 rounded-md`}
             >Add Score
             </button>
 
