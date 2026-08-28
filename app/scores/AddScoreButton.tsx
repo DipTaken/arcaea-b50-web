@@ -17,7 +17,7 @@ interface AddScoreButtonProps {
     size?: 'md' | 'lg'
 }
 
-export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, size = 'lg'  }: AddScoreButtonProps) {
+export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, size = 'lg' }: AddScoreButtonProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -25,8 +25,8 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
 
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
 
-    const sizeClasses = size === 'md' ? 
-    "py-4 px-12 text-lg" : "py-5 px-15 text-xl"
+    const sizeClasses = size === 'md' ?
+        "py-4 px-12 text-lg" : "py-5 px-15 text-xl"
 
     // submit the form data to the server and close the modal
     async function handleSubmit(formData: FormData) {
@@ -127,7 +127,7 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                                 <input name="far" placeholder="Far" {...judgementInputProps} />
                                 <input name="lost" placeholder="Lost" {...judgementInputProps} />
                             </div>
-                            
+
                         </div>
 
                         {/* Display error message if any */}

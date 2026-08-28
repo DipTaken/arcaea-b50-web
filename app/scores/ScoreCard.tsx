@@ -32,7 +32,7 @@ export default function ScoreCard({ score, index, onSelect }: { score: ScoreWith
             <div className="absolute right-0">
                 <img src={getJacketUrl(score.charts?.song_id, score.charts?.difficulty, score.charts?.jacket_override)}
                     alt="Song jacket"
-                    className="z-0 object-cover w-[106px] h-[106px] ">
+                    className="object-cover w-[106px] h-[106px] ">
                 </img>
                 <div className="absolute z-10 bottom-0 left-0 flex flex-col justify-center w-full bg-linear-to-t from-black/70 from-60% to-transparent text-[18px] font-light p-1">
                     {score.score.toLocaleString()}

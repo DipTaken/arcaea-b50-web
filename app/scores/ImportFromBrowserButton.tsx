@@ -29,13 +29,13 @@ export default function ImportFromBrowserButton({ children }: { children?: React
                 <button
                     onClick={handleImport}
                     disabled={isPending}
-                    className={`border-2 border-gray-400 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md disabled:opacity-80`}
+                    className="border-2 border-gray-400 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md disabled:opacity-80"
                 >
                     Import Browser Scores to Account
                 </button>
             </div>
-            <div className="h-5 w-full items-center justify-end">
-                {message && <p className="text-sm text-neutral-400 text-right">{message}</p>}
+            <div className="h-5 w-full">
+                {message && <p className="text-sm text-neutral-400 text-center">{message}</p>}
             </div>
         </div>
     )

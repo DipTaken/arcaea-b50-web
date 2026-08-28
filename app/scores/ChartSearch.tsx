@@ -18,7 +18,7 @@ export default function ChartSearch({ charts }: ChartSearchProps) {
     const setSelectedChart = useSetSelectedChart()
 
     return (
-        <div>
+        <div className="relative">
             {/* Display the selected chart */}
             {selectedId && (
                 <p>
@@ -38,7 +38,7 @@ export default function ChartSearch({ charts }: ChartSearchProps) {
             {/* this displays the charts, but we also need to map it to the chart id in the database
                 also only displays if there are results and if user has typed anything */}
             {search && filteredCharts.length > 0 && (
-                <ul className="absolute left-10 right-10 z-50 max-h-70 overflow-y-auto bg-gray-600 rounded-md p-2 mt-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700">
+                <ul className="absolute -left-1 -right-1 top-full max-h-72 overflow-y-auto bg-gray-600 rounded-md p-2 mt-1 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700">
                     {filteredCharts.map((chart) => (
                         <li
                             key={chart.id}
@@ -47,12 +47,9 @@ export default function ChartSearch({ charts }: ChartSearchProps) {
                                 setSearch('')
                                 setSelectedChart(chart)
                             }}
-                            style={{
-                                fontWeight: chart.id === selectedId ? 'bold' : 'normal',
-                                cursor: 'pointer',
-                            }}
-                            className="p-2 hover:bg-gray-700 rounded-md text-left"
-                        > {chart.title} — {chart.difficulty}
+                            className={`p-2 hover:bg-gray-700 rounded-md text-left ${chart.id === selectedId ? 'font-bold' : 'font-normal'} cursor-pointer`}
+                        >
+                            {chart.title} — {chart.difficulty}
                         </li>
                     ))}
                 </ul>

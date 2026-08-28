@@ -144,7 +144,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     Load More ({filteredCharts.length - visibleCount} remaining)
                 </button>
             )}
-            
+
             {/* The single modal shared by every card in the grid */}
             <BrowseModal chart={selectedChart} ref={dialogRef} onClose={() => setSelectedChart(null)} />
         </>

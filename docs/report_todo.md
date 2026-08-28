@@ -321,7 +321,7 @@ once `z-10` is dropped) and long titles (now genuinely clamping to two lines).
 
 ---
 
-### [Button remaining] 2.4 Extract `CardGrid`, `Panel`, `PageShell`, `Button` → `app/components/`
+### [DONE] 2.4 Extract `CardGrid`, `Panel`, `PageShell`, `Button` → `app/components/`
 
 | Component | Replaces | Call sites |
 |---|---|---|
@@ -360,7 +360,7 @@ emitted twice — a small illustration of the same problem.
 
 ---
 
-### [ ] 2.6 Local dedup — zero visual change
+### [DONE] 2.6 Local dedup — zero visual change
 
 - [ ] `JudgementInput` local to `AddScoreButton.tsx` — collapses lines 116-145 to three lines.
   Dedupes the repeated *props* (`type`, `min`, `max`, `disabled`, `onChange`) as much as the classes.
@@ -381,7 +381,7 @@ file, silently breaks it. Template literals with explicit `${}` boundaries can't
 
 ---
 
-### [ ] 2.7 Fix the conflicting padding pairs
+### [DONE] 2.7 Fix the conflicting padding pairs
 
 `p-6 py-3` → `px-6 py-3` at `BrowseSearch.tsx:57,71,80,91,115`; `px-50 p-4` → `px-50 py-4` at
 `app/scores/page.tsx:46`.
@@ -395,20 +395,20 @@ written in a way that depends on Tailwind's internal ordering staying the same f
 
 ---
 
-### [ ] 2.8 Cosmetic cleanup
+### [DONE] 2.8 Cosmetic cleanup
 
-- [ ] Template literals with no `${}` — `app/scores/page.tsx:40`, `AddScoreButton.tsx:91,111,160,167`,
+- [DONE] Template literals with no `${}` — `app/scores/page.tsx:40`, `AddScoreButton.tsx:91,111,160,167`,
   `ImportFromBrowserButton.tsx:32`
-- [ ] Dead `scrollbar-*` classes at `ChartSearch.tsx:41` — the plugin isn't installed
-- [ ] No-op utilities: `right-0`/`z-0` without positioning (`ScoreCard.tsx:37`),
+- [CLASSES ARE NOT DEAD] Dead `scrollbar-*` classes at `ChartSearch.tsx:41` — the plugin isn't installed
+- [DONE] No-op utilities: `right-0`/`z-0` without positioning (`ScoreCard.tsx:37`),
   `items-center justify-end` on a non-flex div (`ImportFromBrowserButton.tsx:37`), `justify-end` on
   a `<p>` (`ScoreInfo.tsx:36`), `rounded-lg` on a transparent wrapper (`BrowseSearch.tsx:44`)
-- [ ] `ChartSearch.tsx:50-53` — inline `fontWeight`/`cursor` → `font-bold`/`font-normal` +
+- [DONE] `ChartSearch.tsx:50-53` — inline `fontWeight`/`cursor` → `font-bold`/`font-normal` +
   `cursor-pointer`
-- [ ] `ChartSearch.tsx:21,41` — the dropdown's wrapper isn't `relative`, so `absolute left-10
+- [DONE] `ChartSearch.tsx:21,41` — the dropdown's wrapper isn't `relative`, so `absolute left-10
   right-10` resolves against the `<dialog>` and the offsets are hand-tuned to cancel the form's
   `p-10`. Add `relative` to the wrapper, use `left-0 right-0 top-full`.
-- [ ] Stray double/trailing spaces in class strings — `SongInfo:21,68`, `ScoreCard:37`,
+- [DONE] Stray double/trailing spaces in class strings — `SongInfo:21,68`, `ScoreCard:37`,
   `scores/page:37`, `AddScoreButton:59`, `BrowseSearch:56,57,71,80,91,115`
 
 **Concept — positioning is relative to the nearest *positioned* ancestor.** `absolute` looks up the
