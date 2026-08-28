@@ -19,8 +19,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             lang="en"
             className={`${exo.variable} h-full antialiased`}
         >
-            <body className="min-h-full flex flex-col bg-linear-to-r from-[#0f1014] to-[#191621]">
-                <NavBar />{children}
+            <body className="min-h-full flex flex-col text-foreground bg-linear-to-r from-page-start to-page-end">
+                <NavBar />
+                {children}
             </body>
         </html>
     );

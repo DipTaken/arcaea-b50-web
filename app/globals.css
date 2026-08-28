@@ -1,22 +1,15 @@
 @import "tailwindcss";
 
-:root {
-    --background: #ffffff;
-    --foreground: #171717;
-}
-
 @theme inline {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
     --font-sans: var(--font-exo);
     --font-mono: var(--font-exo);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-    }
+@theme {
+    --color-foreground: #ededed;
+    --color-card:       #16222d;
+    --color-page-start: #0f1014;
+    --color-page-end:   #191621;
 }
 
 @utility no-spinner {
@@ -26,9 +19,4 @@
         appearance: none;
         margin: 0;            /* Chrome reserves a little space even when hidden */
     }
-}
-
-body {
-    color: var(--foreground);
-    font-family: var(--font-sans), sans-serif;
 }

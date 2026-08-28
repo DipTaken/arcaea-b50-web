@@ -259,7 +259,7 @@ until the form contains a search box that isn't meant to submit anything.
 Approach: **shared React components + `@theme` tokens.** No `clsx`, no `tailwind-merge` — see
 report §2 for why.
 
-### [ ] 2.1 `@theme` tokens in `globals.css`, then `bg-card`
+### [DONE]] 2.1 `@theme` tokens in `globals.css`, then `bg-card`
 
 Add `--color-foreground`, `--color-card`, `--color-page-start`, `--color-page-end`. Delete the
 `:root` vars, the `prefers-color-scheme` block, and the unlayered `body` rule. Update

@@ -49,5 +49,4 @@ export function getTextSize(title: string): string {
     else return "text-[10px]"
 }
 
-export const cardBgColor = "bg-[#16222d]"
 export const cardHoverAnimation = "cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out"
