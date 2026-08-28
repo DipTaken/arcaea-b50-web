@@ -23,8 +23,10 @@ export function getPlayRating(score: number, chartConstant: number): number {
 
 // returns the number of shiny pure notes in a score. Used to calculate PM rating (MAX - n)
 export function getShinyPureCount(score: number, noteCount: number): number {
-    const noteScore = Math.floor(2 * (score / 10000000) * noteCount)
-    const shiny = score - (noteScore * 5000000) / noteCount
+    // a unit is 5,000,000 points / noteCount, so a pure is 2 units, and a far is 1 unit
+    const unitsHit = Math.ceil(((score + 1) * noteCount) / 5000000) - 1
+    const unitsHitClamped = Math.min(unitsHit, 2 * noteCount) // clamp to 2 * noteCount since you cannot get more than noteCount number of pure notes
+    const shiny = Math.floor((score - (unitsHitClamped * 5000000)) / noteCount)
     return Math.round(shiny)
 }
 

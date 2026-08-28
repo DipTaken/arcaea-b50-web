@@ -11,7 +11,7 @@ duplicated there.
 
 ## Tier 1 — Silently wrong output or data loss
 
-### [ ] 1.1 Fix `getShinyPureCount` — `utils/rating.ts:25-29`
+### [DONE] 1.1 Fix `getShinyPureCount` — `utils/rating.ts:25-29`
 
 ```ts
 export function getShinyPureCount(score: number, noteCount: number): number {
