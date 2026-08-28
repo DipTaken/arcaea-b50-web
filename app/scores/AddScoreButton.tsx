@@ -56,6 +56,15 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
         }
     };
 
+    const judgementInputProps = {
+        type: "number",
+        max: selectedChart?.note_count ?? 0,
+        min: 0,
+        disabled: !selectedChart,
+        onChange: handleInput,
+        className: "no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
+    } as const
+
     const chartInfoElement = (
         <div className="flex items-center justify-start gap-4 ">
             <img src={getJacketUrl(defaultChart?.song_id || "", defaultChart?.difficulty || "", defaultChart?.jacket_override || false)}
@@ -114,38 +123,13 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
 
                             {/* Input fields for Pure, Far, and Lost */}
                             <div className="flex gap-2 h-15 w-full">
-                                <input
-                                    type="number"
-                                    name="pure"
-                                    placeholder="Pure"
-                                    min={0}
-                                    max={selectedChart?.note_count ?? 0}
-                                    disabled={!selectedChart}
-                                    onChange={handleInput}
-                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                                />
-                                <input
-                                    type="number"
-                                    name="far"
-                                    placeholder="Far"
-                                    min={0}
-                                    max={selectedChart?.note_count ?? 0}
-                                    disabled={!selectedChart}
-                                    onChange={handleInput}
-                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                                />
-                                <input
-                                    type="number"
-                                    name="lost"
-                                    placeholder="Lost"
-                                    min={0}
-                                    max={selectedChart?.note_count ?? 0}
-                                    disabled={!selectedChart}
-                                    onChange={handleInput}
-                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                                />
+                                <input name="pure" placeholder="Pure" {...judgementInputProps} />
+                                <input name="far" placeholder="Far" {...judgementInputProps} />
+                                <input name="lost" placeholder="Lost" {...judgementInputProps} />
                             </div>
+                            
                         </div>
+
                         {/* Display error message if any */}
                         {errorMessage && (
                             <div className="text-red-500 text-center text-lg font-bold">

@@ -9,53 +9,38 @@ export default function SongInfo({ chart }: { chart: Chart }) {
         <div className="grid grid-cols-[1fr_2fr] w-full">
             <div className="flex flex-col text-lg justify-center text-white w-full gap-5">
                 {/* Difficulty */}
-                <p>
-                    <span className="font-bold">Difficulty: </span>
+                <InfoRow label="Difficulty">
                     <span className="py-1 px-3 rounded-md font-bold"
-                        style={{ backgroundColor: getDifficultyColor(chart?.difficulty ?? "")}}>
-                        {chart.difficulty ? chart.difficulty : 'Unknown'}
+                        style={{ backgroundColor: getDifficultyColor(chart?.difficulty ?? "")}}
+                    >
+                        {chart.difficulty || 'Unknown'}
                     </span>
-                </p>
+                </InfoRow>
+
                 {/* Level */}
-                <p>
-                    <span className="font-bold ">Level: </span>
-                    <span>{chart.level ? chart.level : 'Unknown'}</span>
-                </p>
+                <InfoRow label="Level"> {chart.level || 'Unknown'} </InfoRow>
+                    
                 {/* Constant */}
-                <p>
-                    <span className="font-bold">Constant: </span>
-                    <span>{chart.chart_constant ? chart.chart_constant?.toFixed(1) : 'Unknown'}</span>
-                </p>
+                <InfoRow label="Constant"> {chart.chart_constant?.toFixed(1) || 'Unknown'} </InfoRow>
+                    
                 {/* Note Count */}
-                <p>
-                    <span className="font-bold">Note Count: </span>
-                    <span>{chart.note_count ? chart.note_count : 'Unknown'}</span>
-                </p>
+                <InfoRow label="Note Count"> {chart.note_count || 'Unknown'} </InfoRow>
+                
                 {/* BPM */}
-                <p>
-                    <span className="font-bold">BPM: </span>
-                    <span>{chart.bpm ? chart.bpm : 'Unknown'}</span>
-                </p>
+                <InfoRow label="BPM"> {chart.bpm || 'Unknown'} </InfoRow>
+                   
                 {/* Length */}
-                <p>
-                    <span className="font-bold">Length: </span>
-                    <span>{chart.length ? chart.length : 'Unknown'}</span>
-                </p>
+                <InfoRow label="Length"> {chart.length || 'Unknown'}  </InfoRow>
+                  
                 {/* Version */}
-                <p>
-                    <span className="font-bold">Version: </span>
-                    <span>{chart.version ? chart.version : 'Unknown'}</span>
-                </p>
+                <InfoRow label="Version"> {chart.version || 'Unknown'} </InfoRow>
+                
                 {/* Chart Designer */}
-                <p>
-                    <span className="font-bold">Chart Designer: </span>
-                    <span>{chart.chart_designer ? chart.chart_designer : 'Unknown'}</span>
-                </p>
+                <InfoRow label="Chart Designer"> {chart.chart_designer || 'Unknown'} </InfoRow>
+                    
                 {/* Jacket Artist */}
-                <p>
-                    <span className="font-bold">Jacket Artist: </span>
-                    <span>{chart.jacket_designer ? chart.jacket_designer : 'Unknown'}</span>
-                </p>
+                <InfoRow label="Jacket Artist"> {chart.jacket_designer || 'Unknown'} </InfoRow>
+                
             </div>
 
             {/* Jacket, Title, Artist */}
@@ -70,5 +55,14 @@ export default function SongInfo({ chart }: { chart: Chart }) {
             </div>
 
         </div>
+    )
+}
+
+function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <p>
+            <span className="font-bold">{label}: </span>
+            {children}
+        </p>
     )
 }

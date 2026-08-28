@@ -41,7 +41,7 @@ export default async function Page() {
       title="B50 View" 
       subtitle="Click on a score for more info">
       
-      <div className="flex justify-center items-center gap-4 p-4 ">
+      <div className="flex justify-center items-center gap-4 p-4">
         <ImportFromBrowserButton>
           <AddScoreButton showSongInfo={false} size='md'>
             <div className={`bg-gray-500 text-white text-center rounded-md w-full border-2`}>
