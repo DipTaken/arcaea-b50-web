@@ -41,7 +41,7 @@ That's the same fact `MAX_NOTES_SAFE_PM_THRESHOLD` already encodes.
 
 ---
 
-### [ ] 1.2 Move `line-clamp-2` off the flex container — `ScoreCard.tsx:46`, `BrowseCard.tsx:44`
+### [DONE] 1.2 Move `line-clamp-2` off the flex container — `ScoreCard.tsx:46`, `BrowseCard.tsx:44`
 
 Put the clamp on an inner `<span>`; leave `flex flex-col justify-center` on the wrapper.
 Handled for free by `CardBottomBar` in item 2.3.
@@ -450,10 +450,10 @@ encoding one gap. Making it a real `gap-x-[30px]` with 200px tracks is what lets
 change without the spacing changing. The math works out exactly: `max-w-6xl` (1152px) − `px-4`
 (32px) = 1120px = 5×200 + 4×30, so desktop is pixel-identical.
 
-### [ ] 3.3 Toolbar and PTT row
+### [DONE] 3.3 Toolbar and PTT row
 
-- [ ] `BrowseSearch.tsx:54` — add `flex-wrap`, drop `h-20` for `h-auto`
-- [ ] `app/scores/page.tsx:46` — replace the hand-tuned `px-50` with
+- [DONE ] `BrowseSearch.tsx:54` — add `flex-wrap`, drop `h-20` for `h-auto`
+- [DONE ] `app/scores/page.tsx:46` — replace the hand-tuned `px-50` with
   `mx-auto flex w-full max-w-6xl items-start gap-4 px-4 py-4` so the PTT badge tracks the grid's
   left edge at every width, not just at 1150px
 

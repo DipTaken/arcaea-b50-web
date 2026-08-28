@@ -46,7 +46,7 @@ export default async function Page() {
         </ImportFromBrowserButton>      
       </div>
 
-      <div className="flex w-full items-start gap-4 px-50 p-4">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-4 p-4">
         <p className="font-bold text-xl border-2 border-gray-400 rounded-md bg-gray-800 text-white px-4 py-2"> 
           PTT: {getB50Rating(sortedScores ?? []).toFixed(3)} </p>
       </div>

@@ -41,7 +41,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
     const visibleCharts = filteredCharts.slice(0, visibleCount)
 
     return (
-        <div className="flex flex-col items-center justify-center gap-5">
+        <>
             <div className="flex flex-col items-center justify-center gap-1 rounded-lg p-4">
                 {/* Search Input */}
                 <input
@@ -52,7 +52,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     onChange={(e) => setSearch(e.target.value)}
                 />
                 {/* Sort and Filter Options */}
-                <div className="flex items-center justify-center gap-6 h-20 w-full rounded-lg">
+                <div className="flex flex-wrap items-center justify-center gap-6 h-auto w-full rounded-lg">
                     {/* Sort Options */}
                     <div className="flex  items-center justify-center gap-1">
                         <select className=" bg-gray-800 text-white text-center p-6 py-3 border-gray-400 rounded-md border-2  "
@@ -144,6 +144,6 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
             
             {/* The single modal shared by every card in the grid */}
             <BrowseModal chart={selectedChart} ref={dialogRef} onClose={() => setSelectedChart(null)} />
-        </div>
+        </>
     )
 }
