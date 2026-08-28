@@ -7,6 +7,7 @@ import ImportFromBrowserButton from '@/app/scores/ImportFromBrowserButton'
 import ChartSearch from './ChartSearch'
 import ScoreGrid from './ScoreGrid'
 import { getB50Rating } from '@/utils/rating'
+import { PageShell } from '@/app/components/PageShell'
 
 export default async function Page() {
   const cookieStore = await cookies()
@@ -31,9 +32,10 @@ export default async function Page() {
     .slice(0, 50)
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-10">
-      <h1 className="text-3xl font-bold">B50 View</h1>
-      <h2 className="text-xl font-light">Click on a score for more info</h2>
+    <PageShell 
+      title="B50 View" 
+      subtitle="Click on a score for more info">
+      
       <div className="flex justify-center items-center gap-4 p-4 ">
         <ImportFromBrowserButton>
           <AddScoreButton showSongInfo={false} sizeClasses="py-4 px-12">
@@ -43,11 +45,13 @@ export default async function Page() {
           </AddScoreButton>
         </ImportFromBrowserButton>      
       </div>
+
       <div className="flex w-full items-start gap-4 px-50 p-4">
         <p className="font-bold text-xl border-2 border-gray-400 rounded-md bg-gray-800 text-white px-4 py-2"> 
-          PTT: {getB50Rating(sortedScores ?? []).toFixed(2)} </p>
+          PTT: {getB50Rating(sortedScores ?? []).toFixed(3)} </p>
       </div>
       <ScoreGrid scores={sortedScores ?? []} />
-    </div>
+
+    </PageShell>
   )
 }

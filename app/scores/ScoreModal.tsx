@@ -3,6 +3,7 @@ import SongInfo from '@/app/components/SongInfo'
 import { ScoreWithChart } from '@/utils/types'
 import AddScoreButton from '../scores/AddScoreButton';
 import ScoreInfo from './ScoreInfo';
+import { Panel } from '@/app/components/Panel';
 
 
 // One shared modal for the whole score grid.
@@ -12,10 +13,10 @@ export default function ScoreModal({ score, ref, onClose }: { score: ScoreWithCh
             {score && (
                 <>
                     {/* Modal content */}
-                    <div className="flex flex-col gap-4 p-10 justify-center items-center rounded-lg bg-gray-800 border-2 border-gray-400 w-full max-w-5xl">
+                    <Panel>
                         <SongInfo chart={score.charts} />
                         <ScoreInfo score={score} />
-                    </div>
+                    </Panel>
 
                     {/* Add Score Button. */}
                     <div className="flex justify-center">

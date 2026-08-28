@@ -321,7 +321,7 @@ once `z-10` is dropped) and long titles (now genuinely clamping to two lines).
 
 ---
 
-### [ ] 2.4 Extract `CardGrid`, `Panel`, `PageShell`, `Button` → `app/components/`
+### [Button remaining] 2.4 Extract `CardGrid`, `Panel`, `PageShell`, `Button` → `app/components/`
 
 | Component | Replaces | Call sites |
 |---|---|---|

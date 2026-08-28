@@ -39,7 +39,7 @@ export function CardBottomBar({ accent, title, constant }: {
         // Chart title and constant (bottom)
         <div style={{ backgroundColor: accent }} className="absolute z-10 bottom-0 left-0 h-10 w-full ">
             <div className={`flex flex-col w-3/4 h-full justify-center p-2`}>
-                <span className={`line-clamp-2 ${getTextSize(title ?? "")}`}>{title}</span>
+                <span className={`${getTextSize(title ?? "")}`}>{title}</span>
             </div>
             <div className="absolute bottom-0 right-1 text-right"> {constant?.toFixed(1)}</div>              
         </div>
