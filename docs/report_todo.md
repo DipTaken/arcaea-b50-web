@@ -163,7 +163,7 @@ in production. Supabase's own template reads the `x-forwarded-host` header for t
 
 ---
 
-### [ ] 4.2 Dedupe B50 by chart — `app/scores/page.tsx:26-31`
+### [DONE] 4.2 Dedupe B50 by chart — `app/scores/page.tsx:26-31`
 
 Group by `chart_id`, keep the highest `getPlayRating`, then sort and slice to 50.
 

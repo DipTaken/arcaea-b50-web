@@ -16,16 +16,21 @@ export default async function Page() {
   const { data: { user } } = await supabase.auth.getUser()
   const userId = user?.id ?? guestId
 
-  const { data: charts } = await supabase.from('charts').select().order('title').limit(5000)
+  const { data: charts } = await supabase.from('charts').select().limit(5000)
   const { data: scores } = await supabase
     .from('scores')
     .select('*, charts(*)')
     .eq('user_id', userId)
     .limit(5000)
 
-    //B50 scores
-    const sortedScores = scores?.slice()
-    .sort((a, b) =>
+    const bestScores = new Map()
+    for (const score of scores ?? []) {
+      const prevScore = bestScores.get(score.chart_id)
+      if (!prevScore || score.score > prevScore.score) 
+        bestScores.set(score.chart_id, score)
+      }
+    
+    const b50Scores = [...bestScores.values()].sort((a, b) =>
       getPlayRating(b.score, b.charts?.chart_constant ?? 0) -
       getPlayRating(a.score, a.charts?.chart_constant ?? 0)
     )
@@ -48,9 +53,9 @@ export default async function Page() {
 
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-4 p-4">
         <p className="font-bold text-xl border-2 border-gray-400 rounded-md bg-gray-800 text-white px-4 py-2"> 
-          PTT: {getB50Rating(sortedScores ?? []).toFixed(3)} </p>
+          B50: {getB50Rating(b50Scores ?? []).toFixed(3)} </p>
       </div>
-      <ScoreGrid scores={sortedScores ?? []} />
+      <ScoreGrid scores={b50Scores ?? []} />
 
     </PageShell>
   )
