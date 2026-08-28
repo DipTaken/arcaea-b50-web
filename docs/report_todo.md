@@ -285,7 +285,7 @@ query was a landmine, not a feature.
 
 ---
 
-### [ ] 2.2 Leave the difficulty/grade palettes alone
+### [DONE] 2.2 Leave the difficulty/grade palettes alone
 
 Keep them as hex in `utils/style.ts`, applied via inline `style={{}}`. Don't convert to `@theme` +
 static class lookups.
@@ -302,7 +302,7 @@ The related rule you already know: Tailwind's scanner only sees complete literal
 
 ---
 
-### [ ] 2.3 Extract `Card` / `CardBadge` / `CardBottomBar` → `app/components/Card.tsx`
+### [DONE] 2.3 Extract `Card` / `CardBadge` / `CardBottomBar` → `app/components/Card.tsx`
 
 Rewrite `ScoreCard.tsx` and `BrowseCard.tsx` around them. Carries the item 1.2 and 1.5 fixes.
 
@@ -422,7 +422,7 @@ is `static`, so inset properties don't apply to it at all.
 
 ## Tier 4 — Responsive layout
 
-### [ ] 3.1 + 3.2 Make the grid responsive
+### [DONE] 3.1 + 3.2 Make the grid responsive
 
 In `CardGrid`:
 

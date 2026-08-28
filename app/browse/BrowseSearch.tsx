@@ -5,6 +5,7 @@ import { filterCharts, getSortDisplayValue, sortCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
 import BrowseCard from './BrowseCard'
 import BrowseModal from './BrowseModal'
+import { CardGrid } from '@/app/components/CardGrid'
 
 const CARDS_PER_PAGE = 100
 
@@ -125,11 +126,11 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
             </div>
 
             {/* Chart List */}
-            <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
+            <CardGrid>
                 {visibleCharts.map((chart) => (
                     <BrowseCard key={chart.id} info={getSortDisplayValue(chart, sortOption)} chart={chart} onSelect={setSelectedChart} />
                 ))}
-            </ul>
+            </CardGrid>
 
             {/* Only shown while some of the filtered charts are still unrendered */}
             {filteredCharts.length > visibleCount && (
