@@ -6,6 +6,7 @@ import { Chart } from '@/utils/types'
 import Modal from '@/app/components/Modal'
 import { getJacketUrl } from '@/utils/jacket'
 import { getDifficultyColor } from '@/utils/style'
+import { Button } from '@/app/components/Button'
 
 const SelectedChartContext = createContext<(chart: Chart | null) => void>(() => { })
 export const useSetSelectedChart = () => useContext(SelectedChartContext)
@@ -24,9 +25,6 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
     const [resetKey, setResetKey] = useState<number>(0) // Used to reset the form after submission
 
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
-
-    const sizeClasses = size === 'md' ?
-        "py-4 px-12 text-lg" : "py-5 px-15 text-xl"
 
     // submit the form data to the server and close the modal
     async function handleSubmit(formData: FormData) {
@@ -84,11 +82,12 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
     return (
         <SelectedChartContext.Provider value={setSelectedChart}>
             {/* Button to open the add score modal */}
-            <button
+            <Button
                 onClick={() => dialogRef.current?.showModal()}
-                className={`bg-gray-800 hover:bg-gray-700 text-white font-bold ${sizeClasses} border-2 border-gray-400 rounded-md`}
+                variant='default'
+                size={size}
             >Add Score
-            </button>
+            </Button>
 
             <Modal ref={dialogRef} width="w-[min(40vw,40rem)]"
                 onClose={() => {
@@ -139,20 +138,21 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
 
                         {/* Submit and Cancel buttons */}
                         <div className="flex gap-4 w-full justify-center items-center h-15">
-                            <button
+                            <Button
                                 type="submit"
                                 disabled={!selectedChart}
-                                className={`flex-1 h-full bg-blue-600 font-bold text-2xl text-white disabled:bg-gray-900 disabled:text-gray-500 rounded-md border-2 border-blue-400`}
-                            >
-                                Add Score
-                            </button>
-                            <button
+                                variant="primary"
+                                size="fill"
+                            > Add Score
+                            </Button>
+
+                            <Button
                                 type="button"
                                 onClick={() => dialogRef.current?.close()}
-                                className={`flex-1 h-full bg-red-400 font-bold text-2xl text-white rounded-md border-2 border-red-200`}
-                            >
-                                Cancel
-                            </button>
+                                variant="danger"
+                                size="fill"
+                            > Cancel
+                            </Button>
                         </div>
                     </div>
                 </form>

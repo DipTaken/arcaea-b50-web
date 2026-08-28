@@ -2,6 +2,7 @@
 
 import { ReactNode, useState, useTransition } from 'react'
 import ImportFromBrowser from "./ImportFromBrowser"
+import { Button } from '../components/Button'
 
 export default function ImportFromBrowserButton({ children }: { children?: ReactNode }) {
     const [isPending, startTransition] = useTransition()
@@ -26,13 +27,14 @@ export default function ImportFromBrowserButton({ children }: { children?: React
         <div className="flex flex-col items-start gap-2">
             <div className="flex gap-5">
                 {children}
-                <button
+                <Button
                     onClick={handleImport}
                     disabled={isPending}
-                    className="border-2 border-gray-400 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md disabled:opacity-80"
+                    variant="default"
+                    size="md"
                 >
                     Import Browser Scores to Account
-                </button>
+                </Button>
             </div>
             <div className="h-5 w-full">
                 {message && <p className="text-sm text-neutral-400 text-center">{message}</p>}

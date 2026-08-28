@@ -6,6 +6,7 @@ import { Chart } from '@/utils/types'
 import BrowseCard from './BrowseCard'
 import BrowseModal from './BrowseModal'
 import { CardGrid } from '@/app/components/CardGrid'
+import { Button } from '../components/Button'
 
 const CARDS_PER_PAGE = 100
 
@@ -137,12 +138,13 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
 
             {/* Only shown while some of the filtered charts are still unrendered */}
             {filteredCharts.length > visibleCount && (
-                <button
+                <Button
                     onClick={() => setVisibleCount(visibleCount + CARDS_PER_PAGE)}
-                    className="bg-gray-800 hover:bg-gray-600 text-white text-center p-6 py-4 rounded-md border-2"
+                    variant="default"
+                    size="md"
                 >
                     Load More ({filteredCharts.length - visibleCount} remaining)
-                </button>
+                </Button>
             )}
 
             {/* The single modal shared by every card in the grid */}
