@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import LoginButton from '@/app/components/LoginButton'
+import { PageShell } from './components/PageShell'
 
 export default async function LandingPage() {
     const cookieStore = await cookies()
@@ -8,9 +9,10 @@ export default async function LandingPage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     return (
-        <div className="flex flex-col items-center justify-center gap-10 py-10">
-            <h1 className="text-3xl font-bold">Arcaea B50 Web</h1>
-            
+        <PageShell 
+            title="Arcaea B50 Web" 
+            subtitle="">
+           
             {/* Display a welcome message if the user is logged in, or a login prompt if not */}
             {user ? (
                 <span>Welcome, {user.email?.split('@')[0]}</span>
@@ -20,6 +22,6 @@ export default async function LandingPage() {
                     <LoginButton />
                 </div>
             )}
-        </div>
+        </PageShell>
     )
 }

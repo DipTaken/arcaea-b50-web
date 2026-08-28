@@ -4,6 +4,7 @@ import { ScoreWithChart } from '@/utils/types'
 import { useRef, useState, useEffect } from 'react'
 import ScoreCard from './ScoreCard'
 import ScoreModal from './ScoreModal'
+import { CardGrid } from '@/app/components/CardGrid'
 
 export default function ScoreGrid({ scores }: { scores: ScoreWithChart[] }) {
     const [selectedScore, setSelectedScore] = useState<ScoreWithChart | null>(null)
@@ -14,16 +15,16 @@ export default function ScoreGrid({ scores }: { scores: ScoreWithChart[] }) {
     }, [selectedScore])
 
     return (
-        <div>
+        <>
             {/* Display the scores in a grid */}
-            <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
+            <CardGrid>
                 {scores?.map((score, index) => (
                     <ScoreCard key={score.id} score={score} index={index} onSelect={setSelectedScore} />
                 ))}
-            </ul>
+            </CardGrid>
 
             {/* Score Modal (opened when a score card is clicked) */}
             <ScoreModal score={selectedScore} ref={dialogRef} onClose={() => setSelectedScore(null)} />
-        </div>
+        </>
     )
 }

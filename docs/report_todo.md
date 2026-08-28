@@ -11,7 +11,7 @@ duplicated there.
 
 ## Tier 1 — Silently wrong output or data loss
 
-### [ ] 1.1 Fix `getShinyPureCount` — `utils/rating.ts:25-29`
+### [DONE] 1.1 Fix `getShinyPureCount` — `utils/rating.ts:25-29`
 
 ```ts
 export function getShinyPureCount(score: number, noteCount: number): number {
@@ -41,7 +41,7 @@ That's the same fact `MAX_NOTES_SAFE_PM_THRESHOLD` already encodes.
 
 ---
 
-### [ ] 1.2 Move `line-clamp-2` off the flex container — `ScoreCard.tsx:46`, `BrowseCard.tsx:44`
+### [DONE] 1.2 Move `line-clamp-2` off the flex container — `ScoreCard.tsx:46`, `BrowseCard.tsx:44`
 
 Put the clamp on an inner `<span>`; leave `flex flex-col justify-center` on the wrapper.
 Handled for free by `CardBottomBar` in item 2.3.
@@ -163,7 +163,7 @@ in production. Supabase's own template reads the `x-forwarded-host` header for t
 
 ---
 
-### [ ] 4.2 Dedupe B50 by chart — `app/scores/page.tsx:26-31`
+### [DONE] 4.2 Dedupe B50 by chart — `app/scores/page.tsx:26-31`
 
 Group by `chart_id`, keep the highest `getPlayRating`, then sort and slice to 50.
 
@@ -259,7 +259,7 @@ until the form contains a search box that isn't meant to submit anything.
 Approach: **shared React components + `@theme` tokens.** No `clsx`, no `tailwind-merge` — see
 report §2 for why.
 
-### [ ] 2.1 `@theme` tokens in `globals.css`, then `bg-card`
+### [DONE]] 2.1 `@theme` tokens in `globals.css`, then `bg-card`
 
 Add `--color-foreground`, `--color-card`, `--color-page-start`, `--color-page-end`. Delete the
 `:root` vars, the `prefers-color-scheme` block, and the unlayered `body` rule. Update
@@ -285,7 +285,7 @@ query was a landmine, not a feature.
 
 ---
 
-### [ ] 2.2 Leave the difficulty/grade palettes alone
+### [DONE] 2.2 Leave the difficulty/grade palettes alone
 
 Keep them as hex in `utils/style.ts`, applied via inline `style={{}}`. Don't convert to `@theme` +
 static class lookups.
@@ -302,7 +302,7 @@ The related rule you already know: Tailwind's scanner only sees complete literal
 
 ---
 
-### [ ] 2.3 Extract `Card` / `CardBadge` / `CardBottomBar` → `app/components/Card.tsx`
+### [DONE] 2.3 Extract `Card` / `CardBadge` / `CardBottomBar` → `app/components/Card.tsx`
 
 Rewrite `ScoreCard.tsx` and `BrowseCard.tsx` around them. Carries the item 1.2 and 1.5 fixes.
 
@@ -321,7 +321,7 @@ once `z-10` is dropped) and long titles (now genuinely clamping to two lines).
 
 ---
 
-### [ ] 2.4 Extract `CardGrid`, `Panel`, `PageShell`, `Button` → `app/components/`
+### [DONE] 2.4 Extract `CardGrid`, `Panel`, `PageShell`, `Button` → `app/components/`
 
 | Component | Replaces | Call sites |
 |---|---|---|
@@ -344,7 +344,7 @@ hatch entirely.
 
 ---
 
-### [ ] 2.5 Replace `AddScoreButton`'s three class props with a `size` union — `AddScoreButton.tsx:22`
+### [DONE] 2.5 Replace `AddScoreButton`'s three class props with a `size` union — `AddScoreButton.tsx:22`
 
 Delete `sizeClasses` / `textClasses` / `borderClasses`, add `size?: 'md' | 'lg'`. The compiler will
 point at every call site (`ScoreModal.tsx:22`, `BrowseModal.tsx:22`, `app/scores/page.tsx:39`).
@@ -360,7 +360,7 @@ emitted twice — a small illustration of the same problem.
 
 ---
 
-### [ ] 2.6 Local dedup — zero visual change
+### [DONE] 2.6 Local dedup — zero visual change
 
 - [ ] `JudgementInput` local to `AddScoreButton.tsx` — collapses lines 116-145 to three lines.
   Dedupes the repeated *props* (`type`, `min`, `max`, `disabled`, `onChange`) as much as the classes.
@@ -381,7 +381,7 @@ file, silently breaks it. Template literals with explicit `${}` boundaries can't
 
 ---
 
-### [ ] 2.7 Fix the conflicting padding pairs
+### [DONE] 2.7 Fix the conflicting padding pairs
 
 `p-6 py-3` → `px-6 py-3` at `BrowseSearch.tsx:57,71,80,91,115`; `px-50 p-4` → `px-50 py-4` at
 `app/scores/page.tsx:46`.
@@ -395,20 +395,20 @@ written in a way that depends on Tailwind's internal ordering staying the same f
 
 ---
 
-### [ ] 2.8 Cosmetic cleanup
+### [DONE] 2.8 Cosmetic cleanup
 
-- [ ] Template literals with no `${}` — `app/scores/page.tsx:40`, `AddScoreButton.tsx:91,111,160,167`,
+- [DONE] Template literals with no `${}` — `app/scores/page.tsx:40`, `AddScoreButton.tsx:91,111,160,167`,
   `ImportFromBrowserButton.tsx:32`
-- [ ] Dead `scrollbar-*` classes at `ChartSearch.tsx:41` — the plugin isn't installed
-- [ ] No-op utilities: `right-0`/`z-0` without positioning (`ScoreCard.tsx:37`),
+- [CLASSES ARE NOT DEAD] Dead `scrollbar-*` classes at `ChartSearch.tsx:41` — the plugin isn't installed
+- [DONE] No-op utilities: `right-0`/`z-0` without positioning (`ScoreCard.tsx:37`),
   `items-center justify-end` on a non-flex div (`ImportFromBrowserButton.tsx:37`), `justify-end` on
   a `<p>` (`ScoreInfo.tsx:36`), `rounded-lg` on a transparent wrapper (`BrowseSearch.tsx:44`)
-- [ ] `ChartSearch.tsx:50-53` — inline `fontWeight`/`cursor` → `font-bold`/`font-normal` +
+- [DONE] `ChartSearch.tsx:50-53` — inline `fontWeight`/`cursor` → `font-bold`/`font-normal` +
   `cursor-pointer`
-- [ ] `ChartSearch.tsx:21,41` — the dropdown's wrapper isn't `relative`, so `absolute left-10
+- [DONE] `ChartSearch.tsx:21,41` — the dropdown's wrapper isn't `relative`, so `absolute left-10
   right-10` resolves against the `<dialog>` and the offsets are hand-tuned to cancel the form's
   `p-10`. Add `relative` to the wrapper, use `left-0 right-0 top-full`.
-- [ ] Stray double/trailing spaces in class strings — `SongInfo:21,68`, `ScoreCard:37`,
+- [DONE] Stray double/trailing spaces in class strings — `SongInfo:21,68`, `ScoreCard:37`,
   `scores/page:37`, `AddScoreButton:59`, `BrowseSearch:56,57,71,80,91,115`
 
 **Concept — positioning is relative to the nearest *positioned* ancestor.** `absolute` looks up the
@@ -422,7 +422,7 @@ is `static`, so inset properties don't apply to it at all.
 
 ## Tier 4 — Responsive layout
 
-### [ ] 3.1 + 3.2 Make the grid responsive
+### [DONE] 3.1 + 3.2 Make the grid responsive
 
 In `CardGrid`:
 
@@ -450,10 +450,10 @@ encoding one gap. Making it a real `gap-x-[30px]` with 200px tracks is what lets
 change without the spacing changing. The math works out exactly: `max-w-6xl` (1152px) − `px-4`
 (32px) = 1120px = 5×200 + 4×30, so desktop is pixel-identical.
 
-### [ ] 3.3 Toolbar and PTT row
+### [DONE] 3.3 Toolbar and PTT row
 
-- [ ] `BrowseSearch.tsx:54` — add `flex-wrap`, drop `h-20` for `h-auto`
-- [ ] `app/scores/page.tsx:46` — replace the hand-tuned `px-50` with
+- [DONE ] `BrowseSearch.tsx:54` — add `flex-wrap`, drop `h-20` for `h-auto`
+- [DONE ] `app/scores/page.tsx:46` — replace the hand-tuned `px-50` with
   `mx-auto flex w-full max-w-6xl items-start gap-4 px-4 py-4` so the PTT badge tracks the grid's
   left edge at every width, not just at 1150px
 

@@ -5,6 +5,8 @@ import { filterCharts, getSortDisplayValue, sortCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
 import BrowseCard from './BrowseCard'
 import BrowseModal from './BrowseModal'
+import { CardGrid } from '@/app/components/CardGrid'
+import { Button } from '../components/Button'
 
 const CARDS_PER_PAGE = 100
 
@@ -39,8 +41,11 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
     const filteredCharts = sortCharts(filterCharts(charts, search, levelFilter, filterComparison, difficultyFilter), sortOption, sortDirection)
     const visibleCharts = filteredCharts.slice(0, visibleCount)
 
+    //common classes for the search input and filter/sort dropdowns
+    const controlClasses = "bg-gray-800 text-white text-center py-3 border-gray-400 rounded-md border-2"
+
     return (
-        <div className="flex flex-col items-center justify-center gap-5">
+        <>
             <div className="flex flex-col items-center justify-center gap-1 rounded-lg p-4">
                 {/* Search Input */}
                 <input
@@ -51,10 +56,10 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     onChange={(e) => setSearch(e.target.value)}
                 />
                 {/* Sort and Filter Options */}
-                <div className="flex items-center justify-center gap-6 h-20 w-full rounded-lg">
+                <div className="flex flex-wrap items-center justify-center gap-6 h-auto w-full rounded-lg">
                     {/* Sort Options */}
-                    <div className="flex  items-center justify-center gap-1">
-                        <select className=" bg-gray-800 text-white text-center p-6 py-3 border-gray-400 rounded-md border-2  "
+                    <div className="flex items-center justify-center gap-1">
+                        <select className={`${controlClasses} px-6`}
                             onChange={(e) => setSortOption(e.target.value)}>
                             <option value="" hidden >Sort by...</option>
                             <option value="title">Title</option>
@@ -68,7 +73,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         </select>
 
                         {/* Sort Direction Button */}
-                        <button className="bg-gray-800 text-white text-center p-5 py-3 border-gray-400 rounded-md border-2 "
+                        <button className={`${controlClasses} px-5`}
                             onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}>
                             {sortDirection === 'asc' ? '↑' : '↓'}
                         </button>
@@ -77,7 +82,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     {/* Filter Options */}
                     <div className="flex items-center justify-center gap-1">
                         {/* Filter Comparison */}
-                        <select className="bg-gray-800 text-white text-center p-2 py-3 border-gray-400 rounded-md border-2 "
+                        <select className={`${controlClasses} px-2`}
                             onChange={(e) => setFilterComparison(e.target.value)}>
                             <option value="eq" hidden >=</option>
                             <option value="lt"> {'<'} </option>
@@ -88,7 +93,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         </select>
 
                         {/* Level Filter */}
-                        <select className="bg-gray-800 text-white text-center p-6 py-3 border-gray-400 rounded-md border-2 "
+                        <select className={`${controlClasses} px-6`}
                             onChange={(e) => setLevelFilter(e.target.value)}>
                             <option value="" >Level</option>
                             <option value="1">1</option>
@@ -112,7 +117,7 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     </div>
 
                     {/* Difficulty Filter */}
-                    <select className="bg-gray-800 text-white text-center p-6 py-3 border-gray-400 rounded-md border-2 "
+                    <select className={`${controlClasses} px-6`}
                         onChange={(e) => setDifficultyFilter(Number(e.target.value))}>
                         <option value="" >Difficulty</option>
                         <option value="1">PST</option>
@@ -125,24 +130,25 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
             </div>
 
             {/* Chart List */}
-            <ul className="grid grid-cols-[repeat(5,230px)] gap-y-10 w-fit justify-items-center mx-auto">
+            <CardGrid>
                 {visibleCharts.map((chart) => (
                     <BrowseCard key={chart.id} info={getSortDisplayValue(chart, sortOption)} chart={chart} onSelect={setSelectedChart} />
                 ))}
-            </ul>
+            </CardGrid>
 
             {/* Only shown while some of the filtered charts are still unrendered */}
             {filteredCharts.length > visibleCount && (
-                <button
+                <Button
                     onClick={() => setVisibleCount(visibleCount + CARDS_PER_PAGE)}
-                    className="bg-gray-800 hover:bg-gray-600 text-white text-center p-6 py-4 rounded-md border-2"
+                    variant="default"
+                    size="md"
                 >
                     Load More ({filteredCharts.length - visibleCount} remaining)
-                </button>
+                </Button>
             )}
-            
+
             {/* The single modal shared by every card in the grid */}
             <BrowseModal chart={selectedChart} ref={dialogRef} onClose={() => setSelectedChart(null)} />
-        </div>
+        </>
     )
 }

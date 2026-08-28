@@ -6,6 +6,7 @@ import { Chart } from '@/utils/types'
 import Modal from '@/app/components/Modal'
 import { getJacketUrl } from '@/utils/jacket'
 import { getDifficultyColor } from '@/utils/style'
+import { Button } from '@/app/components/Button'
 
 const SelectedChartContext = createContext<(chart: Chart | null) => void>(() => { })
 export const useSetSelectedChart = () => useContext(SelectedChartContext)
@@ -14,12 +15,10 @@ interface AddScoreButtonProps {
     children?: React.ReactNode
     showSongInfo?: boolean
     defaultChart?: Chart | null
-    sizeClasses?: string
-    textClasses?: string
-    borderClasses?: string
+    size?: 'md' | 'lg'
 }
 
-export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, sizeClasses = "p-2", textClasses = "text-white", borderClasses = "border-2 border-gray-400" }: AddScoreButtonProps) {
+export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, size = 'lg' }: AddScoreButtonProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -55,6 +54,15 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
         }
     };
 
+    const judgementInputProps = {
+        type: "number",
+        max: selectedChart?.note_count ?? 0,
+        min: 0,
+        disabled: !selectedChart,
+        onChange: handleInput,
+        className: "no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
+    } as const
+
     const chartInfoElement = (
         <div className="flex items-center justify-start gap-4 ">
             <img src={getJacketUrl(defaultChart?.song_id || "", defaultChart?.difficulty || "", defaultChart?.jacket_override || false)}
@@ -74,11 +82,12 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
     return (
         <SelectedChartContext.Provider value={setSelectedChart}>
             {/* Button to open the add score modal */}
-            <button
+            <Button
                 onClick={() => dialogRef.current?.showModal()}
-                className={`bg-gray-800 hover:bg-gray-700 text-white font-bold ${sizeClasses} ${textClasses} ${borderClasses} rounded-md`}
+                variant='default'
+                size={size}
             >Add Score
-            </button>
+            </Button>
 
             <Modal ref={dialogRef} width="w-[min(40vw,40rem)]"
                 onClose={() => {
@@ -113,38 +122,13 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
 
                             {/* Input fields for Pure, Far, and Lost */}
                             <div className="flex gap-2 h-15 w-full">
-                                <input
-                                    type="number"
-                                    name="pure"
-                                    placeholder="Pure"
-                                    min={0}
-                                    max={selectedChart?.note_count ?? 0}
-                                    disabled={!selectedChart}
-                                    onChange={handleInput}
-                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                                />
-                                <input
-                                    type="number"
-                                    name="far"
-                                    placeholder="Far"
-                                    min={0}
-                                    max={selectedChart?.note_count ?? 0}
-                                    disabled={!selectedChart}
-                                    onChange={handleInput}
-                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                                />
-                                <input
-                                    type="number"
-                                    name="lost"
-                                    placeholder="Lost"
-                                    min={0}
-                                    max={selectedChart?.note_count ?? 0}
-                                    disabled={!selectedChart}
-                                    onChange={handleInput}
-                                    className="no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
-                                />
+                                <input name="pure" placeholder="Pure" {...judgementInputProps} />
+                                <input name="far" placeholder="Far" {...judgementInputProps} />
+                                <input name="lost" placeholder="Lost" {...judgementInputProps} />
                             </div>
+
                         </div>
+
                         {/* Display error message if any */}
                         {errorMessage && (
                             <div className="text-red-500 text-center text-lg font-bold">
@@ -154,20 +138,21 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
 
                         {/* Submit and Cancel buttons */}
                         <div className="flex gap-4 w-full justify-center items-center h-15">
-                            <button
+                            <Button
                                 type="submit"
                                 disabled={!selectedChart}
-                                className={`flex-1 h-full bg-blue-600 font-bold text-2xl text-white disabled:bg-gray-900 disabled:text-gray-500 rounded-md border-2 border-blue-400`}
-                            >
-                                Add Score
-                            </button>
-                            <button
+                                variant="primary"
+                                size="fill"
+                            > Add Score
+                            </Button>
+
+                            <Button
                                 type="button"
                                 onClick={() => dialogRef.current?.close()}
-                                className={`flex-1 h-full bg-red-400 font-bold text-2xl text-white rounded-md border-2 border-red-200`}
-                            >
-                                Cancel
-                            </button>
+                                variant="danger"
+                                size="fill"
+                            > Cancel
+                            </Button>
                         </div>
                     </div>
                 </form>
