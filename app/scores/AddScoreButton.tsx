@@ -21,6 +21,8 @@ interface AddScoreButtonProps {
 export default function AddScoreButton({ children, defaultChart = null, showSongInfo = true, size = 'lg' }: AddScoreButtonProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
+    const [isCleared, setIsCleared] = useState(true) // Track if the chart has been cleared
+    const [clearStatus, setClearStatus] = useState<string | null>(null) // Track the clear status of the chart
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [resetKey, setResetKey] = useState<number>(0) // Used to reset the form after submission
 
@@ -63,6 +65,15 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
         className: "no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
     } as const
 
+    const CLEAR_STATUSES = [
+        { value: "fail", label: "Fail", cleared: false },
+        { value: "easyClear", label: "Clear (Easy)", cleared: true },
+        { value: "normalClear", label: "Clear (Normal)", cleared: true },
+        { value: "hardClear", label: "Clear (Hard)", cleared: true },
+        { value: "fullRecall", label: "Full Recall", cleared: true },
+        { value: "pureMemory", label: "Pure Memory", cleared: true }
+    ] as const 
+
     const chartInfoElement = (
         <div className="flex items-center justify-start gap-4 ">
             <img src={getJacketUrl(defaultChart?.song_id || "", defaultChart?.difficulty || "", defaultChart?.jacket_override || false)}
@@ -94,6 +105,8 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                     setSelectedChart(defaultChart)
                     setErrorMessage(null)
                     setResetKey(prev => prev + 1)
+                    setIsCleared(true)
+                    setClearStatus(null)
                 }}
             >
                 <form action={handleSubmit}
@@ -101,9 +114,9 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                 >
                     <h1 className="text-left text-white text-3xl font-bold w-full">Add Score</h1>
                     {showSongInfo && chartInfoElement}
-
-                    {/*Hidden input for chart id*/}
+                   
                     <div key={resetKey} className="contents">
+                        {/*Hidden input for chart id*/}
                         {children}
 
                         <div key={selectedChart?.id ?? 'none'} className="contents">
@@ -127,6 +140,35 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                                 <input name="lost" placeholder="Lost" {...judgementInputProps} />
                             </div>
 
+                            {/* Cleared checkbox and Clear Status dropdown */}
+                            <div className="flex gap-20 h-15 w-full justify-center items-center">
+                                <div className="flex items-center justify-center gap-2">
+                                    <label htmlFor="is_cleared" className="text-white text-lg font-bold mr-2">Cleared:</label>
+                                    <input 
+                                        type="checkbox" 
+                                        name="is_cleared" 
+                                        placeholder="Cleared"
+                                        id="is_cleared" 
+                                        checked={isCleared} 
+                                        onChange={(e) => setIsCleared(e.target.checked)}
+                                        className="w-6 h-6 accent-blue-500"
+                                    />
+                                </div>
+                                
+                                <select className={`bg-gray-800 text-white text-center py-3 border-gray-400 rounded-md border-2 px-2`}
+                                    onChange={(e) => setClearStatus(e.target.value)}
+                                    name="clear_status"
+                                    value={clearStatus ?? ""}
+                                >
+                                    <option value="" disabled hidden>Select Clear Status...</option>
+                                    <option value="" hidden >Clear Status...</option>
+                                    {CLEAR_STATUSES.map((status) => (
+                                        <option key={status.value} value={status.value} disabled={isCleared !== status.cleared}>
+                                            {status.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         {/* Display error message if any */}

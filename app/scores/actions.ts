@@ -15,6 +15,7 @@ export async function addScore(formData: FormData) {
     const pure = parseOptionalNumber(formData.get('pure'))
     const far = parseOptionalNumber(formData.get('far'))
     const lost = parseOptionalNumber(formData.get('lost'))
+    const clearStatus = formData.get('clear_status') as string | null
 
     // Validate the form data
     const { data: chart, error: chartError } = await supabase
@@ -47,6 +48,15 @@ export async function addScore(formData: FormData) {
         return {error: `Invalid values. The sum of pure, far, and lost must not exceed ${chart.note_count}`}
     }
 
+    if (clearStatus) {
+        if (clearStatus === "fullRecall" && lost !== null && lost !== 0) {
+            return {error: `Invalid full recall. Lost must be 0.`}
+        }
+        if (clearStatus === "pureMemory" && ((lost !== null && lost !== 0) || (far !== null && far !== 0))) {
+            return {error: `Invalid pure memory. Far and lost must both be 0.`}
+        }
+    }
+
     const guestId = await getGuestId()
     const { data: { user } } = await supabase.auth.getUser()
     const userId = user?.id ?? guestId
@@ -58,7 +68,8 @@ export async function addScore(formData: FormData) {
         score: score,
         pure: pure,
         far: far,
-        lost: lost
+        lost: lost,
+        //clear_status: clearStatus //we need to add a new column into the table
     })
     revalidatePath('/scores')
 }
