@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, createContext, useContext, ChangeEvent } from 'react'
+import { useRef, useState, createContext, useContext, ChangeEvent, SubmitEvent } from 'react'
 import { addScore } from './actions'
 import { Chart } from '@/utils/types'
 import Modal from '@/app/components/Modal'
@@ -36,13 +36,15 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
 
     // submit the form data to the server and close the modal
-    async function handleSubmit(formData: FormData) {
+    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+        e.preventDefault()
+        const form  = e.currentTarget
+        const formData = new FormData(form)
         setErrorMessage(null) // Clear any previous error message
         const result = await addScore(formData)
 
         if (result?.error) {
             setErrorMessage(result.error)
-            setResetKey(prev => prev + 1) // Reset the form to clear invalid input
             return
         }
         dialogRef.current?.close()
@@ -106,7 +108,7 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                     setResetKey(prev => prev + 1)
                 }}
             >
-                <form action={handleSubmit}
+                <form onSubmit={handleSubmit}
                     className={`flex flex-col gap-4 gap-y-7 p-10 justify-center rounded-lg bg-gray-800 border-2 border-gray-400 w-full max-w-5xl`}
                 >
                     <h1 className="text-left text-white text-3xl font-bold w-full">Add Score</h1>
