@@ -11,6 +11,8 @@ export function getDifficultyColor(difficulty: string): string {
             return "#7340A0"
         case "BYD":
             return "#A04040"
+        case "INS":
+            return "#3933b2"
         default:
             return "#000000"
     }
@@ -45,7 +47,7 @@ export function getClearStatusColor(clearStatus: string): string {
         case "fail":
             return "#965151"
         case "clearEasy":
-            return "#879167"
+            return "#8ba33b"
         case "clearNormal":
             return "#a175b3"
         case "clearHard":

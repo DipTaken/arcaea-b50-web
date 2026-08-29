@@ -1,9 +1,10 @@
 import { ScoreWithChart } from '@/utils/types'
-import { getPlayRating, getShinyPureCount, getPmRating, getGrade } from '@/utils/rating'
-import { getGradeColor } from '@/utils/style'
+import { getPlayRating, getShinyPureCount, getPmRating, getGrade, getClearStatus } from '@/utils/rating'
+import { getClearStatusColor, getGradeColor } from '@/utils/style'
 
 export default function ScoreInfo({ score }: { score: ScoreWithChart }) {
-    const flexClasses = "flex gap-4 items-center w-full text-white font-bold"    
+    const flexClasses = "flex gap-6 items-center w-full text-white font-bold"
+    const clearStatusColor = getClearStatusColor(score.clear_status)
     return (
         <div className="flex flex-col gap-4 p-4 justify-start items-center rounded-lg bg-gray-900 border-2 border-gray-600 w-full">
             <div className={`${flexClasses} text-2xl justify-start`}>
@@ -13,15 +14,15 @@ export default function ScoreInfo({ score }: { score: ScoreWithChart }) {
                         {' ('} {getPmRating(score.score, score.charts?.note_count, score.far, score.lost)} {')'}
                     </span>
                 </p>
-                
-                 <p>Play Rating: {getPlayRating(score.score, score.charts?.chart_constant).toFixed(2)}</p>
 
-                 <p>
+                <p>Play Rating: {getPlayRating(score.score, score.charts?.chart_constant, score.clear_status).toFixed(2)}</p>
+
+                <p>
                     <span> {'Grade: '} </span>
-                    <span style={{color: getGradeColor(getGrade(score.score, score.charts?.note_count, score.pure, score.far, score.lost))}}>
+                    <span style={{ color: getGradeColor(getGrade(score.score, score.charts?.note_count, score.pure, score.far, score.lost)) }}>
                         {getGrade(score.score, score.charts?.note_count, score.pure, score.far, score.lost)}
                     </span>
-                 </p>
+                </p>
             </div>
 
             <div className={`${flexClasses} justify-start`}>
@@ -29,13 +30,24 @@ export default function ScoreInfo({ score }: { score: ScoreWithChart }) {
                 <p>Far: {score.far ?? 'N/A'}</p>
                 <p>Lost: {score.lost ?? 'N/A'}</p>
             </div>
-            
-            
+
+
             <div className={`${flexClasses} justify-between`}>
                 <p>Shiny Pures: {getShinyPureCount(score.score, score.charts?.note_count)}</p>
+                <p>
+                    <span>Lamp: </span>
+                    <span className="text-base text-white font-bold rounded-sm px-2"
+                        style={{
+                            backgroundColor: `color-mix(in srgb, ${clearStatusColor} 30%, var(--color-card))`,
+                            color: clearStatusColor
+                        }}
+                    >
+                        {getClearStatus(score.clear_status, 'long')}
+                    </span>
+                </p>
                 <p className="justify-end text-sm">Achieved: {score.created_at ? new Date(score.created_at).toLocaleString() : 'N/A'} </p>
             </div>
-           
+
 
         </div>
     )

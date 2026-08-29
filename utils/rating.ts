@@ -1,3 +1,5 @@
+import { ScoreWithChart, B50Entry } from "./types"
+
 export function getGrade(score: number, noteCount: number, pure: number | null, far: number | null, lost: number | null): string {
     if (score >= 10000000 && (isPM(score, noteCount, far, lost) || noteCount < 2237)) return "PM"
     else if (score >= 9900000) return "EX+"
@@ -9,20 +11,20 @@ export function getGrade(score: number, noteCount: number, pure: number | null, 
     else return "D"
 }
 
-export function getClearStatus(clearStatus: string): string {
+export function getClearStatus(clearStatus: string, length: 'short' | 'long' = 'short'): string {
     switch (clearStatus) {
         case "fail":
-            return "L"
+            return length === 'short' ? "L" : "Fail"
         case "clearEasy":
-            return "C"
+            return length === 'short' ? "C" : "Clear (Easy)"
         case "clearNormal":
-            return "C"
+            return length === 'short' ? "C" : "Clear (Normal)"
         case "clearHard":
-            return "C"
+            return length === 'short' ? "C" : "Clear (Hard)"
         case "fullRecall":
-            return "F"
+            return length === 'short' ? "F" : "Full Recall"
         case "pureMemory":
-            return "P"
+            return length === 'short' ? "P" : "Pure Memory"
         default:
             return "?"
     }
@@ -72,13 +74,33 @@ export function isPM(score: number, noteCount: number, far: number | null, lost:
     else return far === 0 && lost === 0
 }
 
-export function getB50Rating(sortedScores: { score: number, charts: { chart_constant: number }, clear_status: string }[]): number {
+export function getB50Rating(sortedScores: B50Entry[]): number {
     let totalRating = 0.0
     for (let i = 1; i <= sortedScores.length; i++) {
-        const playRating = getPlayRating(sortedScores[i - 1].score, sortedScores[i - 1].charts.chart_constant, sortedScores[i - 1].clear_status)
-        
-        if (i <= 10) totalRating += playRating * 2.0
-        else totalRating += playRating
+        totalRating += sortedScores[i - 1].playRating * sortedScores[i - 1].weight
     }
     return totalRating / 60.0
+}
+
+export function getB50FromScores(scores: ScoreWithChart[]): B50Entry[] {
+    const bestScores = new Map<number, ScoreWithChart>()
+    for (const score of scores) {
+        const prevScore = bestScores.get(score.chart_id)
+        if (!prevScore || score.score > prevScore.score)
+            bestScores.set(score.chart_id, score)
+    }
+    const b50Scores = [...bestScores.values()]
+        .map((score) => ({
+            ...score,
+            playRating: getPlayRating(score.score, score.charts?.chart_constant ?? 0, score.clear_status),
+        }))
+        .sort((a, b) => b.playRating - a.playRating)
+        .slice(0, 50)
+        .map((score, index): B50Entry => ({
+            rank: index + 1,
+            score,
+            playRating: score.playRating,
+            weight: index < 10 ? 2 : 1,
+        }))
+    return b50Scores
 }

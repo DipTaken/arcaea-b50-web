@@ -29,3 +29,11 @@ export type Score = {
 
 // a score with its associated chart data
 export type ScoreWithChart = Score & { charts: Chart }
+
+// one row of the B50 table, with rank, score, playRating, and weight
+export type B50Entry = { 
+    rank: number
+    score: ScoreWithChart
+    playRating: number
+    weight: 1 | 2
+}

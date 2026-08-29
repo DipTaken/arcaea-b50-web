@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { getGuestIdReadOnly } from '@/utils/guest'
-import { getPlayRating } from '@/utils/rating'
+import { getB50FromScores } from '@/utils/rating'
 import AddScoreButton from './AddScoreButton'
 import ImportFromBrowserButton from '@/app/scores/ImportFromBrowserButton'
 import ChartSearch from './ChartSearch'
@@ -23,18 +23,7 @@ export default async function Page() {
     .eq('user_id', userId)
     .limit(5000)
 
-  const bestScores = new Map()
-  for (const score of scores ?? []) {
-    const prevScore = bestScores.get(score.chart_id)
-    if (!prevScore || score.score > prevScore.score)
-      bestScores.set(score.chart_id, score)
-  }
-
-  const b50Scores = [...bestScores.values()].sort((a, b) =>
-    getPlayRating(b.score, b.charts?.chart_constant ?? 0) -
-    getPlayRating(a.score, a.charts?.chart_constant ?? 0)
-  )
-    .slice(0, 50)
+  const b50Scores = getB50FromScores(scores ?? [])
 
   return (
     <PageShell
@@ -53,9 +42,9 @@ export default async function Page() {
 
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-4 p-4">
         <p className="font-bold text-xl border-2 border-gray-400 rounded-md bg-gray-800 text-white px-4 py-2">
-          B50: {getB50Rating(b50Scores ?? []).toFixed(3)} </p>
+          B50: {getB50Rating(b50Scores).toFixed(3)} </p>
       </div>
-      <ScoreGrid scores={b50Scores ?? []} />
+      <ScoreGrid entries={b50Scores} />
 
     </PageShell>
   )
