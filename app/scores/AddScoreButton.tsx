@@ -32,6 +32,7 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
     const [selectedChart, setSelectedChart] = useState<Chart | null>(defaultChart)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [resetKey, setResetKey] = useState<number>(0) // Used to reset the form after submission
+    const [scoreText, setScoreText] = useState<string>('') // Track the score input value
 
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
 
@@ -106,6 +107,7 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
                     setSelectedChart(defaultChart)
                     setErrorMessage(null)
                     setResetKey(prev => prev + 1)
+                    setScoreText('')
                 }}
             >
                 <form onSubmit={handleSubmit}
@@ -120,24 +122,27 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
 
                         <div key={selectedChart?.id ?? 'none'} className="contents">
                             {/* Score input field */}
-                            <input
-                                type="number"
-                                name="score"
-                                placeholder="Score"
-                                required
-                                min={0}
-                                max={max}
-                                disabled={!selectedChart}
-                                onChange={handleInput}
-                                className={`no-spinner bg-gray-700 h-20 text-white text-center text-4xl rounded-md w-full border-2 border-gray-400`}
-                            />
-
-                            {/* Input fields for Pure, Far, and Lost */}
-                            <div className="flex gap-2 h-15 w-full">
-                                <input name="pure" placeholder="Pure" {...judgementInputProps} />
-                                <input name="far" placeholder="Far" {...judgementInputProps} />
-                                <input name="lost" placeholder="Lost" {...judgementInputProps} />
-                            </div>
+                            <div className="flex flex-col gap-1 w-full justify-center items-center">
+                                <input
+                                    type="number"
+                                    name="score"
+                                    placeholder="Score"
+                                    required
+                                    min={0}
+                                    max={max}
+                                    disabled={!selectedChart}
+                                    onChange={(e) => { handleInput(e); setScoreText(e.currentTarget.value) }}
+                                    className={`no-spinner bg-gray-700 h-20 text-white text-center text-4xl rounded-md w-full border-2 border-gray-400`}
+                                />
+                                {scoreText && <span className="text-gray-400 text-sm ">{Number(scoreText).toLocaleString('en-US')}</span>}
+                            </div>  
+                                {/* Input fields for Pure, Far, and Lost */}
+                                <div className="flex gap-2 h-15 w-full">
+                                    <input name="pure" placeholder="Pure" {...judgementInputProps} />
+                                    <input name="far" placeholder="Far" {...judgementInputProps} />
+                                    <input name="lost" placeholder="Lost" {...judgementInputProps} />
+                                </div>
+                            
 
                             {/* Cleared checkbox and Clear Status dropdown */}
                             <ClearInfo />
