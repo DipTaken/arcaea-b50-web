@@ -11,6 +11,7 @@ Personal project + learning exercise (first time with TypeScript, Next.js, Supab
 | `docs/todo.txt` | The running project list — features, deploy blockers, stage planning. |
 | `docs/report.md` | Full codebase audit: bugs (with failure scenarios and fixes), the Tailwind de-duplication plan, responsive layout, code quality. |
 | `docs/report_todo.md` | The audit as an actionable checklist, each item with a concept note explaining the underlying bug class. |
+| `docs/anon_auth_migration.md` | Staged plan for replacing the `guest_id` cookie with Supabase `signInAnonymously()` — the blocker on UPDATE/DELETE policies. |
 
 ## Stack
 

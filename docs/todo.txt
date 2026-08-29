@@ -67,6 +67,9 @@ This file is the running project list.
 === STAGE 3 / DEPLOY ===
 [ ] Replace the guest_id cookie with Supabase signInAnonymously()
     Prerequisite for everything below it — RLS can't trust a self-issued cookie.
+    Staged plan: docs/anon_auth_migration.md. Start at Step 0 (the proxy
+    getUser() fix) — an anon session expires in ~1hr, so the currently harmless
+    missing refresh becomes data loss.
 [ ] UPDATE / DELETE RLS policies on scores (edit + delete a score)
 [ ] Public deployment
     NOTE: auth/callback/route.ts builds its redirect from new URL(request.url),
