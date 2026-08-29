@@ -4,10 +4,15 @@ import { createClient } from "@/utils/supabase/server"
 import { cookies } from "next/headers"
 import { getGuestId } from '@/utils/guest'
 import { revalidatePath } from 'next/cache'
+import { isPM } from '@/utils/rating'
 
 export async function addScore(formData: FormData) {
     const cookieStore = await cookies()
     const supabase = createClient(cookieStore)
+    
+    const guestId = await getGuestId()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id ?? guestId
 
     // Get the form data
     const chartId = Number(formData.get('chart_id'))
@@ -23,9 +28,16 @@ export async function addScore(formData: FormData) {
         .eq('id', chartId)
         .single()
 
+    // Get the clear status with no NULL guarantee
+    const rawClearStatus = formData.get('clear_status') as string | null
+    const pm = isPM(score, chart?.note_count ?? 0, far, lost)
+    const isCleared = formData.get('is_cleared') === 'on'
+    const clearStatus = pm ? 'pureMemory' : rawClearStatus ?? (isCleared ? 'clearNormal' : 'fail')
+
     if (chartError || !chart) {
         return {error: "Chart not found"}
     }
+    
 
     // Validate the score
     const maxScore = 10000000 + (chart?.note_count ?? 0)
@@ -47,10 +59,16 @@ export async function addScore(formData: FormData) {
         return {error: `Invalid values. The sum of pure, far, and lost must not exceed ${chart.note_count}`}
     }
 
-    const guestId = await getGuestId()
-    const { data: { user } } = await supabase.auth.getUser()
-    const userId = user?.id ?? guestId
+    if (clearStatus) {
+        if (clearStatus === "fullRecall" && lost !== null && lost !== 0) {
+            return {error: `Invalid full recall. Lost must be 0.`}
+        }
+        if (clearStatus === "pureMemory" && ((lost !== null && lost !== 0) || (far !== null && far !== 0))) {
+            return {error: `Invalid pure memory. Far and lost must both be 0.`}
+        }
+    }
 
+    
     // Insert the score into the database
     await supabase.from('scores').insert({
         chart_id: chartId,
@@ -58,7 +76,8 @@ export async function addScore(formData: FormData) {
         score: score,
         pure: pure,
         far: far,
-        lost: lost
+        lost: lost,
+        clear_status: clearStatus
     })
     revalidatePath('/scores')
 }

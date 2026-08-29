@@ -40,6 +40,25 @@ export function getGradeColor(grade: string): string {
     }
 }
 
+export function getClearStatusColor(clearStatus: string): string {
+    switch (clearStatus) {
+        case "fail":
+            return "#965151"
+        case "clearEasy":
+            return "#879167"
+        case "clearNormal":
+            return "#a175b3"
+        case "clearHard":
+            return "#963d3d"
+        case "fullRecall":
+            return "#d6c3fa"
+        case "pureMemory":
+            return "#bbdbea"
+        default:
+            return "#000000"
+    }
+}
+
 // text size based on title length for cards
 export function getTextSize(title: string): string {
     const length = title.length

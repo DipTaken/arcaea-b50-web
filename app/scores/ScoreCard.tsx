@@ -1,7 +1,7 @@
 'use client'
 
-import { getGrade, getPlayRating } from '@/utils/rating'
-import { getDifficultyColor, getTextSize, getGradeColor } from '@/utils/style'
+import { getGrade, getPlayRating, getClearStatus } from '@/utils/rating'
+import { getDifficultyColor, getClearStatusColor, getGradeColor } from '@/utils/style'
 import { getJacketUrl } from '@/utils/jacket'
 import { ScoreWithChart } from '@/utils/types'
 import { Card, CardPill, CardBottomBar } from '@/app/components/Card'
@@ -9,6 +9,7 @@ import { Card, CardPill, CardBottomBar } from '@/app/components/Card'
 //A single score card
 export default function ScoreCard({ score, index, onSelect }: { score: ScoreWithChart, index: number, onSelect: (score: ScoreWithChart) => void }) {
     const accent = getDifficultyColor(score.charts?.difficulty ?? "")
+    const clearStatusColor = getClearStatusColor(score.clear_status)
     return (
         <Card accent={accent}
             onClick={() => onSelect(score)}
@@ -19,12 +20,18 @@ export default function ScoreCard({ score, index, onSelect }: { score: ScoreWith
             </CardPill>
 
             {/* Grade and rating (center left) */}
-            <div className="absolute z-10 top-3 bottom-10 left-1 flex flex-col justify-center p-1 w-[94px]">
+            <div className="absolute z-40 top-4 bottom-13 left-2 flex flex-col justify-between w-[94px]">
                 <div style={{ color: getGradeColor(getGrade(score.score, score.charts?.note_count, score.pure, score.far, score.lost)) }}
-                    className="flex-1 text-[32px] font-extrabold"> {getGrade(score.score, score.charts?.note_count, score.pure, score.far, score.lost)}
+                    className="text-[32px] font-extrabold"> 
+                    {getGrade(score.score, score.charts?.note_count, score.pure, score.far, score.lost)}
                 </div>
-                <div className="absolute bottom-1 left-0 p-1 text-[20px] font-bold">
-                    {getPlayRating(score.score, score.charts?.chart_constant).toFixed(2)}
+                <div className="flex gap-2 items-center w-14">
+                    <span className="text-[18px] font-bold">{getPlayRating(score.score, score.charts?.chart_constant, score.clear_status).toFixed(2)} </span>
+                    <span className="text-sm text-white font-bold rounded-sm px-2" 
+                        style={{ backgroundColor: `color-mix(in srgb, ${clearStatusColor} 30%, var(--color-card))`,
+                        color: clearStatusColor }}>
+                        {getClearStatus(score.clear_status)}
+                    </span>
                 </div>
             </div>
 

@@ -21,7 +21,7 @@ export default function ProfileButton({ user }: { user: User }) {
         <div className="flex items-center gap-4">
 
             {/* User Name */}
-            <span>Welcome, {user.email?.split('@')[0]}</span>
+            <span className="hidden md:inline">Welcome, {user.email?.split('@')[0]}</span>
 
             <div className="relative">
                 {/* Profile Button/Avatar */}
