@@ -24,6 +24,7 @@ export type Score = {
     far: number | null
     lost: number | null
     created_at: string
+    clear_status: string
 }
 
 // a score with its associated chart data
