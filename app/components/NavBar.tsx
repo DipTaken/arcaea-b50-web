@@ -17,7 +17,7 @@ export default async function NavBar() {
             </Link>
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between justify-self-center gap-30">
+            <div className="flex justify-between justify-self-center gap-4 md:gap-30">
                 <Link href="/scores">View Scores</Link>
                 <Link href="/browse">Browse Charts</Link>
                 <Link href="/leaderboard">Leaderboard</Link>

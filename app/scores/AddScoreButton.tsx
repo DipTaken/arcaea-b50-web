@@ -185,9 +185,9 @@ function ClearInfo(): React.ReactNode {
     const [clearStatus, setClearStatus] = useState<string | null>(null) // Track the clear status of the chart
 
     return (
-        <div className="flex gap-20 h-15 w-full justify-center items-center">
+        <div className="flex h-15 w-full justify-between items-center">
             <div className="flex items-center justify-center gap-2">
-                <label htmlFor="is_cleared" className="text-white text-lg font-bold mr-2">Cleared:</label>
+                <label htmlFor="is_cleared" className="text-white text-xl font-bold mr-2">Cleared:</label>
                 <input
                     type="checkbox"
                     name="is_cleared"
@@ -201,12 +201,12 @@ function ClearInfo(): React.ReactNode {
                             setClearStatus(null)
                         }
                     }}
-                    className="w-6 h-6 accent-blue-500"
+                    className="w-8 h-8 accent-blue-500"
                 />
             </div>
 
             <input type="hidden" name="clear_status" value={clearStatus ?? (isCleared ? "clearNormal" : "fail")} />
-            <select className={`bg-gray-800 text-white text-center py-3 border-gray-400 rounded-md border-2 px-2`}
+            <select className={`bg-gray-700 text-white text-center py-3 border-gray-400 rounded-md border-2 px-5`}
                 onChange={(e) => setClearStatus(e.target.value)}
                 value={clearStatus ?? ""}
             >
