@@ -25,7 +25,7 @@ export default async function NavBar() {
 
             {/* Profile/Login Button */}
             <div className="justify-self-end">
-                {user ? (
+                {user && !user.is_anonymous ? (
                     <ProfileButton user={user} />
                 ) : (
                     <LoginButton />

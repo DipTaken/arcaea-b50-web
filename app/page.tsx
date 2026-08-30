@@ -14,7 +14,7 @@ export default async function LandingPage() {
             subtitle="">
            
             {/* Display a welcome message if the user is logged in, or a login prompt if not */}
-            {user ? (
+            {user && !user.is_anonymous ? (
                 <span>Welcome, {user.email?.split('@')[0]}</span>
             ) : (
                 <div className="flex flex-col items-center gap-4">

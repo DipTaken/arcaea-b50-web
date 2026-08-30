@@ -26,7 +26,9 @@ migration isn't an API swap, it's moving the trust boundary from the app into th
 
 ---
 
-## Step 0 — Fix the proxy. Hard blocker, do this before anything else.
+## Step 0 — Fix the proxy. Hard blocker, do this before anything else. — **DONE (code)**
+
+*Code landed; the runtime check at the end of this section has not been run yet.*
 
 `utils/supabase/middleware.ts:15-36` (known bug 1). Add `await supabase.auth.getUser()` before
 `return supabaseResponse`. That makes `createClient` `async`, and `proxy()` in `proxy.ts` too.
@@ -62,20 +64,28 @@ task is about to invalidate.
 
 ---
 
-## Step 1 — Enable the feature
+## Step 1 — Enable the feature — **DONE**
 
-Dashboard → Authentication → Sign In / Providers → **Allow anonymous sign-ins**.
+Dashboard → Authentication → Sign In / Providers → **Allow anonymous sign-ins**. On as of 2026-08-29.
+
+**Allow manual linking** on the same screen is still **off**, and should stay off until Step 4.
+`linkIdentity()` is the only thing that needs it, and leaving it off until then keeps the surface
+small — the API lets any signed-in session attach an identity, so it is worth turning on next to the
+code that uses it rather than months early.
 
 Two operational facts to know before deploying:
 
 - Every call creates a **permanent row in `auth.users`**. They accumulate; plan on a cleanup query for
   anonymous users older than N days with no scores.
 - Supabase rate-limits anonymous sign-ins per IP (30/hr by default). CAPTCHA is the recommended
-  production guard, since the endpoint is a free user-row generator otherwise.
+  production guard, since the endpoint is a free user-row generator otherwise. **Do not enable it
+  yet** — it is not a pure dashboard toggle. It applies to the auth endpoints project-wide and
+  requires every affected call to pass `options: { captchaToken }` from a real widget, so flipping it
+  on before that widget exists breaks local sign-in. It belongs in the deploy step, not here.
 
 ---
 
-## Step 2 — Mint the anon user lazily, on first write
+## Step 2 — Mint the anon user lazily, on first write — **DONE**
 
 The real design decision. Two options:
 
@@ -97,6 +107,19 @@ Actions can write cookies, Server Components can't.
   B50 and skip the query entirely. This also closes **known bug 10** for free: `.eq('user_id', null)`
   is never fired again.
 - **Delete `utils/guest.ts`.**
+- **`app/components/NavBar.tsx:28` and `app/page.tsx:17`** — both branch on bare `user`, which today
+  is a safe stand-in for "signed in with Google" only because guests are `null`. After this step an
+  anonymous visitor *is* a `user`, so both need `user && !user.is_anonymous`.
+
+  **The NavBar one is the dangerous half.** It would render `ProfileButton` for an anonymous user —
+  no avatar, and a working Sign Out button. Signing out of an anonymous session is **irreversible**:
+  there is no credential to sign back in with, the `auth.users` row survives with nobody able to
+  authenticate as it, and every score under that uid is orphaned for good. An anonymous user must be
+  offered *Sign in with Google* (which becomes `linkIdentity()` in Step 4), never *Sign Out*.
+
+  The landing page is only cosmetic by comparison: `user.email` is `undefined` on an anon user, so
+  `user.email?.split('@')[0]` renders `Welcome, ` and nothing else. Note the `?.` is what makes it
+  quiet — without it you'd get a crash pointing straight at the problem.
 
 **Must-get-right:** `getOrCreateUser()` has to call `getUser()` first and only sign in when it's null.
 Calling `signInAnonymously()` unconditionally mints a **brand new user on every action**, and each
@@ -108,6 +131,46 @@ because only one runs somewhere Next allows it. That constraint doesn't go away 
 just changes shape — the write path may create an identity, the read path may only observe one. When a
 framework splits an API into "the one that mutates" and "the one that doesn't," that split is usually
 telling you something about where the code is allowed to run.
+
+---
+
+## Step 2.5 — Version-control the schema, *before* writing any policy
+
+The ordering is the entire point. Run `supabase db pull` now and your current schema becomes
+migration #1; every policy in Step 3 then lands as a reviewable file. Do it afterward and you are
+reverse-engineering which checkboxes you clicked in a web UI.
+
+```
+supabase init
+supabase link --project-ref <ref>
+supabase db pull                        # snapshot current remote schema as the baseline
+supabase migration new add_scores_rls   # then write Step 3 into this file
+supabase db push
+```
+
+**Why this project needs it, specifically:**
+
+- **Step 3's policies are about to be the most security-critical code in the repo**, and they would
+  otherwise exist only as dashboard state — no diff, no review, no rollback, no way to tell what prod
+  actually has versus what you meant.
+- **A second contributor is planned.** Without migrations, onboarding is "ask Dennis to click through
+  twenty screens," which no `.env.example` can fix.
+- **The symptom is already here.** Nobody knows whether the `user_id,chart_id,created_at` unique
+  constraint `ImportFromBrowser`'s `onConflict` depends on is in the live DB. That uncertainty *is*
+  untracked schema.
+
+Free side effect: `supabase gen types typescript` becomes available, which is
+[todo.txt:77](todo.txt) and the fix for the `any` hole that let `score.charts.chart_id` typecheck
+against a shape that never existed.
+
+**Migrations version the schema, not the data.** The ~1800 hand-entered `charts` rows are not covered
+by any of this. Take a separate `pg_dump` of that table — it is the one thing in the project that
+genuinely cannot be regenerated.
+
+**Concept — if it isn't in the repo, it isn't reviewable, reversible, or reproducible.** A dashboard
+click and a line of code have identical power over your data, but only one of them leaves a trace.
+Anything that decides who can read or write rows belongs under the same review as the code that
+depends on it.
 
 ---
 
@@ -185,11 +248,88 @@ moves. Reach for "can these two identities become one?" before writing data-migr
 
 ## Order of work
 
-1. **Step 0** — proxy `getUser()` fix. Self-contained, independently verifiable, already a tracked bug.
-2. **Step 1** — dashboard toggle.
-3. **Step 2** — `utils/auth.ts`, rewrite the two call sites, delete `utils/guest.ts`.
-4. **Step 4 (existing rows)** — clean up before policies lock them away.
-5. **Step 3** — grants + policies. Verify a second browser profile can't read your scores.
-6. **Step 4 (linkIdentity)** — last, and only after the rest is stable.
+| # | Step | Estimate |
+|---|---|---|
+| 1 | **Step 0** — proxy `getUser()` fix. Self-contained, independently verifiable, already a tracked bug. | 30–60 min |
+| 2 | **Step 1** — dashboard toggle. | 5 min |
+| 3 | **Step 2** — `utils/auth.ts`, rewrite the two call sites, delete `utils/guest.ts`. | 1–2 hrs |
+| 4 | **Step 2.5** — `supabase init` / `link` / `db pull`. Baseline before any policy exists. | 1–2 hrs |
+| 5 | **Step 4 (existing rows)** — clean up before policies lock them away. | 15 min |
+| 6 | **Step 3** — grants + policies, as a migration. Verify a second browser profile can't read your scores. | 1–2 hrs |
+| 7 | **Step 4 (linkIdentity)** — last, and only after the rest is stable. | 2–4 hrs |
 
-Then UPDATE/DELETE UI (edit + delete a score) is unblocked.
+**Steps 1–6 are what UPDATE/DELETE actually needs** — roughly 4–7 hours. `linkIdentity` is a separate
+feature that improves the guest→Google upgrade; nothing blocks on it, and it is the least predictable
+item here because it runs through `auth/callback/route.ts`, which still carries known bug 6.
+
+Then UPDATE/DELETE UI is unblocked: Delete first (~1–2 hrs, needs no form refactor and is the cheapest
+way to prove the policies work end to end), then `validateScore` + `ScoreForm` extraction and Update
+(~4–6 hrs). See CLAUDE.md's notes on `AddScoreButton` for why the form has to come apart first.
+
+---
+
+# Deployment
+
+Everything above is a prerequisite. This section is what remains *after* it, and it is mostly not code.
+
+## Hard code blockers
+
+### 1. `origin` is the internal origin behind a proxy — `app/auth/callback/route.ts:6`
+
+```ts
+const { searchParams, origin } = new URL(request.url)
+```
+
+On Vercel — or any host that terminates TLS in front of the app — this is the internal hostname, so
+line 32 redirects production users somewhere they cannot reach. **Google login breaks in prod while
+working perfectly in local dev**, which makes it a nasty first-deploy surprise. Read `x-forwarded-host`
+(falling back to `origin` locally).
+
+### 2. Cancelling Google login reports success — same file, line 9
+
+The `if (code)` block is skipped when the provider returns `?error=access_denied`, and execution falls
+straight through to the `/browse` success redirect. The `error` / `error_description` params are never
+read. Read them and redirect to the error page.
+
+### 3. `/auth/auth-code-error` renders an empty `<div>`
+
+The one route that exists to explain a failure explains nothing. Blocker only because fixing #2 makes
+it genuinely reachable.
+
+## Configuration checklist (lives in no file — catches everyone)
+
+- [ ] Production callback URL added to **Google Cloud Console** → authorized redirect URIs
+- [ ] Same URL in **Supabase → Authentication → URL Configuration** — both *Site URL* and *Redirect URLs*
+- [ ] `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` set in the host
+- [ ] **CAPTCHA enabled on anonymous sign-ins** — a public URL means bots minting permanent
+      `auth.users` rows for free, and the default limit is only 30/hr per IP.
+      **This is a code change, not a checkbox.** Supabase (hCaptcha or Cloudflare Turnstile) applies
+      it to the auth endpoints project-wide, and the token is produced *in the browser* by a widget
+      and is single-use. So `getOrCreateUser()` — which runs server-side, inside a Server Action —
+      cannot call `signInAnonymously()` unaided: the widget has to render in `AddScoreButton`, its
+      token has to ride along as a form field, and the action passes it as
+      `signInAnonymously({ options: { captchaToken } })`. Budget a form change, not five minutes.
+      Cloudflare's dummy testing sitekey/secret pair (always-pass and always-fail variants) lets you
+      build and test all of that before any real widget or domain exists.
+- [ ] A cleanup plan for accumulated anonymous users (old, zero-score, no linked identity)
+- [ ] `pg_dump` of `charts` taken and stored somewhere that is not the Supabase project
+
+## Worth doing, not blocking
+
+- `next.config.ts` is empty — adding `images.remotePatterns` for the Supabase storage domain clears the
+  four `no-img-element` warnings and puts jackets through `next/image`.
+- `ImportFromBrowser.ts:56`'s `as any[]` is the one remaining ESLint **error**. Harmless at runtime,
+  but check whether your build runs lint before it surprises you in CI.
+- `/leaderboard` is still a heading with no content, and it is in the nav on every page.
+
+## Order
+
+1. Fix the three `auth/callback/route.ts` issues locally (they are one file and one sitting).
+2. Deploy to a preview URL **first**. The redirect bugs only manifest behind a proxy, so a preview
+   deploy is the only place they can actually be tested.
+3. Add the preview *and* production URLs to Google Cloud Console and Supabase before testing login.
+4. Verify, in a fresh incognito window: anonymous score add → Google sign-in → scores still present →
+   sign out → sign back in.
+5. Promote to production.
+
+Budget roughly half a day, most of it spent on redirect-URI round trips rather than on code.

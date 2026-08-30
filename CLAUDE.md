@@ -49,12 +49,34 @@ Google OAuth via Supabase is **implemented and working**:
 - `ProfileButton` shows the Google avatar + a click-to-open Sign Out menu, and calls `router.refresh()` after sign-out.
 - `NavBar` picks `ProfileButton` vs `LoginButton` off `supabase.auth.getUser()`.
 
-**Guest → account model.** Both identities coexist:
-- Guest users get a UUID in an `httpOnly` `guest_id` cookie (`utils/guest.ts`), refreshed on write (~1yr maxAge).
-- Every read/write resolves identity the same way: `const userId = user?.id ?? guestId`. A logged-in user's real `auth.uid()` wins; otherwise the guest cookie is used.
-- `ImportFromBrowser` (server action) copies all rows with `user_id = guestId` to `user_id = user.id`. It **copies** rather than moves — the guest rows are left behind. Re-running is now guarded by an `upsert` with `onConflict: 'user_id,chart_id,created_at'`, which requires a matching unique constraint on `scores`; if that constraint isn't in the live DB, every import fails with `42P10`.
+**Anonymous → account model** (the `guest_id` cookie is gone; `utils/guest.ts` is deleted). Steps 0–2 of
+`docs/anon_auth_migration.md` are done, so there is now exactly one kind of identity: a real row in
+`auth.users`, reached through a Supabase-signed JWT. `user_id` on a score is always an `auth.uid()`.
 
-The guest UUID is still **not** cryptographically tied to auth — it's a self-issued cookie value. Before adding UPDATE/DELETE policies on `scores`, this needs replacing with Supabase anonymous auth (`signInAnonymously()`) so RLS can trust `auth.uid()`.
+- **`utils/auth.ts` → `getOrCreateUser(supabase)`** returns a discriminated `{ user, error }`: it calls
+  `getUser()` and only calls `signInAnonymously()` when there is no user. Anonymous users are created
+  **lazily, on the actual write** — `addScore` calls it *after* all validation passes, so a rejected
+  submission never mints a permanent `auth.users` row.
+- **Only Server Actions and Route Handlers may call it.** `utils/supabase/server.ts:17-23` swallows
+  cookie-write failures in a `try/catch`, so calling it from a Server Component would silently create a
+  user, fail to persist the session, and repeat on every render. Read paths (`/scores/page.tsx`,
+  `NavBar`, `/`) use plain `getUser()` and treat `!user` as "no scores yet".
+- **`getUser()` reports "no session" as an `AuthSessionMissingError`, not as `{ user: null, error: null }`.**
+  Every branch must test `user`, never `error` — testing `error` sends every first-time visitor down the
+  failure path. `getOrCreateUser` deliberately discards that error.
+- **`user.is_anonymous` is the "really logged in" test.** `NavBar.tsx:28` and `app/page.tsx:17` use
+  `user && !user.is_anonymous`; bare `user` used to mean "signed in with Google" and now doesn't. This is
+  not cosmetic: an anonymous user handed a Sign Out button loses their identity **irreversibly** — the
+  `auth.users` row survives with no credential to sign back in with, and every score under that uid is
+  orphaned. An anonymous user gets *Sign in with Google*, never *Sign Out*.
+- **`ImportFromBrowser` is dead code for now.** It still reads a `guest_id` cookie that nothing sets any
+  more, so it can only ever report "nothing to import". Its button has been removed from `/scores`; the
+  action and `ImportFromBrowserButton.tsx` still exist. Step 4 of the migration either rewires it to read
+  `prev_anon_id` or drops it, depending on how `linkIdentity()` goes.
+
+Still outstanding: UPDATE/DELETE policies (Step 3), which additionally need the `anon` grants extended to
+`authenticated` — an anonymous **user** carries `role: authenticated`, so the current
+`GRANT ... TO anon` stops covering them.
 
 ## Database schema (Supabase/Postgres)
 
@@ -138,9 +160,12 @@ app/
 │   │                             which made `w-full max-w-5xl` on the children inert and every modal a different size.
 │   └── SongInfo.tsx           — shared 2-column chart detail panel (jacket + all metadata). Used by BrowseModal.
 ├── scores/
-│   ├── page.tsx               — B50 view. Server component. Fetches charts + scores (nested `charts(*)` join), sorts
-│   │                             by Play Rating, slices to top 50. Renders AddScoreButton + ImportFromBrowserButton
-│   │                             + <ScoreGrid>.
+│   ├── page.tsx               — B50 view. Server component. Renders AddScoreButton + <ScoreGrid>.
+│   │                             charts is fetched unconditionally; the scores query (nested `charts(*)` join)
+│   │                             runs only when getUser() returns a user, otherwise `{ data: [] }`. Ordering is
+│   │                             deliberate: a session-less visitor still needs charts, because AddScoreButton
+│   │                             is what mints their anonymous user. B50 selection lives in rating.ts.
+│   │                             ImportFromBrowserButton was removed from here — see the Auth section.
 │   ├── ScoreGrid.tsx          — client; owns `selectedScore` state + the single shared dialog ref, maps ScoreCards,
 │   │                             renders one <ScoreModal>. Exists so page.tsx can stay a server component.
 │   ├── ScoreCard.tsx          — one B50 grid cell: rank badge, grade + Play Rating, jacket, difficulty-colored
@@ -182,11 +207,14 @@ utils/
 ├── supabase/
 │   ├── client.ts              — browser Supabase client
 │   ├── server.ts              — server Supabase client (takes a cookieStore param)
-│   └── middleware.ts          — used by proxy.ts. NOTE: filename still says "middleware" even though the Next.js
-│                                 file convention moved to proxy. See the bug note below — it never calls getUser(),
-│                                 so it does not currently refresh anything.
-├── guest.ts                   — `getGuestId()` (Server Action use, sets/refreshes the cookie) +
-│                                 `getGuestIdReadOnly()` (Server Components, read-only)
+│   └── middleware.ts          — used by proxy.ts. Awaits getUser() before returning, which is what makes the
+│                                 setAll cookie callback fire and the session roll over. NOTE: filename still says
+│                                 "middleware" even though the Next.js file convention moved to proxy, and the
+│                                 export is still named createClient even though it returns a NextResponse.
+├── auth.ts                    — `getOrCreateUser(supabase)` → `{ user, error }` discriminated union.
+│                                 getUser(), then signInAnonymously() only if there is no user.
+│                                 SERVER ACTIONS / ROUTE HANDLERS ONLY — see the Auth section.
+│                                 (Replaced utils/guest.ts, which is deleted.)
 ├── jacket.ts                  — `getJacketUrl(songId, difficulty, jacketOverride)` → Supabase Storage public URL.
 │                                 Picks `{song_id}_{difficulty}.jpg` when jacket_override is true, else `{song_id}.jpg`.
 ├── rating.ts                  — grade / Play Rating / PM math. See below.
@@ -251,20 +279,20 @@ Live issues in the current tree, verified — not speculation. Full reasoning, f
 fixes are in `docs/report.md`; `docs/report_todo.md` is the same list as a checklist. Keep this
 section to the headline and a pointer rather than restating the analysis.
 
-1. **The proxy never refreshes the session.** `utils/supabase/middleware.ts` builds a `createServerClient` into a local `supabase` variable, then returns `supabaseResponse` without ever calling `await supabase.auth.getUser()`. The `setAll` cookie callback only fires during a token refresh, and a refresh only happens when something asks for the session — so `supabase` is dead code and the proxy is a passthrough. Sessions expire instead of rolling over. Supabase's documented pattern calls `getUser()` before returning the response (which also means `createClient` has to become `async`). The ESLint "assigned but never used" warning on that variable *is* the bug.
+1. ~~**The proxy never refreshes the session.**~~ **FIXED** — `utils/supabase/middleware.ts` now awaits `supabase.auth.getUser()` before returning the `supabaseResponse` that `setAll` reassigns, `createClient` is `async`, and `proxy()` returns its promise. Numbering below is left alone so existing references to "bug N" still resolve. Not yet verified against a real expiring token (shorten the JWT expiry, idle past it, reload). Cosmetic leftover: `createClient` returns a `NextResponse`, so `updateSession` would be the honest name.
 2. **`getShinyPureCount` is wrong on ~half of all real scores.** `utils/rating.ts:25-29` subtracts an *unfloored* term where the game floors it, so the result is `shiny − frac(...)` patched up with `Math.round` — which only works when that fraction is under 0.5. Measured: 1532 of 3000 realistic scores off by one, plus a worse failure mode when `shiny` is 0 (a 1024-note chart with 0 shiny displays 4883). This is also why `getPmRating` shows wrong "MAX − n" distances. `docs/report.md` §1.1 has a verified integer-arithmetic replacement.
 3. **`line-clamp-2` has never clamped.** `ScoreCard.tsx:46` and `BrowseCard.tsx:44` put `line-clamp-2` and `flex` on the same element. Both set `display`, and Tailwind emits `.flex` later in the stylesheet, so it wins — class-attribute order is irrelevant. Long titles are hard-cut instead of wrapping. The fix is structural: move the clamp to an inner element.
-4. **`addScore` discards its insert error.** `app/scores/actions.ts:55` doesn't destructure `{ error }` from the `insert`, so an RLS rejection, FK violation, or NOT NULL violation closes the modal as a success and the score silently isn't written. Every other Supabase call in that file checks its error.
+4. ~~**`addScore` discards its insert error.**~~ **FIXED** — the insert now destructures `{ error: insertError }` and returns it before `revalidatePath`. This matters more than it looks: Step 3's RLS policies will make `42501` a routine result, and it used to surface as a modal that closed reporting success.
 5. **`ScoreCard.tsx:50` can crash the whole grid.** `score.charts?.chart_constant.toFixed(1)` — the `?.` guards `charts`, not `chart_constant`. Every other consumer guards the constant (`BrowseCard.tsx:45`, `SongInfo.tsx:27`, `search.ts:34,82`). One score on a constant-less chart throws during render and takes down all of `/scores`.
 6. **Cancelling Google login reports success.** `app/auth/callback/route.ts` skips its `if (code)` block when the provider returns `?error=...` and falls through to the `/browse` success redirect. The `error` params are never read. Same file: `origin` comes from `new URL(request.url)`, which is the internal origin behind a proxy — this will redirect to `localhost` once deployed.
 7. **`NaN` passes every validation gate in `addScore`.** `Number('abc')` is `NaN`, and `NaN < 0 || NaN > max` is `false`, so all four range checks accept it. Server actions are public HTTP endpoints, so the form's `required` isn't a defense.
 8. **Unknown levels slip through `<`/`<=` filters.** In `filterCharts`, a `chart.level` not present in `levelOrder` yields `indexOf` → `-1`, which passes `lt`/`le` comparisons against any real level.
 9. **B50 double-counts repeat plays.** `addScore` always inserts, so multiple rows per chart coexist and nothing dedupes by `chart_id` before `.slice(0, 50)`. Three plays of one chart take three slots and inflate PTT.
-10. **`/scores` queries with `user_id = null` for a first-ever visitor**, and none of the three page queries destructure `error` — so a rejected query is indistinguishable from "no scores".
+10. **Half fixed.** `/scores` no longer queries with a null `user_id` — the scores query is now conditional on `user` and yields `{ data: [] }` otherwise, so the invalid-uuid filter is unreachable. Still open: neither remaining query on that page destructures `error`, so a rejected query still renders as an empty B50. Sharper under Step 3, where a wrong policy returns null and looks exactly like "you have no scores".
 11. **Inline Supabase clients.** `app/auth/callback/route.ts` and `LoginButton.tsx` construct their own clients instead of importing `utils/supabase/server.ts` / `client.ts`.
 12. **`/auth/auth-code-error` and `/leaderboard` are empty stubs.** Neither is an ESLint error any more (both are named exports), but bug 6 makes the former user-reachable.
 
-Lint baseline: `npx eslint .` is **1 error / 7 warnings**. The error is `ImportFromBrowser.ts:56`'s `as any[]`. Four warnings are `no-img-element` (blocked on adding `images.remotePatterns` to `next.config.ts`); the other three are the unused vars in `middleware.ts` (bug 1) and `ImportFromBrowser.ts`.
+Lint baseline: `npx eslint .` is **1 error / 6 warnings**. The error is `ImportFromBrowser.ts:56`'s `as any[]`. Four warnings are `no-img-element` (blocked on adding `images.remotePatterns` to `next.config.ts`); the other two are unused vars — `id` in `ImportFromBrowser.ts:36` and `getPlayRating` in `ScoreCard.tsx:3`.
 
 ## Not yet built
 

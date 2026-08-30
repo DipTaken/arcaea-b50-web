@@ -30,6 +30,14 @@ This file is the running project list.
 [x] .env.example
     NOTE: .gitignore's `.env*` was swallowing it, so it would never have been
     committed. Added `!.env.example` to un-ignore it. .env.local stays ignored.
+[x] Proxy refreshes the session (Step 0 of the anon-auth migration)
+    utils/supabase/middleware.ts now awaits supabase.auth.getUser() before
+    returning the reassigned supabaseResponse; createClient is async and
+    proxy() returns its promise. NOT yet verified at runtime — shorten the JWT
+    expiry in the dashboard, idle past it, confirm you stay signed in.
+    Still open (cosmetic, from report_todo 1.3): rename createClient ->
+    updateSession, since it returns a NextResponse, not a client.
+
 [x] Decided: adding a score from inside a modal leaves the outer modal open.
     close() only closes the inner add-score dialog. Kept as-is.
 
@@ -38,12 +46,6 @@ This file is the running project list.
     CLIENT router cache, which is what was serving the stale grid after a nav.
 
 === BUGS (in priority order) ===
-
-[ ] Proxy never refreshes the session.
-    utils/supabase/middleware.ts creates the supabase client but never calls
-    `await supabase.auth.getUser()`, so the setAll cookie callback never fires
-    and tokens never roll over. ESLint flags the client as unused — that IS
-    the bug. Fix: make createClient async, call getUser() before returning.
 
 [ ] Everything else -> report_todo.md
     Tier 1 there is the urgent set: getShinyPureCount is wrong on ~half of all
@@ -67,14 +69,28 @@ This file is the running project list.
 === STAGE 3 / DEPLOY ===
 [ ] Replace the guest_id cookie with Supabase signInAnonymously()
     Prerequisite for everything below it — RLS can't trust a self-issued cookie.
-    Staged plan: docs/anon_auth_migration.md. Start at Step 0 (the proxy
-    getUser() fix) — an anon session expires in ~1hr, so the currently harmless
-    missing refresh becomes data loss.
+    Staged plan: docs/anon_auth_migration.md. Steps 0-2 are DONE: the proxy
+    refreshes, anon sign-ins are enabled, utils/auth.ts holds getOrCreateUser(),
+    and utils/guest.ts is deleted. Next: Step 2.5 (supabase db pull) then
+    Step 3 (the actual grants + policies).
+    Verified: adding a score as a signed-out visitor creates one auth.users row
+    with a null email, and the score lands under that uid.
+    NOT yet verified: that a SECOND score reuses the same uid instead of
+    minting another user. That is the failure the plan warns about.
+[ ] Version-control the Supabase schema (supabase init / link / db pull)
+    Do this BEFORE writing the RLS policies, so they land as migration files
+    instead of dashboard clicks. See Step 2.5 in docs/anon_auth_migration.md.
+    Also unblocks `supabase gen types typescript` (see MAYBE below).
+    Separately: pg_dump the charts table — migrations version schema, not the
+    ~1800 hand-entered rows.
 [ ] UPDATE / DELETE RLS policies on scores (edit + delete a score)
 [ ] Public deployment
+    Full checklist: docs/anon_auth_migration.md § Deployment.
     NOTE: auth/callback/route.ts builds its redirect from new URL(request.url),
     which behind a proxy is the internal origin — this will redirect to
-    localhost in production. Read x-forwarded-host instead.
+    localhost in production. Read x-forwarded-host instead. Same file also
+    treats a cancelled login as success, and /auth/auth-code-error is empty.
+    Deploy to a preview URL first — these only manifest behind a proxy.
 
 === MAYBE / LOW PRIORITY ===
 [ ] Generated Supabase types (supabase gen types typescript)
