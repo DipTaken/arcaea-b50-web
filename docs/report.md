@@ -92,7 +92,13 @@ element**, and the failure is completely invisible in review.
 
 **Fix:** move the clamp to an inner element. §2.3's `CardBottomBar` does this once for both cards.
 
-### 1.3 The proxy never refreshes the session — `utils/supabase/middleware.ts:15-36`
+### 1.3 The proxy never refreshes the session — `utils/supabase/middleware.ts:15-36` — **FIXED**
+
+*Fixed: `getUser()` is now awaited before the return, and `createClient` is `async`. The analysis
+below is kept for the reasoning. Two corrections to it: `proxy.ts` returns the promise rather than
+awaiting it, which is equivalent from Next's side; and the claim that dropping `options` on line 24
+"loses the cookie attributes" is wrong — the response-side `set` on line 28 carries them, and that is
+the one that reaches the browser. The `createClient` → `updateSession` rename is still outstanding.*
 
 ```ts
 const supabase = createServerClient(supabaseUrl!, supabaseKey!, { cookies: {...} })

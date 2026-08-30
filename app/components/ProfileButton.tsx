@@ -4,6 +4,7 @@ import { useState } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { useRouter } from "next/navigation"
 import { User } from "@supabase/supabase-js"
+import Link from "next/link"
 
 export default function ProfileButton({ user }: { user: User }) {
     const [profileMenuOpen, setProfileMenuOpen] = useState(false)

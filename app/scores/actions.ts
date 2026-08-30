@@ -2,17 +2,13 @@
 
 import { createClient } from "@/utils/supabase/server"
 import { cookies } from "next/headers"
-import { getGuestId } from '@/utils/guest'
 import { revalidatePath } from 'next/cache'
 import { isPM } from '@/utils/rating'
+import { getOrCreateUser } from "@/utils/auth"
 
 export async function addScore(formData: FormData) {
     const cookieStore = await cookies()
     const supabase = createClient(cookieStore)
-    
-    const guestId = await getGuestId()
-    const { data: { user } } = await supabase.auth.getUser()
-    const userId = user?.id ?? guestId
 
     // Get the form data
     const chartId = Number(formData.get('chart_id'))
@@ -68,9 +64,13 @@ export async function addScore(formData: FormData) {
         }
     }
 
-    
-    // Insert the score into the database
-    await supabase.from('scores').insert({
+    //locates current user, and creates one if it doesn't exist
+    const {user, error: authError } = await getOrCreateUser(supabase)
+    if (authError) return {error: authError.message}
+    const userId = user.id
+
+    // Insert the score into the database, and check if there was an error
+    const { error: insertError } = await supabase.from('scores').insert({
         chart_id: chartId,
         user_id: userId,
         score: score,
@@ -79,6 +79,8 @@ export async function addScore(formData: FormData) {
         lost: lost,
         clear_status: clearStatus
     })
+
+    if (insertError) return {error: insertError.message}
     revalidatePath('/scores')
 }
 

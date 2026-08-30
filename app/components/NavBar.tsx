@@ -25,9 +25,20 @@ export default async function NavBar() {
 
             {/* Profile/Login Button */}
             <div className="justify-self-end">
-                {user ? (
+                {/*Show ProfileButton if user is logged in*/}
+                {user && !user.is_anonymous && (
                     <ProfileButton user={user} />
-                ) : (
+                )}
+                {/*Show Link Account button if user is not logged in (and has submitted one or more scores) */}
+                {user && user.is_anonymous && (
+                    <Link href="/auth/link"
+                        className="text-base font-light border-2 p-2 rounded-md"
+                    >
+                        Sign in
+                    </Link>
+                )}
+                {/*Show LoginButton if user is not logged in*/}
+                {!user && (
                     <LoginButton />
                 )}
             </div>

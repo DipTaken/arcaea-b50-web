@@ -67,7 +67,7 @@ to a different element) or to stop writing the conflict.
 
 ---
 
-### [ ] 1.4 Check the insert error in `addScore` — `app/scores/actions.ts:55-62`
+### [x] 1.4 Check the insert error in `addScore` — `app/scores/actions.ts:55-62`
 
 ```ts
 const { error } = await supabase.from('scores').insert({ ... })
@@ -125,11 +125,19 @@ guest cookie for logged-in users because it runs before the `getUser()` check.
 
 ---
 
-### [ ] 1.3 Make the proxy actually refresh the session — `utils/supabase/middleware.ts` → todo.txt
+### [x] 1.3 Make the proxy actually refresh the session — `utils/supabase/middleware.ts` → todo.txt
 
-Call `await supabase.auth.getUser()` before returning `supabaseResponse` (this makes `createClient`
-async, so `proxy.ts` must `await` it). Also stop dropping `options` on line 24, and rename
-`createClient` → `updateSession`.
+Done: `await supabase.auth.getUser()` now runs before the `return supabaseResponse`, `createClient`
+is `async`, and `proxy()` returns its promise (Next awaits a promise-returning proxy, so no `await`
+was needed at the call site). The unused-`supabase` warning is gone.
+
+Two leftovers, neither behavioral: the `createClient` → `updateSession` rename is still not done, and
+this item originally claimed line 24 "loses the cookie attributes" by dropping `options` — that was
+wrong. The *response* set on line 28 passes `options`, and that is the one the browser sees; the
+request-side jar only needs name/value so downstream server code reads the fresh token. Dropping the
+unused binding, as the current code does, is correct and matches Supabase's own snippet.
+
+**Still unverified at runtime:** shorten the JWT expiry in the dashboard, idle past it, reload.
 
 **Why it matters:** sessions expire instead of rolling over. Log in, wait an hour, reload — signed
 out.
@@ -144,7 +152,7 @@ anything with side effects as suspicious rather than cosmetic.
 
 ## Tier 2 — Wrong behavior, contained
 
-### [ ] 1.6 Handle OAuth failure — `app/auth/callback/route.ts:9,32`
+### [x] 1.6 Handle OAuth failure — `app/auth/callback/route.ts`
 
 Read `searchParams.get('error')` and redirect to `/auth/auth-code-error`. Treat "no code and no
 error" as a failure too.
@@ -177,13 +185,19 @@ of the list is supposed to be, and whether the data guarantees one row per unit.
 
 ---
 
-### [ ] 4.3 Guard `user_id` and check query errors — `app/scores/page.tsx:14-23`, `app/browse/page.tsx:9`
+### [~] 4.3 Guard `user_id` and check query errors — `app/scores/page.tsx`, `app/browse/page.tsx:9`
 
-Skip the scores query when `!userId`; destructure `error` on all three page queries and surface it.
+**Guard: done.** The scores query is now conditional on `user` and yields `{ data: [] }` otherwise, so
+no invalid uuid ever reaches the filter. (The anon-auth migration made the original null case
+unreachable anyway — a writer always has a real `auth.uid()` now.)
 
-**Why it matters:** a brand-new visitor has no `guest_id` cookie, so `userId` is `null` and the query
-sends `user_id=eq.null` against a `uuid` column, which Postgres rejects. With `error` never
-destructured, this looks exactly like "you have no scores".
+**Error checks: still open**, and now more urgent than when this was written. Neither query on
+`/scores` nor the one on `/browse` destructures `error`. Once Step 3's RLS policies exist, a wrong
+policy returns null rows, `?? []` turns that into an empty array, and the page renders an empty B50
+with no error anywhere. You would be debugging a policy through a UI that insists nothing is wrong.
+
+**Why it mattered originally:** a brand-new visitor had no `guest_id` cookie, so `userId` was `null`
+and the query sent `user_id=eq.null` against a `uuid` column, which Postgres rejects.
 
 **Concept — a discarded error turns a bug into a feature request.** `const { data } = await …`
 throws away the only signal that something went wrong, and the empty-state UI then renders a
@@ -477,10 +491,19 @@ defend against it being null, and `charts: Chart` is declared non-null while ~20
 `score.charts?.…`. Either the type is wrong or all that optional chaining is dead code — and today
 there's no way to tell which. Generated types make the database the single source of truth.
 
-### [ ] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
+### [~] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
 
-Confirm `(user_id, chart_id, created_at)` actually exists as a unique constraint in the live DB.
-`ON CONFLICT` requires one; without it *every* import fails with `42P10`.
+**Answered: it exists.** The `db pull` baseline shows
+`CONSTRAINT "unique_user_score" UNIQUE (user_id, chart_id, created_at)` on `public.scores`, so the
+`ON CONFLICT` had a real constraint behind it and never risked `42P10`.
+
+Worth noting what it does *not* do: because `created_at` is part of the key, two plays of the same
+chart a microsecond apart are distinct rows. It guards the import against re-running; it does nothing
+about known bug 9 (B50 double-counting repeat plays).
+
+Moot in practice for now — `ImportFromBrowser` reads a `guest_id` cookie nothing sets any more, so the
+action is inert until Step 4 rewires it. The two sub-items below are still live, since the file
+still contains the repo's only ESLint error.
 
 - [ ] Also line 56: `(data as any[]).length` → `data?.length ?? 0` (the repo's only ESLint error)
 - [ ] Also line 36: the unused `id` destructure needs an eslint-disable or a rename to `_id`

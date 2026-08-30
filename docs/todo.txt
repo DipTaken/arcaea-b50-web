@@ -30,6 +30,14 @@ This file is the running project list.
 [x] .env.example
     NOTE: .gitignore's `.env*` was swallowing it, so it would never have been
     committed. Added `!.env.example` to un-ignore it. .env.local stays ignored.
+[x] Proxy refreshes the session (Step 0 of the anon-auth migration)
+    utils/supabase/middleware.ts now awaits supabase.auth.getUser() before
+    returning the reassigned supabaseResponse; createClient is async and
+    proxy() returns its promise. NOT yet verified at runtime — shorten the JWT
+    expiry in the dashboard, idle past it, confirm you stay signed in.
+    Still open (cosmetic, from report_todo 1.3): rename createClient ->
+    updateSession, since it returns a NextResponse, not a client.
+
 [x] Decided: adding a score from inside a modal leaves the outer modal open.
     close() only closes the inner add-score dialog. Kept as-is.
 
@@ -38,12 +46,6 @@ This file is the running project list.
     CLIENT router cache, which is what was serving the stale grid after a nav.
 
 === BUGS (in priority order) ===
-
-[ ] Proxy never refreshes the session.
-    utils/supabase/middleware.ts creates the supabase client but never calls
-    `await supabase.auth.getUser()`, so the setAll cookie callback never fires
-    and tokens never roll over. ESLint flags the client as unused — that IS
-    the bug. Fix: make createClient async, call getUser() before returning.
 
 [ ] Everything else -> report_todo.md
     Tier 1 there is the urgent set: getShinyPureCount is wrong on ~half of all
@@ -65,16 +67,52 @@ This file is the running project list.
     Already speaks the same song_id system used for jackets.
 
 === STAGE 3 / DEPLOY ===
-[ ] Replace the guest_id cookie with Supabase signInAnonymously()
-    Prerequisite for everything below it — RLS can't trust a self-issued cookie.
-    Staged plan: docs/anon_auth_migration.md. Start at Step 0 (the proxy
-    getUser() fix) — an anon session expires in ~1hr, so the currently harmless
-    missing refresh becomes data loss.
-[ ] UPDATE / DELETE RLS policies on scores (edit + delete a score)
+[x] Replace the guest_id cookie with Supabase signInAnonymously()
+    Steps 0-3 of docs/anon_auth_migration.md are done: proxy refreshes,
+    anon sign-ins enabled, utils/auth.ts holds getOrCreateUser(), guest.ts
+    deleted, schema under supabase/migrations/, ownership policies live.
+    Only Step 4 (linkIdentity for the anon -> Google upgrade) remains, and
+    nothing is blocked on it.
+[x] Version-control the Supabase schema
+    supabase/ is committed: db pull baseline + add_scores_rls migration +
+    seed.sql (the charts backup, which db reset also loads locally).
+    CLI is a devDependency -> run everything as `npx supabase ...`.
+[x] UPDATE / DELETE RLS policies on scores
+    Four ownership policies on scores, grants narrowed. The DB no longer
+    blocks edit/delete — see NEXT UP for the UI.
+
+[X] VERIFY the policies in the app (do this before building on them)
+    1. Private window -> /scores must be EMPTY, not show your scores.
+    2. /browse must still load with no session (tests the anon grant on
+       charts). 42501 = missing grant; empty result = policy denial.
+    3. Add a SECOND score as an anon user and confirm auth.users does not
+       grow a new row — proves getOrCreateUser reuses the session.
+
+[x] Step 4 — linkIdentity (anon -> Google upgrade)
+    /auth/link offers two paths: link (keeps the scores) or sign in to an
+    existing account (loses them). NavBar 3-way branch sends anon users there.
+    No merge — ImportFromBrowser deleted; RLS had already made the copy
+    impossible, and a merge would need proof of ownership to not be theft.
+
+[x] Bug 6 — auth/callback/route.ts
+    Error params read before `code` with early returns, so no failure reaches
+    the success redirect. identity_already_exists -> /auth/link?error=
+    account_exists. Redirect base built from x-forwarded-host/-proto.
+    NIT: `${forwardedProto}://${forwardedHost}` gives "undefined://host" if
+    the host header arrives without the proto. Use forwardedProto ?? 'https'.
+
+[ ] Surface query errors on /scores
+    Neither query destructures error, so a denied policy renders as an
+    empty B50 with no error anywhere. This was cosmetic before Step 3 and
+    is now the main debugging hazard. report_todo 4.3.
+
 [ ] Public deployment
+    Full checklist: docs/anon_auth_migration.md § Deployment.
     NOTE: auth/callback/route.ts builds its redirect from new URL(request.url),
     which behind a proxy is the internal origin — this will redirect to
-    localhost in production. Read x-forwarded-host instead.
+    localhost in production. Read x-forwarded-host instead. Same file also
+    treats a cancelled login as success, and /auth/auth-code-error is empty.
+    Deploy to a preview URL first — these only manifest behind a proxy.
 
 === MAYBE / LOW PRIORITY ===
 [ ] Generated Supabase types (supabase gen types typescript)
