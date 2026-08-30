@@ -67,23 +67,45 @@ This file is the running project list.
     Already speaks the same song_id system used for jackets.
 
 === STAGE 3 / DEPLOY ===
-[ ] Replace the guest_id cookie with Supabase signInAnonymously()
-    Prerequisite for everything below it — RLS can't trust a self-issued cookie.
-    Staged plan: docs/anon_auth_migration.md. Steps 0-2 are DONE: the proxy
-    refreshes, anon sign-ins are enabled, utils/auth.ts holds getOrCreateUser(),
-    and utils/guest.ts is deleted. Next: Step 2.5 (supabase db pull) then
-    Step 3 (the actual grants + policies).
-    Verified: adding a score as a signed-out visitor creates one auth.users row
-    with a null email, and the score lands under that uid.
-    NOT yet verified: that a SECOND score reuses the same uid instead of
-    minting another user. That is the failure the plan warns about.
-[ ] Version-control the Supabase schema (supabase init / link / db pull)
-    Do this BEFORE writing the RLS policies, so they land as migration files
-    instead of dashboard clicks. See Step 2.5 in docs/anon_auth_migration.md.
-    Also unblocks `supabase gen types typescript` (see MAYBE below).
-    Separately: pg_dump the charts table — migrations version schema, not the
-    ~1800 hand-entered rows.
-[ ] UPDATE / DELETE RLS policies on scores (edit + delete a score)
+[x] Replace the guest_id cookie with Supabase signInAnonymously()
+    Steps 0-3 of docs/anon_auth_migration.md are done: proxy refreshes,
+    anon sign-ins enabled, utils/auth.ts holds getOrCreateUser(), guest.ts
+    deleted, schema under supabase/migrations/, ownership policies live.
+    Only Step 4 (linkIdentity for the anon -> Google upgrade) remains, and
+    nothing is blocked on it.
+[x] Version-control the Supabase schema
+    supabase/ is committed: db pull baseline + add_scores_rls migration +
+    seed.sql (the charts backup, which db reset also loads locally).
+    CLI is a devDependency -> run everything as `npx supabase ...`.
+[x] UPDATE / DELETE RLS policies on scores
+    Four ownership policies on scores, grants narrowed. The DB no longer
+    blocks edit/delete — see NEXT UP for the UI.
+
+[X] VERIFY the policies in the app (do this before building on them)
+    1. Private window -> /scores must be EMPTY, not show your scores.
+    2. /browse must still load with no session (tests the anon grant on
+       charts). 42501 = missing grant; empty result = policy denial.
+    3. Add a SECOND score as an anon user and confirm auth.users does not
+       grow a new row — proves getOrCreateUser reuses the session.
+
+[ ] Finish Step 4 (linkIdentity)
+    DONE: /auth/link page with the two-path fork (link vs sign in to an
+    existing account), NavBar 3-way branch, LinkButton, ImportFromBrowser
+    deleted (no merge — RLS made the copy impossible anyway).
+    TODO: 1. LinkButton must destructure { error }.
+          2. Dashboard "Allow manual linking" + config.toml:179 — linkIdentity
+             fails outright until this is on.
+          3. Bug 6 in auth/callback/route.ts: the 422 comes back as ?error=
+             with no code, and that route reports every error as success.
+             Map identity_already_exists -> /auth/link?error=account_exists.
+          4. Test with a Google account NOT already in auth.users. Yours is,
+             so it will 422 every time and look broken.
+
+[ ] Surface query errors on /scores
+    Neither query destructures error, so a denied policy renders as an
+    empty B50 with no error anywhere. This was cosmetic before Step 3 and
+    is now the main debugging hazard. report_todo 4.3.
+
 [ ] Public deployment
     Full checklist: docs/anon_auth_migration.md § Deployment.
     NOTE: auth/callback/route.ts builds its redirect from new URL(request.url),

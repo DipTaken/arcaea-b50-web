@@ -491,10 +491,19 @@ defend against it being null, and `charts: Chart` is declared non-null while ~20
 `score.charts?.…`. Either the type is wrong or all that optional chaining is dead code — and today
 there's no way to tell which. Generated types make the database the single source of truth.
 
-### [ ] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
+### [~] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
 
-Confirm `(user_id, chart_id, created_at)` actually exists as a unique constraint in the live DB.
-`ON CONFLICT` requires one; without it *every* import fails with `42P10`.
+**Answered: it exists.** The `db pull` baseline shows
+`CONSTRAINT "unique_user_score" UNIQUE (user_id, chart_id, created_at)` on `public.scores`, so the
+`ON CONFLICT` had a real constraint behind it and never risked `42P10`.
+
+Worth noting what it does *not* do: because `created_at` is part of the key, two plays of the same
+chart a microsecond apart are distinct rows. It guards the import against re-running; it does nothing
+about known bug 9 (B50 double-counting repeat plays).
+
+Moot in practice for now — `ImportFromBrowser` reads a `guest_id` cookie nothing sets any more, so the
+action is inert until Step 4 rewires it. The two sub-items below are still live, since the file
+still contains the repo's only ESLint error.
 
 - [ ] Also line 56: `(data as any[]).length` → `data?.length ?? 0` (the repo's only ESLint error)
 - [ ] Also line 36: the unused `id` destructure needs an eslint-disable or a rename to `_id`

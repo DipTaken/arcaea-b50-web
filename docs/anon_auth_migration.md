@@ -134,7 +134,30 @@ telling you something about where the code is allowed to run.
 
 ---
 
-## Step 2.5 — Version-control the schema, *before* writing any policy
+## Step 2.5 — Version-control the schema, *before* writing any policy — **DONE**
+
+Done, and it paid for itself immediately — see the three corrections at the top of Step 3, none of
+which were visible in the dashboard. Notes from actually doing it:
+
+- The CLI is a **devDependency**, not a global install (`npm i -g supabase` is unsupported). Run it as
+  `npx supabase ...`. Upside: the version is pinned in `package.json` for the second contributor.
+- `supabase login` is a separate credential from the database password. The access token is
+  account-level and lives in your user config, outside the repo.
+- **`supabase db dump --data-only` defaults to every non-system schema**, not just `public`. The first
+  attempt at the `charts` backup pulled `auth.users`, `auth.sessions` and 18 rows of
+  `auth.refresh_tokens` — live bearer credentials — into `seed.sql`. Caught before it was staged.
+  Always `--schema public`, and read a generated file before committing it.
+- The backup landed at `supabase/seed.sql` on purpose: `[db.seed]` in `config.toml` points there, so
+  `supabase db reset` loads the catalog into a local stack. Backup and local-dev fixture in one file.
+- **`config.toml` does not reflect the dashboard.** It shipped with `enable_anonymous_sign_ins = false`
+  while the live project had it on; `supabase config push` would have silently turned the feature off.
+  Set it to match reality before committing.
+- **Don't `db pull` after your own `db push`.** Pull is for capturing changes made outside migrations.
+  Running it afterward re-diffs a schema you already described and emits a redundant migration — here,
+  a bare `DROP TABLE chartsoldold` that broke replay from scratch, since the earlier migration had
+  already dropped it. Removed with `supabase migration repair --status reverted <version>`.
+
+Original notes follow.
 
 The ordering is the entire point. Run `supabase db pull` now and your current schema becomes
 migration #1; every policy in Step 3 then lands as a reviewable file. Do it afterward and you are
@@ -174,7 +197,38 @@ depends on it.
 
 ---
 
-## Step 3 — RLS policies (the actual goal)
+## Step 3 — RLS policies (the actual goal) — **DONE (pushed; app-level verification outstanding)**
+
+Shipped as `supabase/migrations/20260830090336_add_scores_rls.sql`. **Three of this section's own claims
+turned out to be wrong**, and all three were found by reading the `db pull` baseline rather than the
+dashboard — which is the strongest possible argument for having done Step 2.5 first:
+
+- **3a was backwards.** The grants were not `SELECT` / `SELECT, INSERT`. The baseline had
+  `GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE` on *both* tables to
+  `anon` **and** `authenticated`. So the job was never "extend them to `authenticated`" — it was
+  revoking. `anon` held DELETE and UPDATE on the entire chart catalog, and TRUNCATE besides, which no
+  policy could have restrained because TRUNCATE is not subject to RLS.
+- **`scores.user_id` was nullable with `DEFAULT gen_random_uuid()`.** An insert that omitted the column
+  got a random owner rather than an error — a way straight past `WITH CHECK`, which has nothing to
+  compare against when the column is absent. Now `NOT NULL` with no default.
+- **An empty leftover `chartsoldold` table** existed, carrying its own RLS policy and grants to `anon`.
+  Dropped.
+
+Two things that went to plan: `(select auth.uid())` for the InitPlan optimisation, and `UPDATE` getting
+both `USING` and `WITH CHECK` (without the latter a user could reassign a row's `user_id` on the way
+out). Pre-existing guest-cookie rows were deleted rather than reassigned — in the event the DELETE
+matched nothing, since every score already belonged to a real `auth.users` row.
+
+Also settled in passing: the `unique_user_score (user_id, chart_id, created_at)` constraint that
+`ImportFromBrowser`'s `onConflict` depends on **does** exist (closes report_todo 4.4).
+
+**Still to verify in the app:** a second browser profile must not be able to read the first's scores,
+and `/browse` must still load with no session (that one exercises the `anon` grant on `charts`).
+
+**Concept — the dashboard shows you what it has a screen for.** Every one of the three corrections
+above was live in the database for months and invisible in the UI. Version-controlling the schema
+isn't only about review and rollback; the diff is the first time anyone actually *reads* what is
+there. Original notes follow.
 
 Three things that catch people out:
 
@@ -215,7 +269,41 @@ since the publishable key is in the browser.
 
 ---
 
-## Step 4 — Existing rows, and the guest → Google upgrade
+## Step 4 — Existing rows, and the guest → Google upgrade — **IN PROGRESS**
+
+Existing rows: done, by Step 3's DELETE (it matched nothing — every score already had a real owner).
+
+**Decision: no merge.** The fallback this section describes — `ImportFromBrowser` reading `prev_anon_id`
+— cannot work any more, and Step 3 is why. It selects `where user_id = <the anon uid>` using the
+*logged-in* user's session, and `scores_select_own` filters that to zero rows. A merge would need
+elevated access plus proof the caller owned that anon user; without the proof it is score theft with
+extra steps. So `ImportFromBrowser.ts` and `ImportFromBrowserButton.tsx` are deleted, and the
+`prev_anon_id` cookie is not needed.
+
+The flip side is reassuring: a forged `prev_anon_id` cookie would now be inert. The policy is doing
+the work the cookie used to be trusted for.
+
+**`unlinkIdentity` is unavailable here**, confirmed in the SDK's own doc comment: a user needs at least
+two identities to unlink one. An anonymous user has zero, and exactly one after linking. So "permanent"
+is literally true and can be stated in the UI without hedging.
+
+**Shipped:** `/auth/link` — a Server Component, anonymous-only (guards `!user → /`,
+`!is_anonymous → /scores`), showing the score count and two paths:
+
+| Path | Call | Outcome |
+|---|---|---|
+| New account | `linkIdentity` | Google attaches to the existing anon user. Same uid, scores survive. |
+| Existing account | `signInWithOAuth` | Signs into the other account. The anon session is replaced and its scores are unreachable for good. |
+
+Both are irreversible, so the page names the cost of each rather than treating one as a cancel.
+`NavBar` sends anonymous users here via a plain "Sign in" link — same label and styling as the
+signed-out button, because from the user's side nothing is different.
+
+**Remaining:** `LinkButton` doesn't destructure its error; manual linking is still off in the dashboard
+and in `config.toml:179`; and bug 6 has to be fixed before any of it is testable — the 422 arrives as
+`?error=` with no `code`, which that route currently reports as success.
+
+Original notes follow.
 
 ### Existing rows
 
