@@ -1,12 +1,13 @@
 'use client'
 
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient } from '@/utils/supabase/client'
 
-export default function LoginButton() {
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-    )
+interface LoginButtonProps {
+    size?: 'sm' | 'md' | 'lg'
+}
+
+export default function LoginButton({size = 'sm' }: LoginButtonProps) {
+    const supabase = createClient()
     // google auth login button
     const login = async () => {
         await supabase.auth.signInWithOAuth({
@@ -17,11 +18,18 @@ export default function LoginButton() {
             },
         })
     }
+
+    const sizeClasses = {
+        sm: 'text-sm p-1',
+        md: 'text-base p-2',
+        lg: 'text-2xl p-3',
+    }
+
     return (
         <div>
             <button
                 onClick={login}
-                className="text-base font-light border-2 p-2 rounded-md"
+                className={`${sizeClasses[size]} font-light border-2 rounded-md`}
             >
                 Sign in
             </button>
