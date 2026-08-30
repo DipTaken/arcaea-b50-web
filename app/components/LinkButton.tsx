@@ -19,7 +19,7 @@ export default function LinkButton() {
         <div>
             <button
                 onClick={link}
-                className="text-2xl font-light border-2 p-4 rounded-md"
+                className="text-xl font-light border-2 p-4 rounded-md"
             >
                 Link Account
             </button>

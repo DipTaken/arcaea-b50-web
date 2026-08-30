@@ -6,7 +6,7 @@ interface LoginButtonProps {
     size?: 'sm' | 'md' | 'lg'
 }
 
-export default function LoginButton({size = 'sm' }: LoginButtonProps) {
+export default function LoginButton({ size = 'md' }: LoginButtonProps) {
     const supabase = createClient()
     // google auth login button
     const login = async () => {

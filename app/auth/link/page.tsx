@@ -7,9 +7,11 @@ import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 
 
-export default async function LinkPage() {
+export default async function LinkPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const cookieStore = await cookies()
     const supabase = createClient(cookieStore)
+
+    const { error: linkError } = await searchParams
 
     const { data: { user } } = await supabase.auth.getUser()
     //make sure the page is only accessible to anonymous users
@@ -32,14 +34,14 @@ export default async function LinkPage() {
             subtitle=""
         >
             <div className="flex flex-col items-center justify-center gap-10 py-10">
-                <NewUserMessage count={count} />
+                <NewUserMessage count={count} linkError={linkError} />
                 <ReturningUserMessage count={count} />
             </div>
         </PageShell>
     )
 }
 
-function NewUserMessage({count}: {count: number | null}): React.ReactNode {
+function NewUserMessage({ count, linkError }: { count: number | null, linkError?: string | string[] }): React.ReactNode {
     return (
         <div className="flex flex-col items-center justify-center gap-4 py-10">
             <p className="text-4xl font-bold">New Users:</p>
@@ -57,17 +59,21 @@ function NewUserMessage({count}: {count: number | null}): React.ReactNode {
 
                 <div className="flex items-center justify-center gap-20">
                     <LinkButton />
-
                     <Link href="/" className="rounded bg-blue-500 py-4 px-10 text-white text-2xl hover:bg-blue-600">
                         Go Back
                     </Link>
                 </div>
             </div>
+            {linkError === 'account_exists' && (
+                <p className="text-red-500 text-xl">
+                    That Google account already exists — use Returning Users below.
+                </p>
+            )}
         </div>
     )
 }
 
-function ReturningUserMessage({count}: {count: number | null}): React.ReactNode {  
+function ReturningUserMessage({ count }: { count: number | null }): React.ReactNode {
     return (
         <div className="flex flex-col items-center justify-center gap-4 py-10">
             <p className="text-4xl font-bold">Returning Users:</p>
@@ -80,7 +86,7 @@ function ReturningUserMessage({count}: {count: number | null}): React.ReactNode 
                     <span className="font-extrabold text-red-500">{`lost. `} </span>
                 </p>
                 <p className="text-4xl font-extrabold text-red-500 p-3">You cannot undo this action.</p>
-                    <LoginButton size="lg"  />
+                <LoginButton size="lg" />
             </div>
         </div>
     )
