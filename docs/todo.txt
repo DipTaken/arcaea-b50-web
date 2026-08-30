@@ -88,18 +88,18 @@ This file is the running project list.
     3. Add a SECOND score as an anon user and confirm auth.users does not
        grow a new row — proves getOrCreateUser reuses the session.
 
-[ ] Finish Step 4 (linkIdentity)
-    DONE: /auth/link page with the two-path fork (link vs sign in to an
-    existing account), NavBar 3-way branch, LinkButton, ImportFromBrowser
-    deleted (no merge — RLS made the copy impossible anyway).
-    TODO: 1. LinkButton must destructure { error }.
-          2. Dashboard "Allow manual linking" + config.toml:179 — linkIdentity
-             fails outright until this is on.
-          3. Bug 6 in auth/callback/route.ts: the 422 comes back as ?error=
-             with no code, and that route reports every error as success.
-             Map identity_already_exists -> /auth/link?error=account_exists.
-          4. Test with a Google account NOT already in auth.users. Yours is,
-             so it will 422 every time and look broken.
+[x] Step 4 — linkIdentity (anon -> Google upgrade)
+    /auth/link offers two paths: link (keeps the scores) or sign in to an
+    existing account (loses them). NavBar 3-way branch sends anon users there.
+    No merge — ImportFromBrowser deleted; RLS had already made the copy
+    impossible, and a merge would need proof of ownership to not be theft.
+
+[x] Bug 6 — auth/callback/route.ts
+    Error params read before `code` with early returns, so no failure reaches
+    the success redirect. identity_already_exists -> /auth/link?error=
+    account_exists. Redirect base built from x-forwarded-host/-proto.
+    NIT: `${forwardedProto}://${forwardedHost}` gives "undefined://host" if
+    the host header arrives without the proto. Use forwardedProto ?? 'https'.
 
 [ ] Surface query errors on /scores
     Neither query destructures error, so a denied policy renders as an

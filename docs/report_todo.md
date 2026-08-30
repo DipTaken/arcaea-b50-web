@@ -152,7 +152,7 @@ anything with side effects as suspicious rather than cosmetic.
 
 ## Tier 2 — Wrong behavior, contained
 
-### [ ] 1.6 Handle OAuth failure — `app/auth/callback/route.ts:9,32`
+### [x] 1.6 Handle OAuth failure — `app/auth/callback/route.ts`
 
 Read `searchParams.get('error')` and redirect to `/auth/auth-code-error`. Treat "no code and no
 error" as a failure too.

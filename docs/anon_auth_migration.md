@@ -299,9 +299,14 @@ Both are irreversible, so the page names the cost of each rather than treating o
 `NavBar` sends anonymous users here via a plain "Sign in" link — same label and styling as the
 signed-out button, because from the user's side nothing is different.
 
-**Remaining:** `LinkButton` doesn't destructure its error; manual linking is still off in the dashboard
-and in `config.toml:179`; and bug 6 has to be fixed before any of it is testable — the 422 arrives as
-`?error=` with no `code`, which that route currently reports as success.
+**Working end to end.** Manual linking is on (dashboard + `config.toml:179`), and bug 6 is fixed in both
+halves — the callback reads the error params before `code` and returns early, and builds its redirect
+base from `x-forwarded-host`/`-proto` so it will survive deployment. `/auth/auth-code-error` is a real
+page now that it's reachable.
+
+Deliberately skipped: `LinkButton` doesn't check `linkIdentity`'s error. Failures there are pre-redirect
+only (manual linking off, no session, network) and rare once configured; the 422 — the one that matters
+— comes back through the callback instead.
 
 Original notes follow.
 
