@@ -105,7 +105,7 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
             <form onSubmit={handleSubmit}
                 className={`flex flex-col gap-4 gap-y-7 p-10 justify-center rounded-lg bg-gray-800 border-2 border-gray-400 w-full max-w-5xl`}
             >
-                <h1 className="text-left text-white text-3xl font-bold w-full">Add Score</h1>
+                <h1 className="text-left text-white text-3xl font-bold w-full">{submitLabel}</h1>
                 {showSongInfo && chartInfoElement}
 
                 {/*Hidden input for chart id*/}
