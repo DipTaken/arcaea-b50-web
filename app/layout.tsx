@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Exo } from "next/font/google";
 import NavBar from "./components/NavBar";
 import "./globals.css";
+import Footer from "./components/Footer";
 
 const exo = Exo({
     variable: "--font-exo",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <body className="min-h-full flex flex-col text-foreground bg-linear-to-r from-page-start to-page-end">
                 <NavBar />
                 {children}
+                <Footer />
             </body>
         </html>
     );
