@@ -18,6 +18,7 @@ export default function DeleteScoreButton({ defaultChart = null, score, size = '
     return (
         //waiting on jeaneskut's branch to be merged before implementing this button
         <div>
+            <Button variant='danger' size={size} onClick={() => dialogRef.current?.showModal()}>Delete Score</Button>
         </div>
     )
 }

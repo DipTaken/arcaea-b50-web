@@ -23,7 +23,7 @@ export default function AddScoreButton({ children, defaultChart = null, showSong
             {/* Button to open the add score modal */}
             <Button
                 onClick={() => dialogRef.current?.showModal()}
-                variant='default'
+                variant='primary'
                 size={size}
             >Add Score
             </Button>
