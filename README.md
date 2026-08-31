@@ -4,23 +4,39 @@ Browse charts and track your best scores for the mobile rhythm game [Arcaea](htt
 
 ## About
 
-A learning project — my first time with TypeScript, Next.js, Supabase, and CSS. It's built
-deliberately slowly, one concept at a time, and it is **not vibecoded**: I write the code. Where AI
-is involved it's used the way a tutor or a code reviewer would be — explaining a concept before I
-implement it, or auditing what I've already written — not generating features for me to paste in.
-The audit in [docs/report.md](docs/report.md) is an example of the latter.
+A learning project. My first time with TypeScript, Next.js, Supabase, and CSS. It is **not vibecoded**. I write the code myself, but AI is used as a tutor and code reviewer. AI is also used to audit what I've already written.
+The audit in [docs/report.md](docs/report.md) is an example.
 
 ## Stack
 
 - **Next.js 16** (App Router, TypeScript) + **Tailwind CSS v4**
-- **Supabase** — Postgres, Google OAuth, and Storage for song jackets
+- **Supabase** — Postgres, Google OAuth + anonymous auth, Storage for song jackets
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env.local   # fill in both values from the Supabase dashboard
+npm run dev
+```
+
+`.env.local` needs `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+The Supabase CLI is a devDependency, so every command is `npx supabase ...`. Schema changes go
+through a migration in `supabase/migrations/`, not the dashboard.
+
+## Auth
+
+The first write mints an anonymous Supabase user, and
+`/auth/link` provides a way to link it to a Google Account.
 
 ## Routes
 
 ```
-/                  Landing page — sign in, or a welcome line
-/scores            B50 view — your top 50 plays, plus add/import
+/                  Landing — sign in, or a welcome line
+/scores            B50 view — best score per chart, top 50 by Play Rating
 /browse            Chart catalog — search, sort, filter by level and difficulty
+/auth/link         Anonymous → Google upgrade
 /leaderboard       Not implemented yet
 ```
 
@@ -28,25 +44,29 @@ The audit in [docs/report.md](docs/report.md) is an example of the latter.
 
 ```
 app/
-├── auth/          OAuth callback route handler
+├── auth/          OAuth callback, the link page, the error page
 ├── browse/        Chart catalog page, cards, filters
-├── components/    NavBar, Modal, SongInfo, login/profile buttons
-├── scores/        B50 page, ScoreCard, add-score form, guest import
+├── components/    Shared UI — Button, Card, CardGrid, Modal, Panel, PageShell,
+│                  NavBar, Footer, SongInfo, login/link/profile buttons
+├── scores/        B50 page, ScoreCard, the shared add/edit form, server actions
 └── leaderboard/   Stub
 utils/
 ├── supabase/      Browser, server, and proxy clients
-├── rating.ts      Grade, Play Rating, and PM math
+├── auth.ts        getOrCreateUser — lazily mints the anonymous user
+├── rating.ts      Grade, Play Rating, PM distance, B50 selection
 ├── search.ts      Chart filtering and sorting
 ├── jacket.ts      Jacket URL resolution
-├── style.ts       Difficulty/grade colors, title text sizing
-├── guest.ts       Guest cookie handling
-└── types.ts       Chart, Score, and ScoreWithChart
+├── style.ts       Difficulty/grade/lamp colors, title text sizing
+└── types.ts       Chart, Score, ScoreWithChart, B50Entry
 proxy.ts           Proxy entry point (Next 16's rename of middleware.ts)
-docs/              Project list and codebase audit
+supabase/          Migrations, seed data, CLI config
+docs/              Project list, audit, migration plan, gotchas
 ```
 
-## Status
+## Docs
 
 - [docs/todo.txt](docs/todo.txt) — what's built and what's next
 - [docs/report.md](docs/report.md) — codebase audit: bugs, Tailwind refactor, code quality
-- [docs/report_todo.md](docs/report_todo.md) — the audit as a checklist, with notes on each concept
+- [docs/report_todo.md](docs/report_todo.md) — the audit as a checklist, with a note per concept
+- [docs/gotchas.md](docs/gotchas.md) — traps hit on this project, one line each
+- [docs/anon_auth_migration.md](docs/anon_auth_migration.md) — the guest-cookie → anonymous-auth plan

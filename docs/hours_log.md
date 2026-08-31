@@ -13,4 +13,5 @@ holy do not judge my working hours; all hours exclude breaks, however, are fille
 | Aug 27 | 2am-5am, 10pm-12am | 5 | 34.5 |
 | Aug 28 | 12am-5am, 6pm-7pm, 9pm-10pm | 7 | 41.5 |
 | Aug 29 | 1am-4am, 11pm-12am | 4 | 45.5 |
-| Aug 29 | 12am-4:30am | TBC | N/A |
+| Aug 30 | 12am-4:30am 8pm-10pm | 6.5 | 52 |
+| Aug 31 | 12am-4am | TBC | N/A |

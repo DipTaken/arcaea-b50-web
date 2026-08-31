@@ -9,7 +9,9 @@ This file is the running project list.
 [x] Browse card -> modal with full song info
 [x] Real jacket art (Supabase Storage 'jackets' bucket, song_id + jacket_override)
 [x] Google auth via Supabase OAuth
-[x] Import guest scores to a logged-in account
+[-] Import guest scores to a logged-in account — BUILT, THEN DELETED.
+    Step 4 chose link-or-lose over merging identities, and RLS had already
+    made the cross-uid copy impossible. See anon_auth_migration.md Step 4.
 [x] Score detail modal (ScoreModal -> SongInfo + ScoreInfo)
 [x] Real types for the score join (Score / ScoreWithChart)
 [x] Commenting pass over app/ and utils/
@@ -48,11 +50,25 @@ This file is the running project list.
 === BUGS (in priority order) ===
 
 [ ] Everything else -> report_todo.md
-    Tier 1 there is the urgent set: getShinyPureCount is wrong on ~half of all
-    real scores, line-clamp-2 has never clamped, addScore silently discards
-    its insert error, and an unguarded .toFixed can take down /scores.
+    All of Tier 1 is now fixed except 1.7 (NaN passes every validation gate —
+    one Number.isFinite guard in validateScore.ts covers add and edit).
+    Newly noticed and not yet in report_todo:
+      - DeleteScoreButton's onClick calls showModal() on a ref with no <Modal>
+        attached, so the button does nothing. deleteScore itself works.
+      - ScoreForm's <h1> is hardcoded "Add Score", so the edit modal is
+        titled "Add Score". Only submitLabel varies.
+      - heroBackdropURL (utils/style.ts) hardcodes the full project URL
+        instead of building on NEXT_PUBLIC_SUPABASE_URL like getJacketUrl.
+        Breaks for a contributor on a different Supabase project.
+      - getShinyPureCount omits the fix's `if (!noteCount) return 0` guard,
+        so a null/zero note_count yields NaN.
 
 === NEXT UP ===
+[~] Delete score button
+    deleteScore works and Edit is fully built (EditScoreButton + ScoreForm's
+    initialValues). DeleteScoreButton is still a shell — it needs a <Modal>
+    with a confirm step wired to the dialogRef it already creates.
+
 [ ] Leaderboard page
     Route + heading exist, nothing else. Click through to other users' scores.
 
@@ -108,16 +124,16 @@ This file is the running project list.
 
 [ ] Public deployment
     Full checklist: docs/anon_auth_migration.md § Deployment.
-    NOTE: auth/callback/route.ts builds its redirect from new URL(request.url),
-    which behind a proxy is the internal origin — this will redirect to
-    localhost in production. Read x-forwarded-host instead. Same file also
-    treats a cancelled login as success, and /auth/auth-code-error is empty.
-    Deploy to a preview URL first — these only manifest behind a proxy.
+    All three auth/callback code blockers are FIXED (forwarded-host base,
+    error params read first, real error page). What remains is configuration:
+    Google Console redirect URIs, Supabase Site/Redirect URLs, host env vars,
+    and CAPTCHA on anonymous sign-ins (a code change, not a checkbox).
+    Still deploy to a preview URL first — proxy behavior only shows up there.
 
 === MAYBE / LOW PRIORITY ===
 [ ] Generated Supabase types (supabase gen types typescript)
     ScoreWithChart types the components, but the query still returns `any`.
     Root cause of several report_todo.md findings — higher value than it looks.
-[ ] Consolidate the inline Supabase clients in auth/callback/route.ts and
+[x] Consolidate the inline Supabase clients in auth/callback/route.ts and
     LoginButton.tsx onto utils/supabase/{server,client}.ts
 [ ] Add next/prev buttons in Score/Browse Modal to go to next chart w/o clicking off

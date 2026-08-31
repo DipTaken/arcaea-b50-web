@@ -87,7 +87,11 @@ moves the burden onto you: unchecked, the failure is indistinguishable from succ
 
 ---
 
-### [ ] 1.5 Guard `chart_constant` — `app/scores/ScoreCard.tsx:50`
+### [DONE] 1.5 Guard `chart_constant` — `app/scores/ScoreCard.tsx:50`
+
+*Done via the §2.3 extraction: `CardBottomBar` types `constant` as `number | null | undefined` and
+writes `constant?.toFixed(1)`, so both cards are covered at once. `rating.ts` now uses
+`charts?.chart_constant ?? 0`. The concept note below is worth keeping.*
 
 `score.charts?.chart_constant.toFixed(1)` → `score.charts?.chart_constant?.toFixed(1)`
 Also `utils/rating.ts:54`, which uses `.charts.chart_constant` with no guard at all.
@@ -206,7 +210,10 @@ result" — the two cases need to be distinguishable before you can debug anythi
 
 ---
 
-### [ ] 1.8 Wrap `handleSubmit` in `try/catch` — `app/scores/AddScoreButton.tsx:31-40`
+### [ ] 1.8 Wrap `handleSubmit` in `try/catch` — `app/scores/ScoreForm.tsx:47-61`
+
+*Still open. `handleSubmit` moved out of `AddScoreButton` into the shared `ScoreForm`, so one
+`try/catch` there now covers add and edit at once.*
 
 **Why it matters:** validation errors are returned properly now, but a *thrown* rejection (network
 failure, RLS 401) still skips `dialogRef.current?.close()` — the frozen-backdrop symptom, back for a
@@ -376,13 +383,14 @@ emitted twice — a small illustration of the same problem.
 
 ### [DONE] 2.6 Local dedup — zero visual change
 
-- [ ] `JudgementInput` local to `AddScoreButton.tsx` — collapses lines 116-145 to three lines.
+- [DONE] `JudgementInput` — landed in `ScoreForm.tsx` as a shared `judgementInputProps` object spread
+  onto the three inputs, rather than a component. Same three lines at the call site.
   Dedupes the repeated *props* (`type`, `min`, `max`, `disabled`, `onChange`) as much as the classes.
-- [ ] `InfoRow` local to `SongInfo.tsx` — 47 lines of 9 copy-pasted blocks → ~11.
+- [DONE] `InfoRow` local to `SongInfo.tsx` — 47 lines of 9 copy-pasted blocks → ~11.
   ⚠️ Keep `||`, not `??`: `note_count ? … : 'Unknown'` renders `Unknown` for `0` today, and `??`
   would render a literal `0`.
-- [ ] `controlClasses` const in `BrowseSearch.tsx` for the five toolbar controls.
-- [ ] `ScoreInfo.tsx:6` — drop the load-bearing trailing space, use a template literal not `+`.
+- [DONE] `controlClasses` const in `BrowseSearch.tsx` for the five toolbar controls.
+- [DONE] `ScoreInfo.tsx:6` — drop the load-bearing trailing space, use a template literal not `+`.
 
 **Concept — a shared class string is safe only under a rule.** Extend it *only* with utilities that
 set properties the base doesn't set. `controlClasses + " px-6"` is fine because the base has no
@@ -491,7 +499,11 @@ defend against it being null, and `charts: Chart` is declared non-null while ~20
 `score.charts?.…`. Either the type is wrong or all that optional chaining is dead code — and today
 there's no way to tell which. Generated types make the database the single source of truth.
 
-### [~] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
+### [DONE] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
+
+*Closed by deletion. `ImportFromBrowser.ts` and its button are gone — Step 4 chose link-or-lose over
+merging identities — which also removed the two sub-items and the repo's only ESLint error. The
+constraint question was answered first, and the answer is still worth knowing:*
 
 **Answered: it exists.** The `db pull` baseline shows
 `CONSTRAINT "unique_user_score" UNIQUE (user_id, chart_id, created_at)` on `public.scores`, so the
@@ -513,8 +525,8 @@ still contains the repo's only ESLint error.
 - [ ] Extract `useDialogSelection<T>()` — `ScoreGrid.tsx:9-14` and `BrowseSearch.tsx:19-25` are the
   same hook trio (`useState` + `useRef` + `useEffect(showModal)`)
 - [ ] `ScoreModal` and `BrowseModal` are the same 30 lines; `ScoreModal` only adds `<ScoreInfo>`
-- [ ] Inline Supabase clients in `LoginButton.tsx:6-9` and `app/auth/callback/route.ts:11-23`
-  → use `utils/supabase/` → todo.txt
+- [DONE] Inline Supabase clients in `LoginButton.tsx` and `app/auth/callback/route.ts` — both, plus
+  `LinkButton.tsx`, now import from `utils/supabase/{client,server}.ts`
 - [ ] Difficulty list lives in **3** places (`style.ts:2-17`, `search.ts:102-116`,
   `BrowseSearch.tsx:118-122` — where the `<option value>`s 1-5 are hardcoded to match
   `getDifficultyValue`)
@@ -558,7 +570,7 @@ readers, and leaves the field unidentifiable once the user starts typing.
   `eq` option to fake a placeholder; `value` + a real placeholder removes the hack
   **Concept:** an uncontrolled input keeps its own copy of the truth. With `useState` *and* DOM
   state, they can disagree — and here they do from first paint.
-- [ ] `/auth/auth-code-error` is an empty `<div>`; item 1.6 makes it reachable
+- [DONE] `/auth/auth-code-error` is an empty `<div>` — now a real page (PageShell + Go Home)
 - [ ] `useMemo` the filter+sort in `BrowseSearch.tsx:39` — it re-runs
   `.slice().sort().reverse()` over 5000 rows on **every render**, including every keystroke
 - [ ] Both pages ship all ~1800 charts to the browser; `/scores` does it only for the autocomplete
@@ -580,13 +592,13 @@ readers, and leaves the field unidentifiable once the user starts typing.
 
 ## Lint baseline
 
-`npx eslint .` today: **1 error, 7 warnings.**
+`npx eslint .` today: **0 errors, 11 warnings.** `npx tsc --noEmit` is clean.
 
 | | |
 |---|---|
-| 1 error | `ImportFromBrowser.ts:56` `as any[]` |
-| 4 warnings | `no-img-element` — `ProfileButton:31`, `SongInfo:63`, `AddScoreButton:60`, `ScoreCard:35` |
-| 3 warnings | unused `id` (`ImportFromBrowser:36`), unused `supabase` + `options` (`middleware.ts:15,24`) |
+| 4 warnings | `no-img-element` — `ProfileButton`, `SongInfo`, `ScoreCard`, `ScoreForm` |
+| 5 warnings | every import and prop in `DeleteScoreButton.tsx`, still a shell |
+| 2 warnings | unused `getPlayRating` (`ScoreCard:3`), unused `Link` (`ProfileButton:7`) |
 
-Fixing items 4.4 and 1.3 takes this to **0 errors / 4 warnings**, all of them the `next/image`
-migration.
+Building `DeleteScoreButton` and dropping the two dead imports takes this to **4 warnings**, all of
+them the `next/image` migration.
