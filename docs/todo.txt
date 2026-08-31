@@ -53,6 +53,21 @@ This file is the running project list.
     its insert error, and an unguarded .toFixed can take down /scores.
 
 === NEXT UP ===
+[x] Edit a score
+    ScoreForm.tsx extracted from AddScoreButton — one form, two actions,
+    switched by the onSubmit prop. validateScore.ts holds the pure
+    validation/parse/clear-status helpers so client and server share them.
+    EditScoreButton passes initialValues + hidden score_id/chart_id.
+[~] Delete a score
+    deleteScore() works. DeleteScoreButton is an empty shell waiting on
+    jeaneskut's modal UI branch. NOTE: it needs the same .select() +
+    !data?.length check as editScore — an RLS-filtered delete succeeds
+    with no error and removes nothing.
+[ ] ScoreModal shows stale values after an edit
+    revalidatePath refreshes the grid, but ScoreGrid's selectedScore still
+    holds the pre-edit object, so the modal behind shows old data until
+    reopened. Close the outer modal on success, or re-derive selectedScore.
+
 [ ] Leaderboard page
     Route + heading exist, nothing else. Click through to other users' scores.
 

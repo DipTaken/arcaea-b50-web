@@ -206,7 +206,7 @@ result" — the two cases need to be distinguishable before you can debug anythi
 
 ---
 
-### [ ] 1.8 Wrap `handleSubmit` in `try/catch` — `app/scores/AddScoreButton.tsx:31-40`
+### [x] 1.8 Wrap `handleSubmit` in `try/catch` — now `app/scores/ScoreForm.tsx`
 
 **Why it matters:** validation errors are returned properly now, but a *thrown* rejection (network
 failure, RLS 401) still skips `dialogRef.current?.close()` — the frozen-backdrop symptom, back for a
