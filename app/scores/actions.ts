@@ -67,6 +67,22 @@ export async function editScore(formData: FormData) {
     revalidatePath('/scores')
 }
 
+export async function deleteScore(formData: FormData) {
+    const cookieStore = await cookies()
+    const supabase = createClient(cookieStore)
+
+    // Get the score ID from the form data
+    const scoreId = Number(formData.get('score_id'))
+
+    // Delete the score from the database, and check if there was an error
+    const { data, error: deleteError } = await supabase.from('scores').delete().eq('id', scoreId).select()
+
+    if (deleteError) return { error: deleteError.message }
+    if (!data?.length) return { error: 'Score not found.' }
+
+    revalidatePath('/scores')
+}
+
 async function parseAndValidate(supabase: ReturnType<typeof createClient>, formData: FormData) {
     // Parse the form data
     const values = parseScoreFormData(formData)
