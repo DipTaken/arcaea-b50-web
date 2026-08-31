@@ -223,17 +223,39 @@ app/
 │   │                             type, so no placeholder chart is needed). Renders SongInfo + ScoreInfo + AddScoreButton.
 │   ├── ScoreInfo.tsx          — score-detail panel: score + PM distance, Play Rating, colored grade, pure/far/lost,
 │   │                             shiny pure count, and the created_at timestamp.
-│   ├── AddScoreButton.tsx     — client; button + <Modal> wrapping the add-score form. Styling is customizable per
-│   │                             call site via `sizeClasses`/`textClasses`/`borderClasses` props (these REPLACE rather
-│   │                             than append, which avoids Tailwind conflicts — two same-property utilities in one
-│   │                             class attribute are resolved by stylesheet order, not attribute order).
-│   │                             Both modals pass the identical trio; docs/report.md §2.5 argues for collapsing
-│   │                             all three into one `size` union, which makes the conflict unrepresentable.
-│   │                             Exposes SelectedChartContext so ChartSearch can push the picked chart up.
-│   ├── ChartSearch.tsx        — client; searchable chart picker used inside AddScoreButton's form.
-│   ├── actions.ts             — `addScore` server action. Validates chart existence + score range server-side and
-│   │                             returns `{ error }` rather than throwing, resolves user?.id ?? guestId, inserts.
-│   │                             Calls revalidatePath('/scores'). NOTE: the insert's own error is not checked.
+│   ├── ScoreForm.tsx          — client; THE score form, shared by add and edit. Owns selectedChart / scoreText /
+│   │                             errorMessage, the HTML5 setCustomValidity handler, and the local ClearInfo.
+│   │                             Props are the whole variation surface: defaultChart, initialValues, onSubmit
+│   │                             (the server action), onClose, submitLabel, showSongInfo, children.
+│   │                             `onSubmit` is what makes it reusable — everything else is configuration.
+│   │                             handleSubmit wraps it: preventDefault, FormData, try/catch, error display,
+│   │                             onClose() on success. Exposes SelectedChartContext (moved here from
+│   │                             AddScoreButton) so ChartSearch can push the picked chart up.
+│   │                             Inputs are UNCONTROLLED (defaultValue + FormData), so initialValues only
+│   │                             seeds on mount — which is why the parents key it on resetKey.
+│   ├── AddScoreButton.tsx     — client; trigger Button + <Modal> + <ScoreForm onSubmit={addScore}>. Owns
+│   │                             dialogRef and resetKey; Modal's onClose bumps resetKey, and `key={resetKey}`
+│   │                             remounts ScoreForm, which resets ALL its state including ClearInfo's.
+│   │                             Takes a `size` union ('md'|'lg') — the report.md §2.5 refactor, done.
+│   ├── EditScoreButton.tsx    — client; same shape, `onSubmit={editScore}`, plus initialValues built from the
+│   │                             score and hidden score_id / chart_id inputs as children.
+│   ├── DeleteScoreButton.tsx  — SHELL. Empty div, waiting on a collaborator's modal UI branch. deleteScore
+│   │                             itself works.
+│   ├── validateScore.ts       — pure module, NO 'use server', so the client can import it too. Exports
+│   │                             validateScore (range + cross-field rules), parseScoreFormData, getClearStatus.
+│   │                             Shared by addScore and editScore. Known bug 7 (NaN) lives here.
+│   ├── ChartSearch.tsx        — client; searchable chart picker used inside ScoreForm.
+│   ├── actions.ts             — addScore / editScore / deleteScore, all returning `{ error }` rather than throwing.
+│   │                             `parseAndValidate(supabase, formData)` is the shared front half (parse → fetch
+│   │                             chart → getClearStatus → validateScore); it stays here rather than in
+│   │                             validateScore.ts because it needs the Supabase client.
+│   │                             addScore calls getOrCreateUser AFTER validation, so a rejected submission never
+│   │                             mints an auth.users row. edit/delete make NO auth call and no user_id filter —
+│   │                             RLS owns that, and user_id is kept out of the update payload because the
+│   │                             UPDATE policy's WITH CHECK would reject a change to it.
+│   │                             edit/delete both use `.select()` + `if (!data?.length)`: a write that RLS
+│   │                             filters to zero rows succeeds with NO error, so the row count is the only
+│   │                             signal that nothing happened.
 │                                 (ImportFromBrowser.ts / ImportFromBrowserButton.tsx were deleted — Step 4
 │                                 chose not to merge identities, and RLS had already made the copy impossible.)
 ├── browse/
@@ -357,14 +379,14 @@ section to the headline and a pointer rather than restating the analysis.
 4. ~~**`addScore` discards its insert error.**~~ **FIXED** — the insert now destructures `{ error: insertError }` and returns it before `revalidatePath`. This matters more than it looks: Step 3's RLS policies will make `42501` a routine result, and it used to surface as a modal that closed reporting success.
 5. **`ScoreCard.tsx:50` can crash the whole grid.** `score.charts?.chart_constant.toFixed(1)` — the `?.` guards `charts`, not `chart_constant`. Every other consumer guards the constant (`BrowseCard.tsx:45`, `SongInfo.tsx:27`, `search.ts:34,82`). One score on a constant-less chart throws during render and takes down all of `/scores`.
 6. ~~**Cancelling Google login reports success.**~~ **FIXED**, both halves. The route now reads `error` / `error_code` before `code` and returns early, so no failure path reaches the success redirect; and `redirectTo` builds its base from `x-forwarded-host` / `x-forwarded-proto`, falling back to `origin` locally. Remaining nit: `${forwardedProto}://${forwardedHost}` yields `undefined://host` if the host header is present without the proto — `forwardedProto ?? 'https'` closes it.
-7. **`NaN` passes every validation gate in `addScore`.** `Number('abc')` is `NaN`, and `NaN < 0 || NaN > max` is `false`, so all four range checks accept it. Server actions are public HTTP endpoints, so the form's `required` isn't a defense.
+7. **`NaN` passes every validation gate.** Now in `validateScore.ts` — `Number('abc')` is `NaN`, and `NaN < 0 || NaN > max` is `false`, so all four range checks accept it. Deliberately deferred: the form's `type="number"` inputs can't produce it in normal use. Still reachable, since server actions are public HTTP endpoints. One `Number.isFinite` guard in `validateScore` now covers add and edit at once.
 8. **Unknown levels slip through `<`/`<=` filters.** In `filterCharts`, a `chart.level` not present in `levelOrder` yields `indexOf` → `-1`, which passes `lt`/`le` comparisons against any real level.
 9. **B50 double-counts repeat plays.** `addScore` always inserts, so multiple rows per chart coexist and nothing dedupes by `chart_id` before `.slice(0, 50)`. Three plays of one chart take three slots and inflate PTT.
 10. **Half fixed.** `/scores` no longer queries with a null `user_id` — the scores query is now conditional on `user` and yields `{ data: [] }` otherwise, so the invalid-uuid filter is unreachable. Still open: neither remaining query on that page destructures `error`, so a rejected query still renders as an empty B50. Sharper under Step 3, where a wrong policy returns null and looks exactly like "you have no scores".
 11. ~~**Inline Supabase clients.**~~ **FIXED** — `LoginButton.tsx`, `LinkButton.tsx`, and `app/auth/callback/route.ts` all import from `utils/supabase/{client,server}.ts` now.
 12. **`/leaderboard` is an empty stub.** `/auth/auth-code-error` is now a real page (bug 6's fix made it reachable).
 
-Lint baseline: `npx eslint .` is **0 errors / 6 warnings** — five `no-img-element` (blocked on adding `images.remotePatterns` to `next.config.ts`) and `getPlayRating` unused in `ScoreCard.tsx:3`. Note `next dev` does not typecheck, so run `npx tsc --noEmit` — a bad import shows up as a runtime "Element type is invalid ... got: undefined" rather than a compile error.
+Lint baseline: `npx eslint .` is **0 errors**; the warning count is 6 in a clean tree — five `no-img-element` (blocked on adding `images.remotePatterns` to `next.config.ts`) and `getPlayRating` unused in `ScoreCard.tsx:3`. It currently reads 14 because `DeleteScoreButton.tsx` is a shell whose imports and props are all unused; that clears when the button is built. Note `next dev` does not typecheck, so run `npx tsc --noEmit` — a bad import shows up as a runtime "Element type is invalid ... got: undefined" rather than a compile error.
 
 ## Not yet built
 
