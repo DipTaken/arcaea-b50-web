@@ -4,6 +4,7 @@ import { ScoreWithChart } from '@/utils/types'
 import AddScoreButton from '../scores/AddScoreButton';
 import ScoreInfo from './ScoreInfo';
 import { Panel } from '@/app/components/Panel';
+import EditScoreButton from './EditScoreButton';
 
 
 // One shared modal for the whole score grid.
@@ -18,11 +19,13 @@ export default function ScoreModal({ score, ref, onClose }: { score: ScoreWithCh
                         <ScoreInfo score={score} />
                     </Panel>
 
-                    {/* Add Score Button. */}
+                    {/* Button Bar */}
                     <div className="flex justify-center">
                         <AddScoreButton key={score.charts.id} defaultChart={score.charts}>
                             <input type="hidden" name="chart_id" value={score.charts.id} />
                         </AddScoreButton>
+
+                        <EditScoreButton key={score.id} defaultChart={score.charts} score={score} />
                     </div>
                 </>
             )}
