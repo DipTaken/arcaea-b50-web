@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { filterCharts } from '@/utils/search'
 import { Chart } from '@/utils/types'
-import { useSetSelectedChart } from './AddScoreButton'
+import { useSetSelectedChart } from './ScoreForm'
 
 interface ChartSearchProps {
     charts: Chart[]

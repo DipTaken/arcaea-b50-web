@@ -269,7 +269,7 @@ since the publishable key is in the browser.
 
 ---
 
-## Step 4 — Existing rows, and the guest → Google upgrade — **IN PROGRESS**
+## Step 4 — Existing rows, and the guest → Google upgrade — **DONE**
 
 Existing rows: done, by Step 3's DELETE (it matched nothing — every score already had a real owner).
 
@@ -365,7 +365,12 @@ way to prove the policies work end to end), then `validateScore` + `ScoreForm` e
 
 Everything above is a prerequisite. This section is what remains *after* it, and it is mostly not code.
 
-## Hard code blockers
+## Hard code blockers — **ALL THREE FIXED**
+
+`app/auth/callback/route.ts` now builds its base from `x-forwarded-host` / `x-forwarded-proto` (with
+`?? 'https'` and an `origin` fallback for local dev), reads `error` / `error_code` *before* `code`
+with early returns, and `/auth/auth-code-error` is a real page. Nothing here blocks a deploy any
+more — the configuration checklist below is what's left. The analysis is kept for the reasoning.
 
 ### 1. `origin` is the internal origin behind a proxy — `app/auth/callback/route.ts:6`
 

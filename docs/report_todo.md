@@ -87,7 +87,11 @@ moves the burden onto you: unchecked, the failure is indistinguishable from succ
 
 ---
 
-### [ ] 1.5 Guard `chart_constant` — `app/scores/ScoreCard.tsx:50`
+### [DONE] 1.5 Guard `chart_constant` — `app/scores/ScoreCard.tsx:50`
+
+*Done via the §2.3 extraction: `CardBottomBar` types `constant` as `number | null | undefined` and
+writes `constant?.toFixed(1)`, so both cards are covered at once. `rating.ts` now uses
+`charts?.chart_constant ?? 0`. The concept note below is worth keeping.*
 
 `score.charts?.chart_constant.toFixed(1)` → `score.charts?.chart_constant?.toFixed(1)`
 Also `utils/rating.ts:54`, which uses `.charts.chart_constant` with no guard at all.
@@ -104,24 +108,30 @@ in a client component's render is not contained to that component; React unmount
 
 ---
 
-### [ ] 1.7 Reject `NaN` in `addScore` — `app/scores/actions.ts:13-48`
+### [x] 1.7 Reject `NaN` in `addScore` — `app/scores/actions.ts:13-48`
 
-`if (!Number.isFinite(score)) return { error: 'Invalid score' }`, and have `parseOptionalNumber`
-return `null` for non-finite input.
+*Done, via a slightly different route than suggested:* `validateScore.ts` now opens with a
+`for (const value of [score, pure, far, lost])` loop that rejects any non-`null` value failing
+`Number.isInteger`. Since `Number.isInteger(NaN)` is `false`, this catches `NaN` (and `Infinity`,
+and non-integer floats — stricter than the `Number.isFinite` suggested here, which is correct since
+scores are always whole numbers) *before* the four range checks below it ever run. Because
+`parseAndValidate` in `actions.ts` calls `validateScore` before both the `insert` (addScore) and the
+`update` (editScore), a malformed POST is rejected on both paths, not just add.
 
-**Why it matters:** `Number('abc')` is `NaN`, and **all four** range checks let it through.
+**Why it mattered:** `Number('abc')` is `NaN`, and **all four** range checks let it through.
 
 **Concept — `NaN` fails every comparison, including the ones meant to reject it.**
 `NaN < 0` is `false`. `NaN > max` is `false`. `NaN === NaN` is `false`. So a bounds check written as
 `x < min || x > max` accepts `NaN` silently. Always establish that a number *is* a number
-(`Number.isFinite`) before comparing it.
+(`Number.isFinite`, or here the stricter `Number.isInteger`) before comparing it.
 
 Second concept, more important: **a Server Action is a public HTTP endpoint.** The `required` and
 `type="number"` on the form are UX, not validation — anyone can POST to the action directly. Client
 validation improves the experience; server validation is the only thing that protects the database.
 
-While here: line 46 only cross-checks pure+far+lost when all three are present, and line 50 mints a
-guest cookie for logged-in users because it runs before the `getUser()` check.
+Of the two "while here" notes: the guest-cookie-before-`getUser()` ordering is already fixed —
+current `actions.ts` calls `getOrCreateUser` *after* `parseAndValidate` succeeds. The partial
+pure+far+lost cross-check (only runs when all three are non-null) is still open — folded into 1.11.
 
 ---
 
@@ -206,7 +216,10 @@ result" — the two cases need to be distinguishable before you can debug anythi
 
 ---
 
-### [ ] 1.8 Wrap `handleSubmit` in `try/catch` — `app/scores/AddScoreButton.tsx:31-40`
+### [ ] 1.8 Wrap `handleSubmit` in `try/catch` — `app/scores/ScoreForm.tsx:47-61`
+
+*Still open. `handleSubmit` moved out of `AddScoreButton` into the shared `ScoreForm`, so one
+`try/catch` there now covers add and edit at once.*
 
 **Why it matters:** validation errors are returned properly now, but a *thrown* rejection (network
 failure, RLS 401) still skips `dialogRef.current?.close()` — the frozen-backdrop symptom, back for a
@@ -218,7 +231,9 @@ didn't. Any `await` that must be followed by cleanup wants `try/catch` or `try/f
 
 ---
 
-### [ ] 1.9 Use the updater form — `app/browse/BrowseSearch.tsx:137`
+### [wontfix] 1.9 Use the updater form — `app/browse/BrowseSearch.tsx:137`
+
+**Decision:** leaving as-is — one +100 per double-click is acceptable, not worth the change.
 
 `setVisibleCount(visibleCount + CARDS_PER_PAGE)` → `setVisibleCount(c => c + CARDS_PER_PAGE)`
 
@@ -254,17 +269,28 @@ until the form contains a search box that isn't meant to submit anything.
   **Concept:** `indexOf` returns `-1` for "absent", and `-1` is a perfectly valid number that
   silently participates in arithmetic. Sentinel values that share a type with real values are a
   recurring trap (`indexOf`, `parseInt` → `NaN`, `find` → `undefined`).
-- [ ] `app/scores/AddScoreButton.tsx:58-69` — `chartInfoElement` renders `defaultChart` while the
-  form inputs read `selectedChart`. Harmless today, wrong the moment a `ChartSearch` is added to
-  that call site.
+- [x] ~~`app/scores/AddScoreButton.tsx:58-69` — `chartInfoElement` renders `defaultChart` while the
+  form inputs read `selectedChart`.~~ **Resolved by the ScoreForm/ChartSearch refactor.** That logic
+  no longer lives in `AddScoreButton.tsx` at all — it moved into `ScoreForm.tsx`, where
+  `chartInfoElement` and the judgement inputs both read `selectedChart` consistently.
+  `defaultChart` now only seeds `useState<Chart | null>(defaultChart)` on mount; nothing downstream
+  reads the prop directly. This is exactly the "wrong the moment a ChartSearch is added" case the
+  original note predicted, and it was written correctly when that happened.
+- [ ] `app/scores/actions.ts` — `parseAndValidate`'s cross-check only runs when pure, far, and lost
+  are **all** non-null (report §1.7's leftover): a partial `{pure, far}` submission with an
+  impossible sub-total is never checked.
 - [ ] `utils/jacket.ts:3` — `toLocaleLowerCase()` → `toLowerCase()`. Locale-aware casing for a
   storage key is non-deterministic by construction (the Turkish dotless-ı is the classic example).
 - [ ] `utils/rating.ts:2` — `isPM(...) || noteCount < 2237` can never change the result; `isPM`
   already handles that case. Also inlines `2237` when the named constant is 38 lines below.
-- [ ] `app/scores/ScoreGrid.tsx:9,26` — after `revalidatePath`, an open modal keeps rendering the
-  pre-update score object.
+- [x] ~~`app/scores/ScoreGrid.tsx:9,26` — after `revalidatePath`, an open modal keeps rendering the
+  pre-update score object.~~ **FIXED** — `ScoreGrid` now holds `selectedId: number | null` and
+  re-derives `selectedEntry` with `entries.find(...)` on every render, which is exactly the fix below.
+  Edit therefore refreshes the open modal for free.
   **Concept:** state holding a *copy* of a prop goes stale when the prop refreshes. Store the id and
   look the object up from the current list.
+  *Delete needed one more step:* the looked-up entry becomes `undefined`, so the modal would render
+  empty rather than stale. `onDeleted` closes the dialog, and `Modal`'s `onClose` resets `selectedId`.
 
 ---
 
@@ -376,13 +402,14 @@ emitted twice — a small illustration of the same problem.
 
 ### [DONE] 2.6 Local dedup — zero visual change
 
-- [ ] `JudgementInput` local to `AddScoreButton.tsx` — collapses lines 116-145 to three lines.
+- [DONE] `JudgementInput` — landed in `ScoreForm.tsx` as a shared `judgementInputProps` object spread
+  onto the three inputs, rather than a component. Same three lines at the call site.
   Dedupes the repeated *props* (`type`, `min`, `max`, `disabled`, `onChange`) as much as the classes.
-- [ ] `InfoRow` local to `SongInfo.tsx` — 47 lines of 9 copy-pasted blocks → ~11.
+- [DONE] `InfoRow` local to `SongInfo.tsx` — 47 lines of 9 copy-pasted blocks → ~11.
   ⚠️ Keep `||`, not `??`: `note_count ? … : 'Unknown'` renders `Unknown` for `0` today, and `??`
   would render a literal `0`.
-- [ ] `controlClasses` const in `BrowseSearch.tsx` for the five toolbar controls.
-- [ ] `ScoreInfo.tsx:6` — drop the load-bearing trailing space, use a template literal not `+`.
+- [DONE] `controlClasses` const in `BrowseSearch.tsx` for the five toolbar controls.
+- [DONE] `ScoreInfo.tsx:6` — drop the load-bearing trailing space, use a template literal not `+`.
 
 **Concept — a shared class string is safe only under a rule.** Extend it *only* with utilities that
 set properties the base doesn't set. `controlClasses + " px-6"` is fine because the base has no
@@ -491,7 +518,11 @@ defend against it being null, and `charts: Chart` is declared non-null while ~20
 `score.charts?.…`. Either the type is wrong or all that optional chaining is dead code — and today
 there's no way to tell which. Generated types make the database the single source of truth.
 
-### [~] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
+### [DONE] 4.4 Verify the import's unique constraint — `app/scores/ImportFromBrowser.ts:46`
+
+*Closed by deletion. `ImportFromBrowser.ts` and its button are gone — Step 4 chose link-or-lose over
+merging identities — which also removed the two sub-items and the repo's only ESLint error. The
+constraint question was answered first, and the answer is still worth knowing:*
 
 **Answered: it exists.** The `db pull` baseline shows
 `CONSTRAINT "unique_user_score" UNIQUE (user_id, chart_id, created_at)` on `public.scores`, so the
@@ -513,8 +544,8 @@ still contains the repo's only ESLint error.
 - [ ] Extract `useDialogSelection<T>()` — `ScoreGrid.tsx:9-14` and `BrowseSearch.tsx:19-25` are the
   same hook trio (`useState` + `useRef` + `useEffect(showModal)`)
 - [ ] `ScoreModal` and `BrowseModal` are the same 30 lines; `ScoreModal` only adds `<ScoreInfo>`
-- [ ] Inline Supabase clients in `LoginButton.tsx:6-9` and `app/auth/callback/route.ts:11-23`
-  → use `utils/supabase/` → todo.txt
+- [DONE] Inline Supabase clients in `LoginButton.tsx` and `app/auth/callback/route.ts` — both, plus
+  `LinkButton.tsx`, now import from `utils/supabase/{client,server}.ts`
 - [ ] Difficulty list lives in **3** places (`style.ts:2-17`, `search.ts:102-116`,
   `BrowseSearch.tsx:118-122` — where the `<option value>`s 1-5 are hardcoded to match
   `getDifficultyValue`)
@@ -558,7 +589,7 @@ readers, and leaves the field unidentifiable once the user starts typing.
   `eq` option to fake a placeholder; `value` + a real placeholder removes the hack
   **Concept:** an uncontrolled input keeps its own copy of the truth. With `useState` *and* DOM
   state, they can disagree — and here they do from first paint.
-- [ ] `/auth/auth-code-error` is an empty `<div>`; item 1.6 makes it reachable
+- [DONE] `/auth/auth-code-error` is an empty `<div>` — now a real page (PageShell + Go Home)
 - [ ] `useMemo` the filter+sort in `BrowseSearch.tsx:39` — it re-runs
   `.slice().sort().reverse()` over 5000 rows on **every render**, including every keystroke
 - [ ] Both pages ship all ~1800 charts to the browser; `/scores` does it only for the autocomplete
@@ -580,13 +611,13 @@ readers, and leaves the field unidentifiable once the user starts typing.
 
 ## Lint baseline
 
-`npx eslint .` today: **1 error, 7 warnings.**
+`npx eslint .` today: **0 errors, 5 warnings.** `npx tsc --noEmit` is clean.
 
 | | |
 |---|---|
-| 1 error | `ImportFromBrowser.ts:56` `as any[]` |
-| 4 warnings | `no-img-element` — `ProfileButton:31`, `SongInfo:63`, `AddScoreButton:60`, `ScoreCard:35` |
-| 3 warnings | unused `id` (`ImportFromBrowser:36`), unused `supabase` + `options` (`middleware.ts:15,24`) |
+| 4 warnings | `no-img-element` — `ProfileButton`, `SongInfo`, `ScoreCard`, `ScoreForm` |
+| 1 warning | unused `getPlayRating` (`ScoreCard:3`) |
 
-Fixing items 4.4 and 1.3 takes this to **0 errors / 4 warnings**, all of them the `next/image`
+Was 11. Building `DeleteScoreButton` for real cleared its 5, and `ProfileButton`'s unused `Link` is
+gone. Dropping that last dead import takes this to **4 warnings**, all of them the `next/image`
 migration.

@@ -20,7 +20,10 @@ real but secondary — and the right fix for most of it is shared *components*, 
 
 ## 1. Correctness bugs
 
-### 1.1 `getShinyPureCount` is wrong ~51% of the time — `utils/rating.ts:25-29`
+### 1.1 `getShinyPureCount` is wrong ~51% of the time — `utils/rating.ts:25-29` — **FIXED**
+
+*Fixed: the integer-arithmetic version below is what `utils/rating.ts` now ships, minus the
+`if (!noteCount) return 0` guard — so a chart with a null/zero `note_count` still yields `NaN`.*
 
 ```ts
 const noteScore = Math.floor(2 * (score / 10000000) * noteCount)
@@ -70,7 +73,11 @@ encodes), and the `Math.min` clamp keeps the result in range there.
 > fixing the above fixes both. The old "getPmRating reports the wrong distance" entry was pointing
 > one level too high.
 
-### 1.2 `line-clamp-2` has never worked — `app/scores/ScoreCard.tsx:46`, `app/browse/BrowseCard.tsx:44`
+### 1.2 `line-clamp-2` has never worked — `app/scores/ScoreCard.tsx:46`, `app/browse/BrowseCard.tsx:44` — **RESOLVED BY REMOVAL**
+
+*Both cards now render `CardBottomBar` (§2.3), which carries no clamp at all. Titles shrink via
+`getTextSize` and truncate at `h-10` instead of wrapping to two lines — the conflict is gone, but so
+is the two-line wrap the clamp was meant to give. Re-add it on an inner element if that's wanted.*
 
 ```tsx
 <div className={`flex flex-col justify-center line-clamp-2 w-3/4 h-full p-2 ${getTextSize(...)}`}>
@@ -142,7 +149,10 @@ feedback.
 **Fix:** `const { error } = await supabase.from('scores').insert(...)` and
 `if (error) return { error: error.message }` **before** `revalidatePath`.
 
-### 1.5 Unguarded `.toFixed` crashes the whole grid — `app/scores/ScoreCard.tsx:50`
+### 1.5 Unguarded `.toFixed` crashes the whole grid — `app/scores/ScoreCard.tsx:50` — **FIXED**
+
+*Both cards delegate to `CardBottomBar`, which types `constant` as `number | null | undefined` and
+writes `constant?.toFixed(1)`. `rating.ts` now uses `charts?.chart_constant ?? 0`.*
 
 ```tsx
 {score.charts?.chart_constant.toFixed(1)}
@@ -552,7 +562,10 @@ The clients are never parameterized with a generated `Database` type, so
 `createClient<Database>(...)` in all three client factories. This single change closes §1.5, the
 `ScoreWithChart` ambiguity, and makes the `any` in §4.4 impossible.
 
-### 4.2 B50 double-counts repeat plays — `app/scores/page.tsx:26-31`
+### 4.2 B50 double-counts repeat plays — `app/scores/page.tsx:26-31` — **FIXED**
+
+*Fixed as described: `getB50FromScores` in `utils/rating.ts` keeps the best score per `chart_id` in a
+`Map` before sorting and slicing, and also owns the rank/weight assignment. `/scores` just calls it.*
 
 `addScore` always `insert`s (never upserts), and `ImportFromBrowser` deliberately preserves
 `created_at` so multiple rows per chart coexist. Nothing dedupes by `chart_id` before
@@ -565,7 +578,11 @@ is inflated and the grid shows visual duplicates.
 **Fix:** group by `chart_id`, keep the max `getPlayRating`, then sort and slice. A `Map` keyed on
 `chart_id` is the straightforward version.
 
-### 4.3 `user_id` can be `null` on a first visit — `app/scores/page.tsx:14-23`
+### 4.3 `user_id` can be `null` on a first visit — `app/scores/page.tsx:14-23` — **HALF FIXED**
+
+*The guard is done — the scores query is conditional on `user` and yields `{ data: [] }` otherwise,
+and anon auth made the null case unreachable anyway. The error checks are still open and now matter
+more: with RLS on, a wrong policy returns no rows and renders as an empty B50 with no error anywhere.*
 
 `getGuestIdReadOnly()` returns `null` when the cookie is absent, and the cookie is only minted by
 `getGuestId()` inside `addScore`. So a brand-new visitor sends `.eq('user_id', null)` →
@@ -577,7 +594,12 @@ grid and `PTT: 0.00`.
 
 **Fix:** skip the query entirely when `!userId`, and destructure + surface `error` on all three.
 
-### 4.4 `ImportFromBrowser` — `app/scores/ImportFromBrowser.ts:46-56`
+### 4.4 `ImportFromBrowser` — `app/scores/ImportFromBrowser.ts:46-56` — **MOOT (file deleted)**
+
+*The constraint question was answered — `unique_user_score UNIQUE (user_id, chart_id, created_at)` is
+real, confirmed by the `db pull` baseline. The file itself is gone: Step 4 chose link-or-lose over
+merging identities, and RLS had already made the cross-uid copy impossible. Its deletion also took
+the repo's only ESLint error.*
 
 ```ts
 .upsert(duplicatedScores, { onConflict: 'user_id,chart_id,created_at', ignoreDuplicates: true })
@@ -617,16 +639,19 @@ deserves the same.
 
 ### 5.1 Lint baseline
 
-`npx eslint .` is currently **1 error / 7 warnings**:
+`npx eslint .` is currently **0 errors / 5 warnings**; `npx tsc --noEmit` is clean:
 
-- 1 error — `ImportFromBrowser.ts:56` `as any[]` (§4.4)
-- 4 warnings — `no-img-element` on `ProfileButton:31`, `SongInfo:63`, `AddScoreButton:60`,
-  `ScoreCard:35`. `next.config.ts` has no `images.remotePatterns` for the Supabase storage host,
-  which is what blocks migrating to `next/image`.
-- 3 warnings — unused `id` (`ImportFromBrowser:36`), unused `supabase` and `options`
-  (`middleware.ts:15,24`). The latter two disappear when §1.3 is fixed.
+- 4 warnings — `no-img-element` on `ProfileButton`, `SongInfo`, `ScoreCard`, `ScoreForm`.
+  `next.config.ts` has no `images.remotePatterns` for the Supabase storage host, which is what
+  blocks migrating to `next/image`.
+- 1 warning — unused `getPlayRating` (`ScoreCard:3`).
 
-So: fixing §4.4 and §1.3 takes this to **0 errors / 4 warnings**, all of them the `<img>` migration.
+The 5 `DeleteScoreButton.tsx` warnings cleared when the button was actually built, and the unused
+`Link` in `ProfileButton` is gone. So the floor once that last dead import goes is **4 warnings**,
+all of them the `next/image` migration.
+
+`next dev` does not typecheck — a bad import shows up as a runtime "Element type is invalid … got:
+undefined", not a compile error. Run `tsc` rather than trusting the dev server.
 
 ### 5.2 Accessibility
 

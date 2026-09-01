@@ -25,7 +25,7 @@ export default function ScoreGrid({ entries }: { entries: B50Entry[] }) {
             </CardGrid>
 
             {/* Score Modal (opened when a score card is clicked) */}
-            <ScoreModal score={selectedEntry?.score ?? null} ref={dialogRef} onClose={() => setSelectedId(null)} />
+            <ScoreModal score={selectedEntry?.score ?? null} ref={dialogRef} onClose={() => setSelectedId(null) } onDeleted={() => dialogRef.current?.close() } />
         </>
     )
 }

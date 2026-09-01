@@ -71,3 +71,5 @@ export function getTextSize(title: string): string {
 }
 
 export const cardHoverAnimation = "cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out"
+
+export const heroBackdropURL = "https://jkdyzmjuiojlitzvslmx.supabase.co/storage/v1/object/public/images/Partner_saya_konzetsu.png"
