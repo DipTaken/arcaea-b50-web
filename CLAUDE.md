@@ -175,9 +175,14 @@ app/
 │   │                      Both queries `.limit(5000)`. B50 selection + the B50 number live in rating.ts.
 │   ├── ScoreGrid.tsx    — client; owns `selectedId: number | null` and the one dialogRef, derives the
 │   │                      entry by `find`. Exists so page.tsx can stay a server component.
+│   │                      Passes `onDeleted={() => dialogRef.current?.close()}` — closing the dialog,
+│   │                      not resetting state, because Modal's onClose already maps close → selectedId
+│   │                      null. `setSelectedId(null)` alone would leave the <dialog> open and empty.
 │   ├── ScoreCard.tsx    — one B50 cell from a B50Entry: rank pill, grade, playRating, clear lamp,
 │   │                      jacket + score, title bar. Owns no modal — calls onSelect(entry).
 │   ├── ScoreModal.tsx   — Panel(SongInfo + ScoreInfo) plus an Add / Edit / Delete button bar.
+│   │                      Pure pass-through for `onDeleted`: it forwards ScoreGrid's callback to
+│   │                      DeleteScoreButton and does nothing with it itself.
 │   ├── ScoreInfo.tsx    — score + PM distance, Play Rating, colored grade, pure/far/lost, shiny
 │   │                      pures, lamp, created_at.
 │   ├── ScoreForm.tsx    — client; THE form, shared by add and edit. Props are the entire variation
@@ -192,12 +197,20 @@ app/
 │   │                      all its state including ClearInfo's.
 │   ├── EditScoreButton.tsx — same shape, onSubmit={editScore}, initialValues from the score, hidden
 │   │                      score_id / chart_id inputs as children.
-│   ├── DeleteScoreButton.tsx — SHELL. Renders a danger Button whose onClick targets a dialogRef with
-│   │                      no <Modal> attached, so the click does nothing. deleteScore itself works.
+│   ├── DeleteScoreButton.tsx — danger Button + a confirm <Modal> (no ScoreForm — delete needs no
+│   │                      input). `handleDelete` awaits deleteScore(score.id), shows `{ error }` in
+│   │                      local errorMessage state, and only on success closes its own dialog then
+│   │                      calls `onDeleted?.()` to close the parent. Modal's onClose clears
+│   │                      errorMessage — the component is keyed on the score id, so a close/reopen
+│   │                      would otherwise show a stale error. The `if (!score)` guard is unreachable
+│   │                      (the buttons only render when score is truthy) but required: TS can't
+│   │                      narrow a prop from a JSX condition into a closure.
 │   ├── ChartSearch.tsx  — client; searchable chart picker used inside ScoreForm.
 │   ├── validateScore.ts — pure module, NO 'use server', so the client can import it. validateScore
 │   │                      (range + cross-field), parseScoreFormData, getClearStatus. Bug 7 lives here.
 │   └── actions.ts       — addScore / editScore / deleteScore, all returning `{ error }` not throwing.
+│                          add/edit take FormData; **deleteScore takes `scoreId: number`** — it has no
+│                          form behind it, just a confirm dialog, so there's nothing to parse.
 │                          `parseAndValidate` is the shared front half (parse → fetch chart →
 │                          getClearStatus → validateScore); it stays here because it needs the client.
 │                          addScore calls getOrCreateUser AFTER validation. edit/delete make no auth
@@ -309,10 +322,12 @@ headline. Numbering is stable, so fixed entries stay listed.
    `number | null | undefined` and writes `constant?.toFixed(1)`.
 6. ~~Cancelling Google login reports success.~~ **FIXED**, including the `forwardedProto ?? 'https'`
    fallback.
-7. **`NaN` passes every validation gate.** `validateScore.ts` — `Number('abc')` is `NaN`, and
-   `NaN < 0 || NaN > max` is `false`, so all four range checks accept it. The `type="number"` inputs
-   can't produce it in normal use, but server actions are public HTTP endpoints. One
-   `Number.isFinite` guard covers add and edit at once.
+7. ~~`NaN` passes every validation gate.~~ **FIXED** — `validateScore` now opens with a loop rejecting
+   any non-null `score`/`pure`/`far`/`lost` that fails `Number.isInteger` (stricter than the
+   `Number.isFinite` originally planned; also catches non-integer floats). It runs before the range
+   checks and covers add and edit, since both go through `parseAndValidate`. Still open: the
+   pure+far+lost cross-check only fires when all three are non-null, and `deleteScore` has no
+   equivalent guard on `scoreId` (RLS makes that non-urgent).
 8. **Unknown levels slip through `</<=` filters.** `filterCharts` guards `levelIndex >= 0` for the
    *filter* value, but a `chart.level` missing from `levelOrder` still yields `-1`, which passes
    `lt`/`le` against any real level.
@@ -323,18 +338,19 @@ headline. Numbering is stable, so fixed entries stay listed.
     hazard now that RLS is on.
 11. ~~Inline Supabase clients.~~ **FIXED.**
 12. **`/leaderboard` is an empty stub.**
-13. **`DeleteScoreButton` renders a dead button** — its onClick calls `showModal()` on a ref that no
-    `<Modal>` is attached to. Source of 5 of the lint warnings.
+13. ~~`DeleteScoreButton` renders a dead button.~~ **FIXED** — real confirm modal, awaited action,
+    error display, and an `onDeleted` callback that closes the parent modal. All 5 of its lint
+    warnings are gone.
 14. **`ScoreForm`'s heading is hardcoded `"Add Score"`**, so the edit modal is titled "Add Score".
     Only `submitLabel` varies.
 15. **`heroBackdropURL` hardcodes the full project URL** (`utils/style.ts`) instead of building on
     `NEXT_PUBLIC_SUPABASE_URL` like `getJacketUrl` does — it breaks for a contributor on another
     Supabase project.
 
-Baselines: `npx tsc --noEmit` is clean. `npx eslint .` is **0 errors, 11 warnings** — 4
-`no-img-element` (blocked on `images.remotePatterns` in `next.config.ts`), 5 unused in
-`DeleteScoreButton.tsx`, 1 unused `getPlayRating` in `ScoreCard.tsx`, 1 unused `Link` in
-`ProfileButton.tsx`. Note `next dev` does not typecheck — a bad import surfaces as a runtime
+Baselines: `npx tsc --noEmit` is clean. `npx eslint .` is **0 errors, 5 warnings** — 4
+`no-img-element` (blocked on `images.remotePatterns` in `next.config.ts`) and 1 unused
+`getPlayRating` in `ScoreCard.tsx`. The 5 `DeleteScoreButton.tsx` warnings and the unused `Link` in
+`ProfileButton.tsx` are gone. Note `next dev` does not typecheck — a bad import surfaces as a runtime
 "Element type is invalid … got: undefined", so run `tsc` rather than trusting the dev server.
 
 ## Not yet built
@@ -347,7 +363,6 @@ Baselines: `npx tsc --noEmit` is clean. `npx eslint .` is **0 errors, 11 warning
   window seeing an *empty* `/scores` (not your scores), `/browse` still loading with no session, and
   `auth.users` not growing when the same anon user adds a second score. "I can see my own scores" is
   equally true with no policy at all.
-- **Delete UI** — `deleteScore` works; `DeleteScoreButton` is a shell (bug 13). Edit is done.
 - **Leaderboard** — route only.
 - **Play/import history** — no history table; each play is just another `scores` row. Needs a schema
   decision first.

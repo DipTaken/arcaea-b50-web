@@ -108,24 +108,30 @@ in a client component's render is not contained to that component; React unmount
 
 ---
 
-### [ ] 1.7 Reject `NaN` in `addScore` — `app/scores/actions.ts:13-48`
+### [x] 1.7 Reject `NaN` in `addScore` — `app/scores/actions.ts:13-48`
 
-`if (!Number.isFinite(score)) return { error: 'Invalid score' }`, and have `parseOptionalNumber`
-return `null` for non-finite input.
+*Done, via a slightly different route than suggested:* `validateScore.ts` now opens with a
+`for (const value of [score, pure, far, lost])` loop that rejects any non-`null` value failing
+`Number.isInteger`. Since `Number.isInteger(NaN)` is `false`, this catches `NaN` (and `Infinity`,
+and non-integer floats — stricter than the `Number.isFinite` suggested here, which is correct since
+scores are always whole numbers) *before* the four range checks below it ever run. Because
+`parseAndValidate` in `actions.ts` calls `validateScore` before both the `insert` (addScore) and the
+`update` (editScore), a malformed POST is rejected on both paths, not just add.
 
-**Why it matters:** `Number('abc')` is `NaN`, and **all four** range checks let it through.
+**Why it mattered:** `Number('abc')` is `NaN`, and **all four** range checks let it through.
 
 **Concept — `NaN` fails every comparison, including the ones meant to reject it.**
 `NaN < 0` is `false`. `NaN > max` is `false`. `NaN === NaN` is `false`. So a bounds check written as
 `x < min || x > max` accepts `NaN` silently. Always establish that a number *is* a number
-(`Number.isFinite`) before comparing it.
+(`Number.isFinite`, or here the stricter `Number.isInteger`) before comparing it.
 
 Second concept, more important: **a Server Action is a public HTTP endpoint.** The `required` and
 `type="number"` on the form are UX, not validation — anyone can POST to the action directly. Client
 validation improves the experience; server validation is the only thing that protects the database.
 
-While here: line 46 only cross-checks pure+far+lost when all three are present, and line 50 mints a
-guest cookie for logged-in users because it runs before the `getUser()` check.
+Of the two "while here" notes: the guest-cookie-before-`getUser()` ordering is already fixed —
+current `actions.ts` calls `getOrCreateUser` *after* `parseAndValidate` succeeds. The partial
+pure+far+lost cross-check (only runs when all three are non-null) is still open — folded into 1.11.
 
 ---
 
@@ -225,7 +231,9 @@ didn't. Any `await` that must be followed by cleanup wants `try/catch` or `try/f
 
 ---
 
-### [ ] 1.9 Use the updater form — `app/browse/BrowseSearch.tsx:137`
+### [wontfix] 1.9 Use the updater form — `app/browse/BrowseSearch.tsx:137`
+
+**Decision:** leaving as-is — one +100 per double-click is acceptable, not worth the change.
 
 `setVisibleCount(visibleCount + CARDS_PER_PAGE)` → `setVisibleCount(c => c + CARDS_PER_PAGE)`
 
@@ -261,17 +269,28 @@ until the form contains a search box that isn't meant to submit anything.
   **Concept:** `indexOf` returns `-1` for "absent", and `-1` is a perfectly valid number that
   silently participates in arithmetic. Sentinel values that share a type with real values are a
   recurring trap (`indexOf`, `parseInt` → `NaN`, `find` → `undefined`).
-- [ ] `app/scores/AddScoreButton.tsx:58-69` — `chartInfoElement` renders `defaultChart` while the
-  form inputs read `selectedChart`. Harmless today, wrong the moment a `ChartSearch` is added to
-  that call site.
+- [x] ~~`app/scores/AddScoreButton.tsx:58-69` — `chartInfoElement` renders `defaultChart` while the
+  form inputs read `selectedChart`.~~ **Resolved by the ScoreForm/ChartSearch refactor.** That logic
+  no longer lives in `AddScoreButton.tsx` at all — it moved into `ScoreForm.tsx`, where
+  `chartInfoElement` and the judgement inputs both read `selectedChart` consistently.
+  `defaultChart` now only seeds `useState<Chart | null>(defaultChart)` on mount; nothing downstream
+  reads the prop directly. This is exactly the "wrong the moment a ChartSearch is added" case the
+  original note predicted, and it was written correctly when that happened.
+- [ ] `app/scores/actions.ts` — `parseAndValidate`'s cross-check only runs when pure, far, and lost
+  are **all** non-null (report §1.7's leftover): a partial `{pure, far}` submission with an
+  impossible sub-total is never checked.
 - [ ] `utils/jacket.ts:3` — `toLocaleLowerCase()` → `toLowerCase()`. Locale-aware casing for a
   storage key is non-deterministic by construction (the Turkish dotless-ı is the classic example).
 - [ ] `utils/rating.ts:2` — `isPM(...) || noteCount < 2237` can never change the result; `isPM`
   already handles that case. Also inlines `2237` when the named constant is 38 lines below.
-- [ ] `app/scores/ScoreGrid.tsx:9,26` — after `revalidatePath`, an open modal keeps rendering the
-  pre-update score object.
+- [x] ~~`app/scores/ScoreGrid.tsx:9,26` — after `revalidatePath`, an open modal keeps rendering the
+  pre-update score object.~~ **FIXED** — `ScoreGrid` now holds `selectedId: number | null` and
+  re-derives `selectedEntry` with `entries.find(...)` on every render, which is exactly the fix below.
+  Edit therefore refreshes the open modal for free.
   **Concept:** state holding a *copy* of a prop goes stale when the prop refreshes. Store the id and
   look the object up from the current list.
+  *Delete needed one more step:* the looked-up entry becomes `undefined`, so the modal would render
+  empty rather than stale. `onDeleted` closes the dialog, and `Modal`'s `onClose` resets `selectedId`.
 
 ---
 
@@ -592,13 +611,13 @@ readers, and leaves the field unidentifiable once the user starts typing.
 
 ## Lint baseline
 
-`npx eslint .` today: **0 errors, 11 warnings.** `npx tsc --noEmit` is clean.
+`npx eslint .` today: **0 errors, 5 warnings.** `npx tsc --noEmit` is clean.
 
 | | |
 |---|---|
 | 4 warnings | `no-img-element` — `ProfileButton`, `SongInfo`, `ScoreCard`, `ScoreForm` |
-| 5 warnings | every import and prop in `DeleteScoreButton.tsx`, still a shell |
-| 2 warnings | unused `getPlayRating` (`ScoreCard:3`), unused `Link` (`ProfileButton:7`) |
+| 1 warning | unused `getPlayRating` (`ScoreCard:3`) |
 
-Building `DeleteScoreButton` and dropping the two dead imports takes this to **4 warnings**, all of
-them the `next/image` migration.
+Was 11. Building `DeleteScoreButton` for real cleared its 5, and `ProfileButton`'s unused `Link` is
+gone. Dropping that last dead import takes this to **4 warnings**, all of them the `next/image`
+migration.

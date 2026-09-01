@@ -7,9 +7,15 @@ import { Panel } from '@/app/components/Panel';
 import EditScoreButton from './EditScoreButton';
 import DeleteScoreButton from './DeleteScoreButton';
 
+interface ScoreModalProps {
+    score: ScoreWithChart | null
+    ref: React.RefObject<HTMLDialogElement | null>
+    onClose: () => void
+    onDeleted: () => void
+}
 
 // One shared modal for the whole score grid.
-export default function ScoreModal({ score, ref, onClose }: { score: ScoreWithChart | null; ref: React.RefObject<HTMLDialogElement | null>, onClose: () => void }) {
+export default function ScoreModal({ score, ref, onClose, onDeleted }: ScoreModalProps) {
     return (
         <Modal ref={ref} onClose={onClose}>
             {score && (
@@ -28,7 +34,7 @@ export default function ScoreModal({ score, ref, onClose }: { score: ScoreWithCh
 
                         <EditScoreButton key={`edit-${score.id}`} defaultChart={score.charts} score={score} />
 
-                        <DeleteScoreButton key={`delete-${score.id}`} defaultChart={score.charts} score={score} />
+                        <DeleteScoreButton key={`delete-${score.id}`} score={score} onDeleted={onDeleted} />
                     </div>
                 </>
             )}

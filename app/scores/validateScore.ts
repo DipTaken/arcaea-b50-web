@@ -9,6 +9,12 @@ export function validateScore(
     noteCount: number):
     string | null {
 
+    for (const value of [score, pure, far, lost]) {
+        if (value !== null && !Number.isInteger(value)) {
+            return `Invalid value. Must be an integer.`
+        }
+    }
+
     // Validate the score
     const maxScore = 10000000 + (noteCount ?? 0)
     if (score < 0 || score > maxScore) {

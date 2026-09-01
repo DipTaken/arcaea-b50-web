@@ -67,12 +67,13 @@ export async function editScore(formData: FormData) {
     revalidatePath('/scores')
 }
 
-export async function deleteScore(formData: FormData) {
+export async function deleteScore(scoreId: number) {
     const cookieStore = await cookies()
     const supabase = createClient(cookieStore)
 
-    // Get the score ID from the form data
-    const scoreId = Number(formData.get('score_id'))
+    if (!Number.isInteger(scoreId)) {
+        return { error: 'Invalid score ID.' }
+    }
 
     // Delete the score from the database, and check if there was an error
     const { data, error: deleteError } = await supabase.from('scores').delete().eq('id', scoreId).select()

@@ -50,11 +50,10 @@ This file is the running project list.
 === BUGS (in priority order) ===
 
 [ ] Everything else -> report_todo.md
-    All of Tier 1 is now fixed except 1.7 (NaN passes every validation gate —
-    one Number.isFinite guard in validateScore.ts covers add and edit).
+    All of Tier 1 is now fixed. 1.7 (NaN) closed via a Number.isInteger loop at
+    the top of validateScore, which covers add and edit. 1.9 (Load More updater
+    form) is deliberately wontfix.
     Newly noticed and not yet in report_todo:
-      - DeleteScoreButton's onClick calls showModal() on a ref with no <Modal>
-        attached, so the button does nothing. deleteScore itself works.
       - ScoreForm's <h1> is hardcoded "Add Score", so the edit modal is
         titled "Add Score". Only submitLabel varies.
       - heroBackdropURL (utils/style.ts) hardcodes the full project URL
@@ -64,10 +63,13 @@ This file is the running project list.
         so a null/zero note_count yields NaN.
 
 === NEXT UP ===
-[~] Delete score button
-    deleteScore works and Edit is fully built (EditScoreButton + ScoreForm's
-    initialValues). DeleteScoreButton is still a shell — it needs a <Modal>
-    with a confirm step wired to the dialogRef it already creates.
+[x] Delete score button
+    Done. DeleteScoreButton has a confirm <Modal>, awaits deleteScore(score.id)
+    and displays its { error }, and an onDeleted callback threads up through
+    ScoreModal to ScoreGrid so the parent modal closes on success instead of
+    sitting open on an empty panel. deleteScore now takes a scoreId: number
+    rather than FormData. jeaneskut's ui/delete-button was merged in for the
+    modal markup; the gutted DeleteScoreModal.tsx was deleted afterward.
 
 [ ] Leaderboard page
     Route + heading exist, nothing else. Click through to other users' scores.

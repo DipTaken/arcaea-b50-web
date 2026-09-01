@@ -639,17 +639,16 @@ deserves the same.
 
 ### 5.1 Lint baseline
 
-`npx eslint .` is currently **0 errors / 11 warnings**; `npx tsc --noEmit` is clean:
+`npx eslint .` is currently **0 errors / 5 warnings**; `npx tsc --noEmit` is clean:
 
 - 4 warnings — `no-img-element` on `ProfileButton`, `SongInfo`, `ScoreCard`, `ScoreForm`.
   `next.config.ts` has no `images.remotePatterns` for the Supabase storage host, which is what
   blocks migrating to `next/image`.
-- 5 warnings — every import and prop in `DeleteScoreButton.tsx`, which is still a shell. These clear
-  when the button is built.
-- 2 warnings — unused `getPlayRating` (`ScoreCard:3`), unused `Link` (`ProfileButton:7`).
+- 1 warning — unused `getPlayRating` (`ScoreCard:3`).
 
-So the floor once `DeleteScoreButton` ships and the two dead imports go is **4 warnings**, all of
-them the `next/image` migration.
+The 5 `DeleteScoreButton.tsx` warnings cleared when the button was actually built, and the unused
+`Link` in `ProfileButton` is gone. So the floor once that last dead import goes is **4 warnings**,
+all of them the `next/image` migration.
 
 `next dev` does not typecheck — a bad import shows up as a runtime "Element type is invalid … got:
 undefined", not a compile error. Run `tsc` rather than trusting the dev server.
