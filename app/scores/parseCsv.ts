@@ -1,16 +1,7 @@
 import Papa from "papaparse"
 
-import { Chart } from "@/utils/types"
+import { Chart, ImportScore, RowError } from "@/utils/types"
 import { validateScore, getClearStatus, CLEAR_STATUS_VALUES } from "./validateScore"
-
-type ImportScore = {
-    chartId: number;
-    scoreValue: number;
-    pure: number | null;
-    far: number | null;
-    lost: number | null;
-    clear_status: string;
-}
 
 type RawRow = {
     song: string | undefined;
@@ -22,12 +13,6 @@ type RawRow = {
     lost: string | undefined;
     clear_status: string | undefined;
 }
-
-type RowError = {
-    rowNumber: number;
-    error: string;
-}
-
 
 export function parseCsv(csvString: string) {
     const config = {
@@ -72,8 +57,11 @@ export function validateImportScores(charts: Chart[], scores: RawRow[]): { score
         }
 
         //validate the clear status
-        const clearStatus = clear_status?.trim()
-        if (!clearStatus || !CLEAR_STATUS_VALUES.includes(clearStatus)) {
+        let clearStatus = clear_status?.trim()
+        if (!clearStatus) {
+            clearStatus = "clearNormal" //default to clearNormal if not provided
+        }
+        if (!CLEAR_STATUS_VALUES.includes(clearStatus)) {
             errorArray.push({ rowNumber: rowNumber, error: `Invalid clear status: "${clearStatus}"` })
             continue
         }
