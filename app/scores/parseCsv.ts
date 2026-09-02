@@ -31,10 +31,15 @@ export function validateImportScores(charts: Chart[], scores: RawRow[]): { score
     //create a map of charts with key as chart title + difficulty, and value as an array of charts with that title and difficulty
     const chartMap = new Map<string, Chart[]>()
     for (const chart of charts) {
-        const key = chartKey(chart.title, chart.difficulty)
-        const existing = chartMap.get(key) ?? []
-        existing.push(chart)
-        chartMap.set(key, existing)
+        const keys = new Set([
+            chartKey(chart.title, chart.difficulty),
+            chartKey(chart.song_id, chart.difficulty) //also add song_id as a key for matching
+        ])
+        for (const key of keys) {
+            const existing = chartMap.get(key) ?? []
+            existing.push(chart)
+            chartMap.set(key, existing)
+        }
     }
 
     //looping through each of the scores
@@ -80,8 +85,10 @@ export function validateImportScores(charts: Chart[], scores: RawRow[]): { score
 
         //if there are multiple charts and the artist is not provided, ask the user to provide the artist in the CSV
         if (!chart) {
-            errorArray.push({ rowNumber: rowNumber, 
-                error: `Multiple charts found for song "${song}" with difficulty "${difficulty}". Please add one of these artists ${candidates.map(c => c.artist).join(', ')} to the Artist column.` });
+            errorArray.push({
+                rowNumber: rowNumber,
+                error: `Multiple charts found for song "${song}" with difficulty "${difficulty}". Please add one of these artists ${candidates.map(c => c.artist).join(', ')} to the Artist column.`
+            });
             continue
         }
 
