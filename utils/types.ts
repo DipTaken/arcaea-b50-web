@@ -31,9 +31,23 @@ export type Score = {
 export type ScoreWithChart = Score & { charts: Chart }
 
 // one row of the B50 table, with rank, score, playRating, and weight
-export type B50Entry = { 
+export type B50Entry = {
     rank: number
     score: ScoreWithChart
     playRating: number
     weight: 1 | 2
+}
+
+export type RowError = {
+    rowNumber: number;
+    error: string;
+}
+
+export type ImportScore = {
+    chartId: number;
+    scoreValue: number;
+    pure: number | null;
+    far: number | null;
+    lost: number | null;
+    clear_status: string;
 }

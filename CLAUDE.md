@@ -20,7 +20,8 @@ explanation over speed — see Working style at the bottom.
 
 Next.js 16.3.2 (App Router) · React 19.2 · TypeScript · Tailwind v4 · Supabase (Postgres + Google
 OAuth + Storage) · npm. Font `Exo` via `next/font/google` → `--font-exo`, mapped to
-`--font-sans`/`--font-mono`.
+`--font-sans`/`--font-mono`. One runtime dependency beyond the framework: **`papaparse`** (+
+`@types/papaparse`), for CSV/TSV parsing — see `parseCsv.ts`.
 
 Env vars (`.env.local`, gitignored): `NEXT_PUBLIC_SUPABASE_URL`,
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — one string used by browser, server, and proxy clients
@@ -35,7 +36,7 @@ same `song_id` system used for jackets).
 
 | Route | Purpose |
 |---|---|
-| `/` | Landing. Welcome line if signed in, else `<LoginButton>`. |
+| `/` | Landing. Welcome line if signed in, else `<LoginButton>`, plus a hand-maintained `<Panel>` changelog (newest first — the comment in the file notes the order is wrong). |
 | `/scores` | B50 view — best score per chart, top 50 by Play Rating, plus the B50 number. |
 | `/browse` | Chart catalog: search, sort, level/difficulty filters, Load More. |
 | `/leaderboard` | Stub — `PageShell` heading only. |
@@ -153,7 +154,10 @@ app/
 │   │                      BrowseCard, 40px for ScoreCard's rank), and the title+constant bottom bar.
 │   ├── CardGrid.tsx     — `grid-cols-[repeat(auto-fit,200px)] max-w-6xl`. Responsive; both grids use it.
 │   ├── PageShell.tsx    — <main> + h1 title + h2 subtitle. Every page's outer wrapper.
-│   ├── Panel.tsx        — the gray bordered box used inside modals.
+│   ├── Panel.tsx        — the gray bordered box used inside modals. `mx-auto max-w-5xl`: the auto
+│   │                      margins are load-bearing only when the dialog is WIDER than 64rem, which
+│   │                      ImportCSVButton's `w-[min(90vw,90rem)]` is — max-width caps size, never
+│   │                      centers. Every other modal is ≤60rem so the cap never engages.
 │   ├── Footer.tsx       — logo, GitHub link, disclaimer. `mt-auto` pins it via the flex-col body.
 │   ├── Modal.tsx        — <dialog> wrapper (ref, children, onClose?, width?). Centered with `m-auto`
 │   │                      (Preflight zeroes the UA's margin:auto). Click-outside closes via
@@ -205,12 +209,42 @@ app/
 │   │                      would otherwise show a stale error. The `if (!score)` guard is unreachable
 │   │                      (the buttons only render when score is truthy) but required: TS can't
 │   │                      narrow a prop from a JSX condition into a closure.
-│   ├── ChartSearch.tsx  — client; searchable chart picker used inside ScoreForm.
+│   ├── ChartSearch.tsx  — client; searchable chart picker used inside ScoreForm. Gets its setter from
+│   │                      ScoreForm's SelectedChartContext, so it only works inside that provider —
+│   │                      elsewhere useContext returns the default no-op and picking silently does
+│   │                      nothing. An onSelect prop would free it; not needed while ScoreForm is the
+│   │                      only caller.
+│   ├── ImportCSVButton.tsx — client; the CSV/TSV import flow. Two steps in one Modal, switched by
+│   │                      `showTable`: ImportTextArea (paste box + ImportErrorList + row counts) then
+│   │                      ImportPreview (PreviewTable + Import / Go back). `scores`/`errors` are
+│   │                      DERIVED during render from `text` — no second useState, so the preview can't
+│   │                      go stale. ~0.3ms per keystroke including the 1799-chart map, so no memo.
+│   │                      `isImporting` is separate from `showTable`: one is "which screen", the other
+│   │                      "request in flight". Modal's onClose resets both and clears `text`.
+│   ├── parseCsv.ts      — pure module, NO 'use server' (same reason as validateScore.ts): the browser
+│   │                      needs it for the live preview and the action reuses it. parseCsv wraps Papa
+│   │                      with header:true + skipEmptyLines + lowercasing transformHeader, and NO
+│   │                      `delimiter`, so comma and tab both auto-detect — a spreadsheet clipboard is
+│   │                      TSV, which is why paste works with no export step. validateImportScores
+│   │                      groups charts into a Map<key, Chart[]>, then per row COLLECTS failures and
+│   │                      continues, returning { scores, errors }. Columns: song, difficulty, score,
+│   │                      clear_status required; pure/far/lost/artist optional.
 │   ├── validateScore.ts — pure module, NO 'use server', so the client can import it. validateScore
-│   │                      (range + cross-field), parseScoreFormData, getClearStatus. Bug 7 lives here.
-│   └── actions.ts       — addScore / editScore / deleteScore, all returning `{ error }` not throwing.
-│                          add/edit take FormData; **deleteScore takes `scoreId: number`** — it has no
-│                          form behind it, just a confirm dialog, so there's nothing to parse.
+│   │                      (range + cross-field), parseScoreFormData, getClearStatus, and the
+│   │                      CLEAR_STATUS_VALUES whitelist. NOTE: validateScore does NOT check that
+│   │                      whitelist — it only compares clearStatus to "fullRecall"/"pureMemory" for the
+│   │                      cross-checks — so every caller must check membership itself. parseCsv and
+│   │                      importScores both do.
+│   └── actions.ts       — addScore / editScore / deleteScore / importScores, all returning `{ error }`
+│                          not throwing. add/edit take FormData; **deleteScore takes `scoreId: number`**
+│                          and **importScores takes `ImportScore[]`** — neither has a form behind it, so
+│                          there's nothing to parse.
+│                          importScores re-validates from scratch: it fetches note_counts itself with
+│                          one `.in('id', chartIds)` and builds the Map SERVER-SIDE. Taking that map as
+│                          a parameter was tried and reverted — it let the caller supply the yardstick,
+│                          so every bound check passed against forged numbers. Then one array `.insert`
+│                          (atomic; a per-row loop leaves half the rows written on failure) and
+│                          `{ imported: data.length }`.
 │                          `parseAndValidate` is the shared front half (parse → fetch chart →
 │                          getClearStatus → validateScore); it stays here because it needs the client.
 │                          addScore calls getOrCreateUser AFTER validation. edit/delete make no auth
@@ -246,9 +280,11 @@ utils/
 │                 `style` (Tailwind's scanner only sees complete literal class strings, so
 │                 `bg-[${color}]` never generates CSS). getTextSize(title) → a *static* class bucketed
 │                 by length, so interpolating THAT is fine. Also cardHoverAnimation and
-│                 heroBackdropURL.
-└── types.ts    — Chart, Score, ScoreWithChart = Score & { charts: Chart }, and
-                  B50Entry = { rank, score, playRating, weight: 1 | 2 }.
+│                 heroBackdropURL. Also `scrollbarStyle` — but those are `tailwind-scrollbar` plugin
+│                 classes and the plugin is NOT installed, so the constant currently emits no CSS.
+└── types.ts    — Chart, Score, ScoreWithChart = Score & { charts: Chart },
+                  B50Entry = { rank, score, playRating, weight: 1 | 2 }, and the import pair
+                  ImportScore / RowError (moved here so actions.ts and the client can share them).
                   Hand-written, NOT generated — so it can and does disagree with the DB.
 
 proxy.ts        — Next 16's rename of middleware.ts; delegates to utils/supabase/middleware.ts.
@@ -346,6 +382,24 @@ headline. Numbering is stable, so fixed entries stay listed.
 15. **`heroBackdropURL` hardcodes the full project URL** (`utils/style.ts`) instead of building on
     `NEXT_PUBLIC_SUPABASE_URL` like `getJacketUrl` does — it breaks for a contributor on another
     Supabase project.
+16. **A blank `clear_status` in an imported row silently becomes `clearNormal`** (`parseCsv.ts:60-63`,
+    commit 41b114d). `getClearFactor` gives 0 only to exactly `"fail"` and 0.2 to everything else, so
+    a genuine fail imported blank gains 0.2 play rating and inflates the B50 — and it's stored, so a
+    later formula fix can't repair it. Deliberate trade for friction; the alternative is requiring the
+    column. Nothing tells the user the default was applied.
+17. **`importScores` rejects the whole batch on the first bad row**, with a message that names a
+    `chartId` and no row number (`ImportScore` has no `rowNumber`). Low-impact — the client already
+    filtered, so this only fires on tampering or a stale chart list — but the message is unactionable.
+18. **`handleImport` has no `try/catch`** (`ImportCSVButton.tsx`) and reports via `alert()`. A thrown
+    rejection skips `setIsImporting(false)`, leaving the button stuck on "Importing…". Same class as
+    `ScoreForm.handleSubmit`; `finally` fixes it. Every other surface uses inline error state.
+19. **Re-importing the same paste duplicates every row.** `unique_user_score` is
+    `(user_id, chart_id, created_at)` and `created_at` defaults to `now()`, so nothing conflicts.
+    `getB50FromScores` keeps the best per chart, so the B50 looks correct while `scores` doubles.
+20. **`scrollbarStyle` is dead** (`utils/style.ts`) — `tailwind-scrollbar` classes with the plugin
+    uninstalled. Used by the textarea, error list, and preview table.
+21. **`/docs/importing-scores` 404s** — `ImportCSVButton`'s help link points at a route that
+    doesn't exist.
 
 Baselines: `npx tsc --noEmit` is clean. `npx eslint .` is **0 errors, 5 warnings** — 4
 `no-img-element` (blocked on `images.remotePatterns` in `next.config.ts`) and 1 unused
@@ -365,7 +419,9 @@ Baselines: `npx tsc --noEmit` is clean. `npx eslint .` is **0 errors, 5 warnings
   equally true with no policy at all.
 - **Leaderboard** — route only.
 - **Play/import history** — no history table; each play is just another `scores` row. Needs a schema
-  decision first.
+  decision first. CSV import made this concrete: see bug 19.
+- **Import hardening** — the feature works end to end; bugs 16–21 are what's left. The most
+  consequential is the silent `clearNormal` default, since it writes a fabricated fact.
 - **Typed Supabase queries** — `ScoreWithChart` types the components, but the queries still return
   `any`, so a narrowed `select()` wouldn't fail at compile time. This is why `utils/types.ts`
   disagrees with the code (`chart_constant` and `charts` are declared non-nullable while ~20 call

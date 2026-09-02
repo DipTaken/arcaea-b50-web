@@ -6,6 +6,7 @@ import ChartSearch from './ChartSearch'
 import ScoreGrid from './ScoreGrid'
 import { getB50Rating } from '@/utils/rating'
 import { PageShell } from '@/app/components/PageShell'
+import ImportCSVButton from './ImportCSVButton'
 
 export default async function Page() {
   const cookieStore = await cookies()
@@ -37,6 +38,8 @@ export default async function Page() {
               <ChartSearch charts={charts ?? []} />
             </div>
           </AddScoreButton>
+
+          <ImportCSVButton charts={charts ?? []} />
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-4 p-4">

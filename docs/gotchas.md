@@ -18,6 +18,10 @@ Things that cost time on this project. One line each. Details live in the other 
 - **`defaultValue` and `useState(initial)` only apply on mount.** A changed prop won't update them.
 - **`key` changes remount and reset all state** — including children's. That's how `AddScoreButton` resets `ScoreForm`. `key` is consumed by React, never seen as a prop.
 - **"Element type is invalid… got: undefined"** = named/default import mismatch.
+- **`<textarea>` takes `value`, not children.** HTML puts the text between the tags; React doesn't. `<textarea>{text}</textarea>` is wrong.
+- **Derive during render instead of a second `useState`.** `parseCsv(text)` recomputed each render can't go stale; a mirrored state can. Sync work has no "done" event to wait for.
+- **A child needing its parent's setters means the boundary is misplaced.** Split on ownership (own state, or genuinely reusable), not on function length.
+- **Hyphenated JSX attributes are never type-checked** — the `data-*`/`aria-*` escape hatch means `resize-y` as a bare attribute compiles, renders `resize-y="true"` on the DOM, and only warns at runtime. Tailwind classes belong in `className`.
 
 ## Next.js 16
 
@@ -28,6 +32,9 @@ Things that cost time on this project. One line each. Details live in the other 
 - **Use `request.headers`, not `headers()` from `next/headers`,** when you already have the request.
 - **`NextResponse` vs `Response`** — only matters when setting cookies on the response (`.cookies`). Otherwise interchangeable.
 - **Server Components can't set cookies.** `utils/supabase/server.ts` swallows the failure silently, so anything that writes a session must be a Server Action or Route Handler.
+- **A `'use server'` file may only export `async` functions** — enforced by SWC at build time (the message lives in `next-swc`), not by `tsc`. The directive marks every export as a public endpoint, so returns must be promises. Files with *neither* directive are shared and get bundled into whichever side imports them — that's what `validateScore.ts` and `parseCsv.ts` are.
+- **A duplicate import binding fails the whole route, not just the file.** Turbopack refuses to compile it, so the page renders nothing at all — indistinguishable from a CSS mistake. When *nothing* renders, read the dev-server terminal before inspecting styles.
+- **A file nothing imports is never compiled**, so `next build` passing proves nothing about it.
 
 ## Supabase — auth
 
@@ -66,6 +73,14 @@ Things that cost time on this project. One line each. Details live in the other 
 - **Two utilities setting the same property → stylesheet emit order decides, not `className` order.** `flex` beats `line-clamp-2`; one of them is dead and you can't tell which from the JSX. Fix structurally, or don't write the conflict.
 - **Variant props beat `className` props.** `size="lg"` can't express a conflict; `sizeClasses="p-6"` against a base `p-2` compiles and renders wrong.
 - **The JIT scanner only sees complete literal class strings.** `bg-[${color}]` never generates CSS — use an inline `style` for dynamic values, and static class buckets for the rest.
+- **Preflight sets `background-color: transparent` and `color: inherit` on form controls** (`preflight.css:255`). An unstyled `<input>`/`<textarea>` is invisible on a dark panel — every input in this project spells out `bg-gray-700 text-white`.
+- **`overflow` does nothing without a height constraint.** `max-h-*` creates the overflow; `overflow-y-auto` only decides how to handle it.
+- **`overflow` on a `<table>` is ignored** — tables have their own layout model. Put the scroll on a wrapper div.
+- **`border-radius` has no effect under `border-collapse: collapse`** (Preflight's default, `preflight.css:171`). Round the scroll wrapper instead — any non-`visible` overflow clips. Same cause: a `border` on a sticky `<th>` is owned by the table and scrolls away; use a shadow.
+- **`max-w-*` caps width, it never centers.** Always `max-w-* mx-auto`. Only visible once the container is wider than the cap.
+- **A flex item won't shrink below its content** (`min-height: auto`), so `flex-1` + `overflow-y-auto` silently never scrolls. Add `min-h-0`. Doesn't bite with an explicit `max-h-*`.
+- **`odd:`/`even:` are `:nth-child`,** so they go on `<tr>` — on `<td>` they'd stripe columns. Cells with their own `bg-*` paint over the row.
+- **`display: flex` on a `<td>` removes `display: table-cell`,** so that column stops sizing with the table. Put the flex on an inner div.
 
 ## This project
 
@@ -73,3 +88,9 @@ Things that cost time on this project. One line each. Details live in the other 
 - **Read paths use plain `getUser()`.** Only Server Actions and Route Handlers may call `getOrCreateUser`.
 - **No merge between identities.** `scores_select_own` makes reading another uid's rows impossible, so a merge would need elevated access plus proof of ownership. `/auth/link` offers link-or-sign-in instead.
 - **`utils/types.ts` is hand-written and disagrees with the DB** in places. `supabase gen types typescript` is the real fix.
+- **`title + difficulty` is NOT unique in `charts`.** Quon and Genesis each exist twice (different `song_id` and artist) — 6 colliding pairs. `new Map(entries)` is last-write-wins, so keying on it silently picks one and validates against the wrong `note_count`. `title + difficulty + artist` is unique across all 1799 rows; import uses `artist` only to break ties.
+- **Grouping needs accumulation, not the `Map` constructor.** `new Map(xs.map(x => [k, [x]]))` looks like grouping and isn't — duplicates still overwrite. Get-or-default, push, set.
+- **Six song titles contain commas** (`Love me, Love me, Love me`), one contains quotes. A naive `split(',')` corrupts them — hence papaparse.
+- **Spreadsheet clipboards are TSV, not CSV.** Leaving papaparse's `delimiter` unset auto-detects both, which is what makes paste-from-Sheets work with no export step.
+- **`Number(' ')` is `0`, not `NaN`** — trim before testing for blank, or whitespace cells become zeros.
+- **Don't collapse `NaN` to `null` when parsing** — `null` means "absent" and `validateScore`'s integer guard deliberately skips it, so garbage would pass. Let the `NaN` through and be rejected.
