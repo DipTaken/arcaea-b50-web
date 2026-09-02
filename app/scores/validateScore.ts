@@ -1,5 +1,9 @@
 import { isPM } from "@/utils/rating"
 
+export const CLEAR_STATUS_VALUES = [
+    "fail", "clearEasy", "clearNormal", "clearHard", "fullRecall", "pureMemory"
+]
+
 export function validateScore(
     score: number,
     pure: number | null,

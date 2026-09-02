@@ -84,6 +84,7 @@ export async function deleteScore(scoreId: number) {
     revalidatePath('/scores')
 }
 
+
 async function parseAndValidate(supabase: ReturnType<typeof createClient>, formData: FormData) {
     // Parse the form data
     const values = parseScoreFormData(formData)
