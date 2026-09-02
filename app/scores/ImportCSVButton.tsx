@@ -9,18 +9,29 @@ import { getClearStatus } from "@/utils/rating";
 import { Panel } from "../components/Panel";
 import Link from "next/link";
 import { getDifficultyColor, scrollbarStyle } from "@/utils/style";
+import { importScores } from "./actions";
 
 export default function ImportCSVButton({ charts }: { charts: Chart[] }) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const [isImporting, setIsImporting] = useState(false)
     const [showTable, setShowTable] = useState(false)
     const [text, setText] = useState('')
+    const [importResult, setImportResult] = useState<string | null>(null)
     const { scores, errors } = validateImportScores(charts, parseCsv(text).data)
 
     const chartsById = new Map(charts.map(c => [c.id, c]))
 
     async function handleImport() {
-        //not working yet
+        setIsImporting(true)
+        const result = await importScores(scores)
+        setIsImporting(false)
+        if (result?.error) {
+            setImportResult(result.error)
+        }
+        else {
+            setImportResult(`Successfully imported ${result.imported} scores.`)
+            dialogRef.current?.close()
+        }
     }
 
     return (
@@ -45,7 +56,6 @@ export default function ImportCSVButton({ charts }: { charts: Chart[] }) {
                         errors={errors}
                         text={text}
                         isImporting={isImporting}
-                        setIsImporting={setIsImporting}
                         setText={setText}
                         setShowTable={setShowTable}
                     />
@@ -57,6 +67,7 @@ export default function ImportCSVButton({ charts }: { charts: Chart[] }) {
                         isImporting={isImporting}
                         handleImport={handleImport}
                         setShowTable={setShowTable}
+                        importResult={importResult}
                     />
                 )}
             </Modal>
@@ -69,12 +80,11 @@ interface ImportTextAreaProps {
     errors: RowError[];
     text: string;
     isImporting: boolean;
-    setIsImporting: (isImporting: boolean) => void;
     setText: (text: string) => void;
     setShowTable: (showTable: boolean) => void;
 }
 
-function ImportTextArea({ scores, errors, text, isImporting, setIsImporting, setText, setShowTable }: ImportTextAreaProps) {
+function ImportTextArea({ scores, errors, text, isImporting, setText, setShowTable }: ImportTextAreaProps) {
     return (
         <Panel>
             <h1 className="text-white text-2xl font-bold">
@@ -113,10 +123,10 @@ function ImportTextArea({ scores, errors, text, isImporting, setIsImporting, set
             )}
             {errors.length > 0 && (
                 <p className="text-sm text-white font-bold">
-                    Skipped rows won't be imported — fix them and paste again to include them.
+                    {`Skipped rows won't be imported — fix them and paste again to include them.`}
                 </p>
             )}
-            
+
             <Button variant='default' size={'lg'} onClick={() => setShowTable(true)} disabled={scores.length === 0}>
                 {isImporting ? 'Importing...' : 'Import'}
             </Button>
@@ -131,9 +141,10 @@ interface ImportPreviewProps {
     isImporting: boolean;
     handleImport: () => void;
     setShowTable: (show: boolean) => void;
+    importResult: string | null;
 }
 
-function ImportPreview({ scores, charts, isImporting, handleImport, setShowTable }: ImportPreviewProps) {
+function ImportPreview({ scores, charts, importResult, isImporting, handleImport, setShowTable }: ImportPreviewProps) {
     return (
         <Panel>
             <h1 className="text-white text-2xl font-bold">
@@ -144,6 +155,12 @@ function ImportPreview({ scores, charts, isImporting, handleImport, setShowTable
             </h2>
 
             <PreviewTable scores={scores} charts={charts} />
+
+            {importResult && (
+                <p className="text-sm text-white font-bold">
+                    {importResult}
+                </p>
+            )}
 
             <div className="flex justify-between items-center gap-4 mt-4">
                 <Button variant='primary' size={'lg'} onClick={handleImport} disabled={scores.length === 0}>

@@ -4,7 +4,8 @@ import { createClient } from "@/utils/supabase/server"
 import { cookies } from "next/headers"
 import { revalidatePath } from 'next/cache'
 import { getOrCreateUser } from "@/utils/auth"
-import { validateScore, parseScoreFormData, getClearStatus } from "./validateScore"
+import { validateScore, parseScoreFormData, getClearStatus, CLEAR_STATUS_VALUES } from "./validateScore"
+import { ImportScore } from "@/utils/types"
 
 export async function addScore(formData: FormData) {
     const cookieStore = await cookies()
@@ -49,7 +50,7 @@ export async function editScore(formData: FormData) {
     // Get the score ID from the form data
     const scoreId = Number(formData.get('score_id'))
 
-    // Insert the score into the database, and check if there was an error
+    // update the score from the database, and check if there was an error
     const { data, error: updateError } = await supabase.from('scores').update({
         chart_id: values.chartId,
         score: values.score,
@@ -84,6 +85,62 @@ export async function deleteScore(scoreId: number) {
     revalidatePath('/scores')
 }
 
+export async function importScores(scores: ImportScore[]) {
+    const cookieStore = await cookies()
+    const supabase = createClient(cookieStore)
+
+    if (scores.length === 0) {
+        return { error: 'No scores to import.' }
+    }
+
+    //create a set of unique chart IDs from the scores to import
+    const chartIds = [... new Set(scores.map(s => s.chartId))]
+    //fetch the note counts for the charts from the database
+    const { data: charts, error: chartError } = await supabase.from('charts').select('id, note_count').in('id', chartIds)
+    if (chartError) return { error: chartError.message }
+    //create a map of chart IDs to note counts for validation
+    const chartNotecountMap = new Map(charts.map(c => [c.id, c.note_count]))
+
+    for (const score of scores) {
+        // Validate each score before inserting
+        const chartNotecount = chartNotecountMap.get(score.chartId)
+        
+        if (chartNotecount === undefined) {
+            return { error: `Chart with ID ${score.chartId} not found.` }
+        }
+
+        const isClearStatusValid = CLEAR_STATUS_VALUES.includes(score.clear_status)
+        if (!isClearStatusValid) {
+            return { error: `Invalid clear status ${score.clear_status}.` }
+        }
+
+        const validationError = validateScore(score.scoreValue, score.pure, score.far, score.lost, score.clear_status, chartNotecount)
+        if (validationError) {
+            return { error: validationError }
+        }
+    }
+
+    //locates current user, and creates one if it doesn't exist
+    const { user, error: authError } = await getOrCreateUser(supabase)
+    if (authError) return { error: authError.message }
+    const userId = user.id
+
+    // Insert the score into the database, and check if there was an error
+    const { data, error: insertError } = await supabase.from('scores').insert(scores.map(s => ({
+        chart_id: s.chartId,
+        user_id: userId,
+        score: s.scoreValue,
+        pure: s.pure,
+        far: s.far,
+        lost: s.lost,
+        clear_status: s.clear_status
+    })))
+        .select()
+    if (insertError) return { error: insertError.message }
+
+    revalidatePath('/scores')
+    return { imported: data.length }
+}
 
 async function parseAndValidate(supabase: ReturnType<typeof createClient>, formData: FormData) {
     // Parse the form data
