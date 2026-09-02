@@ -71,6 +71,37 @@ This file is the running project list.
     rather than FormData. jeaneskut's ui/delete-button was merged in for the
     modal markup; the gutted DeleteScoreModal.tsx was deleted afterward.
 
+[x] Import scores from CSV / spreadsheet          (branch feat/import-csv)
+    Done end to end. Paste TSV or CSV into a textarea -> live client-side
+    preview -> confirm table -> importScores server action.
+      - papaparse added (delimiter left unset so a spreadsheet clipboard,
+        which is TSV, auto-detects alongside real CSV).
+      - parseCsv.ts is a pure module like validateScore.ts: parseCsv +
+        validateImportScores, which COLLECTS per-row errors instead of
+        bailing, returning { scores, errors }.
+      - Columns: song, difficulty, score, clear_status required;
+        pure/far/lost/artist optional. artist only breaks ties, because
+        title+difficulty is NOT unique (Quon, Genesis).
+      - importScores fetches note_counts itself and re-runs the full
+        validation. Passing the chart map in from the client was tried and
+        reverted: it let the caller supply the yardstick.
+    Cut deliberately, revisit only with evidence:
+      - inline-editable preview cells + per-row ChartSearch. The paste is
+        still in step 1, so "go back and fix" is two clicks, and editing
+        the table would leave the user's actual spreadsheet wrong.
+      - a dropdown for ambiguous charts. The optional artist column covers
+        all 6 colliding pairs with no UI.
+    Left open -> CLAUDE.md bugs 16-21. Most consequential is the blank
+    clear_status defaulting to clearNormal, which stores a fabricated fact
+    and inflates the B50 by 0.2 for any fail imported blank.
+
+[ ] Decide the re-import policy                   (blocks calling import "done")
+    unique_user_score is (user_id, chart_id, created_at) and created_at
+    defaults to now(), so importing the same paste twice inserts a second
+    full set. getB50FromScores keeps the best per chart, so the B50 still
+    looks right while scores silently doubles. Skip / replace / append?
+    Same schema question as play history below.
+
 [ ] Leaderboard page
     Route + heading exist, nothing else. Click through to other users' scores.
 
