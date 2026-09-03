@@ -73,6 +73,15 @@ export function parseScoreFormData(formData: FormData) {
 // Get the clear status with no NULL guarantee
 export function getClearStatus(score: number, noteCount: number, far: number | null, lost: number | null, rawClearStatus: string | null, isCleared: boolean): string {
     const pm = isPM(score, noteCount, far, lost)
-    const clearStatus = pm ? 'pureMemory' : rawClearStatus ?? (isCleared ? 'clearNormal' : 'fail')
+    let clearStatus: string
+    if (pm) {
+        clearStatus = 'pureMemory' //autofill pm if score is valid pm
+    }
+    else if (rawClearStatus || !pm) {
+        clearStatus = 'clearNormal' //when changing score from pm to non-pm, we want to default to clearNormal 
+    }
+    else {
+        clearStatus = isCleared ? 'clearNormal' : 'fail'
+    }
     return clearStatus
 }
