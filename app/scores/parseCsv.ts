@@ -47,6 +47,12 @@ export function validateImportScores(charts: Chart[], scores: RawRow[]): { score
         const { song, difficulty, artist, score, pure, far, lost, clear_status } = scoreRow
         const rowNumber = convertIndexToRowNumber(index) //since the first row is the header, we add 2 to the index to get the actual row number in the CSV
 
+        const emptyFields = Object.values(scoreRow).every(value => !value?.trim())
+        if (emptyFields) {
+            //skip empty rows
+            continue
+        }
+        
         //validate that the required fields are present
         if (!song?.trim()) {
             errorArray.push({ rowNumber: rowNumber, error: `Invalid song data on row: ${rowNumber} ` });
@@ -137,5 +143,5 @@ function convertIndexToRowNumber(index: number): number {
 }
 
 function chartKey(chartTitle: string, chartDifficulty: string): string {
-    return `${chartTitle.trim().toLowerCase()}-${chartDifficulty.trim().toLowerCase()}`
+    return `${chartTitle.trim()}-${chartDifficulty.trim()}`
 }
