@@ -1,0 +1,3055 @@
+{
+	"notes": {
+		"sayonarahatsukoi": [
+			205,
+			305,
+			666,
+			null,
+			728
+		],
+		"lostcivilization": [
+			462,
+			690,
+			986,
+			1061
+		],
+		"goodtek": [
+			449,
+			632,
+			968,
+			1103
+		],
+		"viyella": [
+			414,
+			492,
+			791
+		],
+		"rise": [
+			322,
+			599,
+			788
+		],
+		"lucifer": [
+			424,
+			506,
+			861
+		],
+		"fairytale": [
+			336,
+			511,
+			782,
+			932
+		],
+		"hearditsaid": [
+			510,
+			664,
+			864
+		],
+		"babaroque": [
+			402,
+			645,
+			808
+		],
+		"memoryfactory": [
+			308,
+			448,
+			672
+		],
+		"snowwhite": [
+			486,
+			672,
+			978,
+			1031
+		],
+		"relentless": [
+			607,
+			722,
+			1015
+		],
+		"shadesoflight": [
+			517,
+			789,
+			1067,
+			1042
+		],
+		"vexaria": [
+			369,
+			534,
+			734,
+			785
+		],
+		"essenceoftwilight": [
+			556,
+			767,
+			1204
+		],
+		"qualia": [
+			550,
+			875,
+			1022,
+			1288
+		],
+		"pragmatism": [
+			476,
+			855,
+			942,
+			1502
+		],
+		"sheriruth": [
+			611,
+			832,
+			1151
+		],
+		"lumia": [
+			469,
+			438,
+			961,
+			814
+		],
+		"dement": [
+			548,
+			756,
+			970,
+			1040
+		],
+		"dandelion": [
+			391,
+			698,
+			921
+		],
+		"anokumene": [
+			412,
+			588,
+			851,
+			971
+		],
+		"infinityheaven": [
+			336,
+			545,
+			853,
+			986
+		],
+		"partyvinyl": [
+			337,
+			543,
+			800,
+			946
+		],
+		"flashback": [
+			356,
+			488,
+			856
+		],
+		"flyburg": [
+			413,
+			650,
+			930
+		],
+		"nirvluce": [
+			297,
+			547,
+			980
+		],
+		"paradise": [
+			253,
+			349,
+			729
+		],
+		"brandnewworld": [
+			322,
+			432,
+			787
+		],
+		"dataerror": [
+			502,
+			785,
+			955
+		],
+		"crosssoul": [
+			606,
+			823,
+			1081
+		],
+		"yourvoiceso": [
+			469,
+			677,
+			1013
+		],
+		"chronostasis": [
+			619,
+			812,
+			916
+		],
+		"kanagawa": [
+			375,
+			707,
+			1111,
+			1121
+		],
+		"moonlightofsandcastle": [
+			418,
+			394,
+			645
+		],
+		"reconstruction": [
+			347,
+			469,
+			825
+		],
+		"evoltex": [
+			297,
+			627,
+			775
+		],
+		"oracle": [
+			425,
+			508,
+			963
+		],
+		"aterlbus": [
+			505,
+			668,
+			1030
+		],
+		"clotho": [
+			519,
+			745,
+			1021,
+			null,
+			1031
+		],
+		"impurebird": [
+			350,
+			518,
+			805
+		],
+		"ignotus": [
+			579,
+			809,
+			1225,
+			1077
+		],
+		"lethaeus": [
+			480,
+			717,
+			900
+		],
+		"romancewars": [
+			423,
+			378,
+			641
+		],
+		"blossoms": [
+			275,
+			383,
+			655
+		],
+		"moonheart": [
+			449,
+			566,
+			947,
+			1139
+		],
+		"genesis": [
+			275,
+			399,
+			713
+		],
+		"harutopia": [
+			444,
+			706,
+			1061
+		],
+		"auxesia": [
+			385,
+			648,
+			1000
+		],
+		"rabbitintheblackroom": [
+			373,
+			467,
+			772
+		],
+		"modelista": [
+			418,
+			691,
+			1010
+		],
+		"soundwitch": [
+			315,
+			488,
+			785
+		],
+		"trappola": [
+			415,
+			541,
+			1044,
+			1086
+		],
+		"iconoclast": [
+			443,
+			593,
+			795
+		],
+		"conflict": [
+			520,
+			731,
+			1056
+		],
+		"axiumcrisis": [
+			685,
+			1065,
+			1094,
+			1682
+		],
+		"grievouslady": [
+			956,
+			1194,
+			1450
+		],
+		"dreaminattraction": [
+			592,
+			785,
+			1129
+		],
+		"redandblue": [
+			464,
+			597,
+			845,
+			1194
+		],
+		"onelastdrive": [
+			604,
+			564,
+			885
+		],
+		"surrender": [
+			550,
+			721,
+			925
+		],
+		"yozakurafubuki": [
+			416,
+			582,
+			931
+		],
+		"cyanine": [
+			661,
+			947,
+			1171
+		],
+		"dreamgoeson": [
+			532,
+			751,
+			719
+		],
+		"journey": [
+			551,
+			778,
+			997
+		],
+		"specta": [
+			390,
+			706,
+			1096
+		],
+		"quon": [
+			547,
+			718,
+			991
+		],
+		"syro": [
+			535,
+			829,
+			1150
+		],
+		"reinvent": [
+			570,
+			703,
+			852
+		],
+		"silentrush": [
+			416,
+			674,
+			941
+		],
+		"singularity": [
+			534,
+			678,
+			1105,
+			1114
+		],
+		"memoryforest": [
+			639,
+			726,
+			978
+		],
+		"strongholds": [
+			570,
+			778,
+			922
+		],
+		"nexttoyou": [
+			454,
+			583,
+			824,
+			954
+		],
+		"metallicpunisher": [
+			500,
+			846,
+			1238
+		],
+		"blaster": [
+			571,
+			635,
+			1002
+		],
+		"guardina": [
+			507,
+			678,
+			1120
+		],
+		"carminescythe": [
+			493,
+			710,
+			1164
+		],
+		"bethere": [
+			592,
+			792,
+			982,
+			1127
+		],
+		"cyberneciacatharsis": [
+			377,
+			655,
+			946,
+			991
+		],
+		"callmyname": [
+			591,
+			653,
+			921
+		],
+		"inkarusi": [
+			276,
+			326,
+			463,
+			857
+		],
+		"mazenine": [
+			494,
+			445,
+			775
+		],
+		"themessage": [
+			536,
+			630,
+			992
+		],
+		"sulfur": [
+			458,
+			608,
+			1045
+		],
+		"halcyon": [
+			662,
+			943,
+			1227
+		],
+		"etherstrike": [
+			659,
+			837,
+			1170
+		],
+		"fractureray": [
+			983,
+			1343,
+			1279
+		],
+		"suomi": [
+			368,
+			550,
+			818,
+			null,
+			732
+		],
+		"bookmaker": [
+			538,
+			728,
+			1124,
+			1287
+		],
+		"darakunosono": [
+			535,
+			585,
+			1061
+		],
+		"dropdead": [
+			44,
+			1323,
+			823,
+			1503
+		],
+		"fallensquare": [
+			316,
+			486,
+			703
+		],
+		"nhelv": [
+			647,
+			913,
+			1108,
+			1474
+		],
+		"espebranch": [
+			624,
+			757,
+			1058
+		],
+		"purgatorium": [
+			609,
+			641,
+			983,
+			1051
+		],
+		"hikari": [
+			237,
+			450,
+			684
+		],
+		"stager": [
+			453,
+			559,
+			1004
+		],
+		"hallofmirrors": [
+			535,
+			553,
+			898
+		],
+		"linearaccelerator": [
+			438,
+			488,
+			905
+		],
+		"tiferet": [
+			450,
+			720,
+			1086
+		],
+		"alexandrite": [
+			507,
+			699,
+			1040
+		],
+		"rugie": [
+			566,
+			754,
+			975
+		],
+		"astraltale": [
+			445,
+			642,
+			884
+		],
+		"phantasia": [
+			544,
+			579,
+			952
+		],
+		"empireofwinter": [
+			484,
+			662,
+			920
+		],
+		"merlin": [
+			315,
+			428,
+			712,
+			881
+		],
+		"dxfullmetal": [
+			327,
+			556,
+			808
+		],
+		"omakeno": [
+			502,
+			616,
+			869,
+			931
+		],
+		"scarletlance": [
+			517,
+			644,
+			1130
+		],
+		"ouroboros": [
+			575,
+			832,
+			1369
+		],
+		"libertas": [
+			476,
+			514,
+			947,
+			1048
+		],
+		"solitarydream": [
+			712,
+			854,
+			972
+		],
+		"antithese": [
+			845,
+			826,
+			877,
+			968
+		],
+		"corruption": [
+			664,
+			847,
+			1293
+		],
+		"blackterritory": [
+			627,
+			785,
+			1195
+		],
+		"viciousheroism": [
+			430,
+			756,
+			1150,
+			1772
+		],
+		"cyaegha": [
+			760,
+			984,
+			1368
+		],
+		"revixy": [
+			538,
+			729,
+			1047
+		],
+		"grimheart": [
+			728,
+			699,
+			959
+		],
+		"vector": [
+			675,
+			1002,
+			1299
+		],
+		"supernova": [
+			664,
+			564,
+			1123
+		],
+		"dottodot": [
+			453,
+			522,
+			739
+		],
+		"garakuta": [
+			444,
+			572,
+			1035
+		],
+		"ikazuchi": [
+			656,
+			976,
+			1347
+		],
+		"worldvanquisher": [
+			529,
+			759,
+			1452
+		],
+		"dreadnought": [
+			715,
+			897,
+			1099
+		],
+		"particlearts": [
+			529,
+			637,
+			925
+		],
+		"vindication": [
+			721,
+			899,
+			1075
+		],
+		"heavensdoor": [
+			766,
+			869,
+			1101,
+			1534
+		],
+		"ringedgenesis": [
+			672,
+			860,
+			1146
+		],
+		"chelsea": [
+			388,
+			503,
+			650
+		],
+		"aiueoon": [
+			436,
+			623,
+			989
+		],
+		"melodyoflove": [
+			422,
+			670,
+			931
+		],
+		"tiemedowngently": [
+			581,
+			535,
+			724
+		],
+		"valhallazero": [
+			624,
+			893,
+			1173
+		],
+		"mirzam": [
+			662,
+			885,
+			1303
+		],
+		"diode": [
+			452,
+			472,
+			709
+		],
+		"freefall": [
+			589,
+			782,
+			1023,
+			1336
+		],
+		"gloryroad": [
+			868,
+			999,
+			1479
+		],
+		"monochromeprincess": [
+			621,
+			756,
+			974
+		],
+		"heavenlycaress": [
+			855,
+			909,
+			1560,
+			1717
+		],
+		"senkyou": [
+			627,
+			722,
+			964
+		],
+		"filament": [
+			582,
+			780,
+			991
+		],
+		"avantraze": [
+			580,
+			727,
+			1125
+		],
+		"battlenoone": [
+			476,
+			677,
+			1042
+		],
+		"laqryma": [
+			447,
+			651,
+			956,
+			1161
+		],
+		"einherjar": [
+			582,
+			767,
+			1159,
+			1857
+		],
+		"izana": [
+			609,
+			836,
+			976
+		],
+		"saikyostronger": [
+			654,
+			1067,
+			1384
+		],
+		"worldexecuteme": [
+			452,
+			582,
+			851
+		],
+		"blrink": [
+			400,
+			683,
+			1015
+		],
+		"oblivia": [
+			574,
+			517,
+			956,
+			1021
+		],
+		"amygdata": [
+			504,
+			711,
+			1199
+		],
+		"corpssansorganes": [
+			438,
+			615,
+			1077
+		],
+		"equilibrium": [
+			587,
+			724,
+			951
+		],
+		"antagonism": [
+			431,
+			738,
+			1142
+		],
+		"lostdesire": [
+			684,
+			871,
+			1154
+		],
+		"dantalion": [
+			731,
+			843,
+			1476
+		],
+		"ifi": [
+			765,
+			1144,
+			1576
+		],
+		"tempestissimo": [
+			919,
+			1034,
+			1254,
+			1540
+		],
+		"arcahv": [
+			818,
+			884,
+			1065
+		],
+		"altale": [
+			357,
+			424,
+			690,
+			1074
+		],
+		"givemeanightmare": [
+			676,
+			817,
+			948
+		],
+		"blacklotus": [
+			653,
+			687,
+			965
+		],
+		"gekka": [
+			559,
+			628,
+			817
+		],
+		"vividtheory": [
+			447,
+			658,
+			885
+		],
+		"onefr": [
+			411,
+			539,
+			758
+		],
+		"scarletcage": [
+			570,
+			711,
+			1195
+		],
+		"faintlight": [
+			587,
+			711,
+			809
+		],
+		"feelssoright": [
+			594,
+			636,
+			947
+		],
+		"teriqma": [
+			345,
+			579,
+			873,
+			954
+		],
+		"mahoroba": [
+			422,
+			632,
+			828
+		],
+		"badtek": [
+			532,
+			595,
+			916
+		],
+		"maliciousmischance": [
+			510,
+			706,
+			1126
+		],
+		"gothiveofra": [
+			322,
+			509,
+			794
+		],
+		"buchigireberserker": [
+			850,
+			1046,
+			1412
+		],
+		"galaxyfriends": [
+			474,
+			572,
+			1013
+		],
+		"crossover": [
+			653,
+			810,
+			1094
+		],
+		"xeraphinite": [
+			383,
+			643,
+			1048
+		],
+		"lapis": [
+			391,
+			520,
+			920
+		],
+		"xanatos": [
+			735,
+			938,
+			1232
+		],
+		"purpleverse": [
+			558,
+			664,
+			1023,
+			1202
+		],
+		"alicealamode": [
+			436,
+			618,
+			872
+		],
+		"eccentrictale": [
+			313,
+			483,
+			732,
+			995
+		],
+		"alicessuitcase": [
+			644,
+			660,
+			999
+		],
+		"jump": [
+			531,
+			622,
+			841
+		],
+		"felis": [
+			463,
+			624,
+			1153
+		],
+		"besideyou": [
+			526,
+			634,
+			703
+		],
+		"heartjackin": [
+			506,
+			543,
+			1112
+		],
+		"toaliceliddell": [
+			535,
+			674,
+			998
+		],
+		"lazyaddiction": [
+			462,
+			647,
+			1031
+		],
+		"dazzlehop": [
+			561,
+			571,
+			1022
+		],
+		"viyellastears": [
+			716,
+			942,
+			1403
+		],
+		"omegafour": [
+			816,
+			943,
+			1393
+		],
+		"aprilshowers": [
+			363,
+			544,
+			697
+		],
+		"seventhsense": [
+			360,
+			739,
+			925
+		],
+		"oshamascramble": [
+			508,
+			568,
+			1073
+		],
+		"amazingmightyyyy": [
+			624,
+			776,
+			1249
+		],
+		"climax": [
+			773,
+			988,
+			1367
+		],
+		"lastcelebration": [
+			969,
+			994,
+			1475
+		],
+		"gou": [
+			814,
+			1070,
+			1522
+		],
+		"glow": [
+			504,
+			666,
+			916
+		],
+		"attraqtia": [
+			732,
+			1002,
+			1433
+		],
+		"enchantedlove": [
+			436,
+			617,
+			759
+		],
+		"take": [
+			499,
+			631,
+			1050
+		],
+		"gimmedablood": [
+			582,
+			737,
+			1093
+		],
+		"bassline": [
+			415,
+			548,
+			861
+		],
+		"lifeispiano": [
+			398,
+			437,
+			674
+		],
+		"paperwitch": [
+			348,
+			487,
+			793
+		],
+		"crystalgravity": [
+			571,
+			653,
+			872
+		],
+		"farawaylight": [
+			656,
+			769,
+			1322
+		],
+		"loschen": [
+			642,
+			850,
+			1235
+		],
+		"aegleseeker": [
+			973,
+			1235,
+			1568
+		],
+		"coastalhighway": [
+			355,
+			479,
+			732
+		],
+		"odysseia": [
+			717,
+			909,
+			1092
+		],
+		"overwhelm": [
+			854,
+			1038,
+			1251
+		],
+		"vandalism": [
+			668,
+			685,
+			1087
+		],
+		"turbocharger": [
+			419,
+			659,
+			979
+		],
+		"theultimacy": [
+			749,
+			919,
+			1304
+		],
+		"rekkaresonance": [
+			860,
+			1051,
+			1212
+		],
+		"kyogenkigo": [
+			576,
+			684,
+			969,
+			1325
+		],
+		"hivemind": [
+			995,
+			988,
+			1252
+		],
+		"seclusion": [
+			544,
+			762,
+			1132
+		],
+		"smallcloud": [
+			548,
+			727,
+			919,
+			1158
+		],
+		"alterale": [
+			728,
+			881,
+			1277
+		],
+		"divinelight": [
+			798,
+			835,
+			1021
+		],
+		"mazymetroplex": [
+			453,
+			704,
+			952
+		],
+		"quonwacca": [
+			425,
+			496,
+			749,
+			1044
+		],
+		"withu": [
+			448,
+			649,
+			932
+		],
+		"genocider": [
+			832,
+			1025,
+			1483
+		],
+		"letyoudivermx": [
+			608,
+			819,
+			1049
+		],
+		"sheriruthrmx": [
+			671,
+			795,
+			1134
+		],
+		"eveninginscarlet": [
+			530,
+			638,
+			922
+		],
+		"bluecomet": [
+			494,
+			645,
+			776
+		],
+		"energysynergymatrix": [
+			471,
+			608,
+			922,
+			1011
+		],
+		"gengaozo": [
+			580,
+			870,
+			1353
+		],
+		"goldenslaughterer": [
+			864,
+			880,
+			1326
+		],
+		"lastendconductor": [
+			726,
+			901,
+			1209,
+			1339
+		],
+		"redolentshape": [
+			570,
+			717,
+			1088
+		],
+		"cosmica": [
+			428,
+			566,
+			773
+		],
+		"ascent": [
+			455,
+			626,
+			1023
+		],
+		"livefastdieyoung": [
+			565,
+			837,
+			1292
+		],
+		"summerfireworks": [
+			478,
+			641,
+			1088
+		],
+		"firstsnow": [
+			366,
+			442,
+			578
+		],
+		"bluerose": [
+			595,
+			669,
+			955
+		],
+		"blockedlibrary": [
+			449,
+			622,
+			850
+		],
+		"neokosmo": [
+			603,
+			791,
+			979
+		],
+		"lightningscrew": [
+			611,
+			811,
+			1192
+		],
+		"lightsofmuse": [
+			333,
+			438,
+			580
+		],
+		"finalstep": [
+			625,
+			684,
+			1056
+		],
+		"akinokagerou": [
+			533,
+			733,
+			1077
+		],
+		"medusa": [
+			550,
+			645,
+			931
+		],
+		"init": [
+			713,
+			957,
+			1204
+		],
+		"internetoverdose": [
+			430,
+			578,
+			657
+		],
+		"sakurafubuki": [
+			526,
+			571,
+			837
+		],
+		"nulctrl": [
+			407,
+			410,
+			715
+		],
+		"macromod": [
+			608,
+			794,
+			1117
+		],
+		"neowings": [
+			591,
+			840,
+			1328
+		],
+		"kissinglucifer": [
+			639,
+			770,
+			1183
+		],
+		"avril": [
+			459,
+			607,
+			851
+		],
+		"aurgelmir": [
+			540,
+			765,
+			1100
+		],
+		"headbonkache": [
+			570,
+			725,
+			1061
+		],
+		"ddd": [
+			363,
+			484,
+			653
+		],
+		"prism": [
+			476,
+			544,
+			785
+		],
+		"protoflicker": [
+			510,
+			633,
+			1042
+		],
+		"stasis": [
+			848,
+			935,
+			1521
+		],
+		"picopicotranslation": [
+			543,
+			723,
+			1049
+		],
+		"nekonote": [
+			417,
+			593,
+			891
+		],
+		"mu": [
+			825,
+			986,
+			1256
+		],
+		"sanskia": [
+			670,
+			783,
+			1046
+		],
+		"altair": [
+			670,
+			828,
+			830
+		],
+		"mukishitsu": [
+			568,
+			680,
+			886
+		],
+		"trapcrow": [
+			876,
+			898,
+			1074
+		],
+		"pupa": [
+			374,
+			684,
+			1099
+		],
+		"defection": [
+			588,
+			800,
+			1141
+		],
+		"infinitestrife": [
+			888,
+			1081,
+			1511,
+			1633
+		],
+		"worldender": [
+			616,
+			850,
+			1225,
+			1661
+		],
+		"pentiment": [
+			911,
+			1055,
+			1345,
+			1741
+		],
+		"arcanaeden": [
+			1097,
+			1310,
+			1792,
+			2134
+		],
+		"testify": [
+			1001,
+			1225,
+			1766,
+			2221
+		],
+		"lovelessdress": [
+			537,
+			630,
+			850
+		],
+		"last": [
+			680,
+			781,
+			831,
+			888
+		],
+		"lasteternity": [
+			null,
+			null,
+			null,
+			790
+		],
+		"callimakarma": [
+			1024,
+			989,
+			1222
+		],
+		"kokoro": [
+			428,
+			575,
+			872
+		],
+		"aidrew": [
+			694,
+			732,
+			1066
+		],
+		"fluffyflash": [
+			787,
+			946,
+			1329
+		],
+		"goodbyemerry": [
+			679,
+			696,
+			1084
+		],
+		"lamia": [
+			826,
+			885,
+			1385
+		],
+		"freemyself": [
+			662,
+			785,
+			1132
+		],
+		"cocorocosmetic": [
+			525,
+			687,
+			1025
+		],
+		"capella": [
+			884,
+			904,
+			1159
+		],
+		"dialnote": [
+			393,
+			548,
+			684
+		],
+		"tsukinimurakumo": [
+			468,
+			610,
+			740
+		],
+		"mantis": [
+			575,
+			760,
+			1014
+		],
+		"worldfragments": [
+			777,
+			999,
+			1387
+		],
+		"astrawalkthrough": [
+			769,
+			886,
+			1191
+		],
+		"chronicle": [
+			928,
+			1077,
+			1264
+		],
+		"nullapophenia": [
+			990,
+			1098,
+			1299
+		],
+		"crimsonthrone": [
+			727,
+			1079,
+			1313
+		],
+		"manicjeer": [
+			698,
+			875,
+			1286
+		],
+		"hiirogekka": [
+			719,
+			709,
+			1126
+		],
+		"letsrock": [
+			541,
+			963,
+			1177
+		],
+		"cycles": [
+			389,
+			430,
+			695
+		],
+		"maxrage": [
+			696,
+			760,
+			1184
+		],
+		"infinity": [
+			594,
+			782,
+			1190
+		],
+		"temptation": [
+			627,
+			768,
+			1099
+		],
+		"primitivelights": [
+			785,
+			1073,
+			1524
+		],
+		"cosmopop": [
+			352,
+			591,
+			809
+		],
+		"impact": [
+			723,
+			913,
+			1231,
+			1392
+		],
+		"genesischunithm": [
+			587,
+			838,
+			867
+		],
+		"trrricksters": [
+			561,
+			784,
+			1183
+		],
+		"spidersthread": [
+			794,
+			764,
+			1203
+		],
+		"lostemotion": [
+			602,
+			780,
+			1123
+		],
+		"gimmick": [
+			421,
+			598,
+			733
+		],
+		"thesurvivor": [
+			817,
+			750,
+			1100
+		],
+		"newyorkbackraise": [
+			762,
+			803,
+			1091
+		],
+		"galacticlove": [
+			513,
+			694,
+			813
+		],
+		"lawlesspoint": [
+			476,
+			630,
+			838
+		],
+		"lostintheabyss": [
+			907,
+			908,
+			1179
+		],
+		"hybris": [
+			757,
+			973,
+			1196
+		],
+		"tothemilkyway": [
+			928,
+			1154,
+			1392
+		],
+		"internetyamero": [
+			677,
+			987,
+			1222
+		],
+		"bulletwaiting": [
+			325,
+			390,
+			701
+		],
+		"devillicsphere": [
+			490,
+			692,
+			1129
+		],
+		"lucidtraveler": [
+			634,
+			1006,
+			1341
+		],
+		"chaos": [
+			646,
+			848,
+			1369
+		],
+		"usedtobe": [
+			537,
+			675,
+			799
+		],
+		"ultimatetaste": [
+			828,
+			1008,
+			1405
+		],
+		"syuten": [
+			395,
+			446,
+			592
+		],
+		"drg": [
+			380,
+			624,
+			872
+		],
+		"nnglooms": [
+			637,
+			774,
+			1294
+		],
+		"ii": [
+			690,
+			816,
+			1051
+		],
+		"magnolia": [
+			625,
+			726,
+			895
+		],
+		"sacrifice": [
+			548,
+			779,
+			958
+		],
+		"rgb": [
+			652,
+			803,
+			1131
+		],
+		"waitfordawn": [
+			596,
+			636,
+			861
+		],
+		"ravenspride": [
+			697,
+			797,
+			1030
+		],
+		"riseoftheworld": [
+			722,
+			843,
+			1176
+		],
+		"unknownlevels": [
+			591,
+			771,
+			1149
+		],
+		"abstrusedilemma": [
+			983,
+			1127,
+			1467
+		],
+		"matenrou": [
+			736,
+			929,
+			1294
+		],
+		"tothefurthestdream": [
+			836,
+			994,
+			1102
+		],
+		"remindthesouls": [
+			561,
+			756,
+			945
+		],
+		"dynitikos": [
+			683,
+			894,
+			986
+		],
+		"amekagura": [
+			741,
+			851,
+			1076
+		],
+		"bbkkbkk": [
+			669,
+			708,
+			976
+		],
+		"primevaltexture": [
+			387,
+			525,
+			810
+		],
+		"technicolour": [
+			644,
+			812,
+			1140
+		],
+		"logos": [
+			697,
+			798,
+			1040
+		],
+		"egoeimi": [
+			801,
+			937,
+			1223
+		],
+		"arghena": [
+			883,
+			1082,
+			1444
+		],
+		"fantasy": [
+			536,
+			715,
+			965
+		],
+		"transientspace": [
+			419,
+			607,
+			805
+		],
+		"namelesspassion": [
+			681,
+			890,
+			1223
+		],
+		"teravolt": [
+			675,
+			804,
+			1008
+		],
+		"stratoliner": [
+			535,
+			702,
+			877
+		],
+		"ouverture": [
+			583,
+			786,
+			913
+		],
+		"xtreme": [
+			752,
+			831,
+			1258
+		],
+		"edenwacca": [
+			826,
+			1194,
+			1365
+		],
+		"metamysteria": [
+			844,
+			905,
+			1309
+		],
+		"aloneandlorn": [
+			643,
+			742,
+			970
+		],
+		"wishuponasnow": [
+			1031,
+			1095,
+			1309
+		],
+		"overdrive": [
+			584,
+			714,
+			1108
+		],
+		"felys": [
+			626,
+			771,
+			1130
+		],
+		"onandon": [
+			370,
+			616,
+			836
+		],
+		"lightmyway": [
+			673,
+			738,
+			954
+		],
+		"hotarubinoyuki": [
+			589,
+			733,
+			991
+		],
+		"theformula": [
+			427,
+			587,
+			957
+		],
+		"lunarossa": [
+			443,
+			578,
+			920
+		],
+		"jingle": [
+			530,
+			741,
+			848,
+			null,
+			1047
+		],
+		"innocence": [
+			734,
+			811,
+			1023,
+			null,
+			1157
+		],
+		"ionostream": [
+			845,
+			890,
+			818,
+			null,
+			871
+		],
+		"alephzero": [
+			388,
+			579,
+			919
+		],
+		"masqueradelegion": [
+			510,
+			698,
+			1064
+		],
+		"kyorenromance": [
+			821,
+			982,
+			1519
+		],
+		"qovat": [
+			519,
+			765,
+			1299
+		],
+		"hellohell": [
+			466,
+			445,
+			673,
+			null,
+			770
+		],
+		"ichirin": [
+			368,
+			519,
+			708
+		],
+		"awakeninruins": [
+			412,
+			570,
+			754
+		],
+		"morningloom": [
+			710,
+			829,
+			940,
+			null,
+			1035
+		],
+		"lethalvoltage": [
+			724,
+			922,
+			1497
+		],
+		"mirinae": [
+			646,
+			881,
+			1277
+		],
+		"ultradiaxon": [
+			605,
+			896,
+			1228
+		],
+		"leaveallbehind": [
+			380,
+			488,
+			828
+		],
+		"distortedfate": [
+			756,
+			890,
+			1172,
+			null,
+			1402
+		],
+		"floatingworld": [
+			753,
+			793,
+			1047
+		],
+		"chromafill": [
+			757,
+			890,
+			1130
+		],
+		"desive": [
+			1007,
+			1051,
+			1273,
+			null,
+			1340
+		],
+		"epicurus": [
+			595,
+			644,
+			783,
+			null,
+			884
+		],
+		"tasogare": [
+			584,
+			634,
+			803,
+			null,
+			962
+		],
+		"oldschoolsalvage": [
+			705,
+			950,
+			1316
+		],
+		"beautifuldreamer": [
+			611,
+			773,
+			1139
+		],
+		"backtobasics": [
+			717,
+			1115,
+			1544
+		],
+		"stargateextreme": [
+			337,
+			430,
+			724,
+			null,
+			915
+		],
+		"signof": [
+			490,
+			564,
+			735
+		],
+		"temptationgc": [
+			475,
+			704,
+			906,
+			null,
+			1087
+		],
+		"blackmind": [
+			601,
+			754,
+			1274
+		],
+		"hypervision": [
+			639,
+			839,
+			1040
+		],
+		"distortionhuman": [
+			544,
+			841,
+			1317
+		],
+		"shrink": [
+			451,
+			660,
+			939
+		],
+		"invain": [
+			562,
+			677,
+			1111
+		],
+		"hypnotize": [
+			518,
+			761,
+			993,
+			null,
+			1164
+		],
+		"ashenboundary": [
+			702,
+			813,
+			1183
+		],
+		"judgement": [
+			844,
+			1055,
+			1432
+		],
+		"alterego": [
+			865,
+			1213,
+			1466,
+			null,
+			1644
+		],
+		"epitaxy": [
+			826,
+			939,
+			1177,
+			null,
+			1410
+		],
+		"waltzforlorelei": [
+			664,
+			814,
+			916,
+			null,
+			999
+		],
+		"dualdoom": [
+			838,
+			830,
+			1094,
+			null,
+			1292
+		],
+		"invertedworld": [
+			525,
+			646,
+			940,
+			null,
+			1065
+		],
+		"mvurbd": [
+			999,
+			1031,
+			1497
+		],
+		"vulcanus": [
+			968,
+			1234,
+			1542
+		],
+		"rainofconflict": [
+			831,
+			934,
+			1164,
+			null,
+			1247
+		],
+		"saintorsinner": [
+			447,
+			563,
+			906,
+			1124
+		],
+		"hailstone": [
+			534,
+			651,
+			1002
+		],
+		"furetemitai": [
+			447,
+			523,
+			763,
+			null,
+			841
+		],
+		"gensounosatellite": [
+			721,
+			783,
+			992,
+			null,
+			1139
+		],
+		"prayer": [
+			419,
+			479,
+			591,
+			null,
+			714
+		],
+		"crimsonquartz": [
+			569,
+			615,
+			861,
+			null,
+			1200
+		],
+		"thirdsun": [
+			532,
+			702,
+			811,
+			null,
+			1043
+		],
+		"spiritdauntless": [
+			693,
+			957,
+			1207
+		],
+		"diesirae": [
+			632,
+			802,
+			1052,
+			null,
+			1263
+		],
+		"astralexe": [
+			654,
+			734,
+			1059
+		],
+		"liftoff": [
+			459,
+			500,
+			660,
+			null,
+			988
+		],
+		"superambulance": [
+			740,
+			971,
+			1371
+		],
+		"dontfightmusic": [
+			757,
+			962,
+			1043,
+			null,
+			1385
+		],
+		"andrevivemelody": [
+			962,
+			1269,
+			1710
+		],
+		"swansong": [
+			563,
+			719,
+			1225
+		],
+		"renegade": [
+			655,
+			751,
+			994,
+			1165
+		],
+		"raysofremnant": [
+			710,
+			766,
+			982,
+			1118
+		],
+		"breachoffaith": [
+			986,
+			1171,
+			1373,
+			1448
+		],
+		"lamentrain": [
+			1025,
+			1186,
+			1380,
+			1637
+		],
+		"designant": [
+			1055,
+			1426,
+			1768,
+			2184
+		],
+		"astralquant": [
+			782,
+			943,
+			1388
+		],
+		"ignition": [
+			578,
+			621,
+			994
+		],
+		"blazingair": [
+			433,
+			571,
+			757,
+			null,
+			1129
+		],
+		"eightem": [
+			557,
+			847,
+			1081,
+			null,
+			1201
+		],
+		"daat": [
+			921,
+			1091,
+			1500
+		],
+		"breakbreak": [
+			472,
+			614,
+			894,
+			null,
+			1251
+		],
+		"straightintolights": [
+			583,
+			714,
+			1226,
+			null,
+			1280
+		],
+		"virtus": [
+			877,
+			1000,
+			1222,
+			null,
+			1341
+		],
+		"yomibitoshirazu": [
+			641,
+			764,
+			1075
+		],
+		"aethercrest": [
+			921,
+			1147,
+			1508,
+			null,
+			1941
+		],
+		"heartache": [
+			425,
+			687,
+			803,
+			null,
+			851
+		],
+		"deathbyglamour": [
+			460,
+			470,
+			610,
+			null,
+			912
+		],
+		"yourbestnightmare": [
+			760,
+			925,
+			1086,
+			1451
+		],
+		"lastgoodbye": [
+			497,
+			605,
+			727,
+			null,
+			911
+		],
+		"megalovania": [
+			906,
+			969,
+			1064,
+			null,
+			1202
+		],
+		"megalovaniarmx": [
+			946,
+			1161,
+			1345,
+			null,
+			1468
+		],
+		"placebobattler": [
+			597,
+			827,
+			1194
+		],
+		"blackmirror": [
+			471,
+			613,
+			735,
+			null,
+			894
+		],
+		"shinchoku": [
+			595,
+			743,
+			957,
+			null,
+			1162
+		],
+		"trpno": [
+			451,
+			562,
+			897
+		],
+		"tau": [
+			553,
+			798,
+			1057
+		],
+		"dullblade": [
+			579,
+			780,
+			1199
+		],
+		"wontbackdown": [
+			437,
+			551,
+			1015
+		],
+		"dontdie": [
+			460,
+			565,
+			793,
+			null,
+			1004
+		],
+		"ladymadestar": [
+			394,
+			491,
+			636,
+			null,
+			753
+		],
+		"endmoonlight": [
+			340,
+			434,
+			738
+		],
+		"uad": [
+			366,
+			526,
+			643,
+			null,
+			836
+		],
+		"oblivion": [
+			469,
+			527,
+			759,
+			null,
+			871
+		],
+		"nightmare": [
+			680,
+			757,
+			901,
+			null,
+			1116
+		],
+		"tictactoe": [
+			353,
+			505,
+			760,
+			null,
+			907
+		],
+		"satisfaction": [
+			580,
+			738,
+			890,
+			null,
+			1047
+		],
+		"someday": [
+			367,
+			477,
+			673
+		],
+		"miles": [
+			385,
+			548,
+			687,
+			null,
+			829
+		],
+		"iwantyou": [
+			326,
+			395,
+			528,
+			null,
+			660
+		],
+		"syriana": [
+			490,
+			516,
+			886
+		],
+		"liar": [
+			461,
+			614,
+			919
+		],
+		"blythe": [
+			610,
+			729,
+			1000,
+			null,
+			1207
+		],
+		"wereallgonnadie": [
+			733,
+			864,
+			1147,
+			null,
+			1335
+		],
+		"dematerialized": [
+			469,
+			659,
+			722,
+			null,
+			790
+		],
+		"seethelights": [
+			445,
+			582,
+			692,
+			null,
+			844
+		],
+		"scarletlunar": [
+			609,
+			698,
+			1037
+		],
+		"dualdependency": [
+			607,
+			784,
+			987,
+			null,
+			1162
+		],
+		"lilly": [
+			865,
+			1052,
+			1312,
+			null,
+			1353
+		],
+		"extradimensional": [
+			1011,
+			1193,
+			1422,
+			null,
+			1726
+		],
+		"disintegration": [
+			387,
+			466,
+			605,
+			null,
+			821
+		],
+		"factorder": [
+			510,
+			663,
+			849,
+			null,
+			1015
+		],
+		"incompleteone": [
+			691,
+			848,
+			912,
+			null,
+			1008
+		],
+		"chaosblast": [
+			786,
+			1000,
+			1290,
+			null,
+			1539
+		],
+		"welcomequeen": [
+			610,
+			832,
+			1172,
+			null,
+			1442
+		],
+		"altergate": [
+			774,
+			993,
+			1324
+		],
+		"acheron": [
+			538,
+			688,
+			1024
+		],
+		"eternitybreak": [
+			634,
+			882,
+			1051,
+			null,
+			1155
+		],
+		"rostpagegene": [
+			475,
+			697,
+			1028
+		],
+		"violaillyria": [
+			539,
+			683,
+			927
+		],
+		"vainspire": [
+			771,
+			787,
+			947,
+			null,
+			1133
+		],
+		"nowayback": [
+			564,
+			639,
+			837,
+			null,
+			1008
+		],
+		"andorxor": [
+			559,
+			758,
+			1055,
+			null,
+			1404
+		],
+		"undyingmacula": [
+			883,
+			904,
+			1250,
+			null,
+			1461
+		],
+		"awakening": [
+			394,
+			492,
+			608,
+			null,
+			726
+		],
+		"mod": [
+			572,
+			676,
+			853
+		],
+		"particle": [
+			519,
+			613,
+			890,
+			null,
+			881
+		],
+		"paradoxpalette": [
+			476,
+			653,
+			814,
+			null,
+			1043
+		],
+		"xxium": [
+			768,
+			806,
+			1182,
+			null,
+			1096
+		],
+		"angelsboundary": [
+			841,
+			1013,
+			1246
+		],
+		"xterfusion": [
+			640,
+			924,
+			1138,
+			null,
+			1441
+		],
+		"infinitedim": [
+			566,
+			708,
+			947,
+			null,
+			1111
+		],
+		"incarnator": [
+			1178,
+			1276,
+			1565,
+			null,
+			1355
+		],
+		"zephyrlast": [
+			563,
+			832,
+			1027,
+			null,
+			1166
+		],
+		"marenyx": [
+			886,
+			1143,
+			1307,
+			null,
+			1500
+		],
+		"codeoblivion": [
+			773,
+			1015,
+			1281,
+			null,
+			1503
+		],
+		"azalea": [
+			847,
+			973,
+			1144,
+			null,
+			1075
+		],
+		"tabootears": [
+			449,
+			637,
+			845,
+			null,
+			1125
+		],
+		"grandspell": [
+			704,
+			977,
+			1289
+		],
+		"undefined": [
+			371,
+			532,
+			896
+		],
+		"mask": [
+			869,
+			994,
+			1201
+		],
+		"paranoidarc": [
+			762,
+			849,
+			1204,
+			null,
+			1412
+		],
+		"subsphere": [
+			781,
+			997,
+			1177,
+			null,
+			1327
+		],
+		"theraft": [
+			722,
+			803,
+			999,
+			null,
+			1193
+		],
+		"omajinai": [
+			288,
+			572,
+			886
+		],
+		"chaintonite": [
+			723,
+			759,
+			883,
+			null,
+			1037
+		],
+		"onestepcloser": [
+			454,
+			551,
+			752
+		],
+		"mylifeismine": [
+			460,
+			612,
+			933,
+			null,
+			1075
+		],
+		"meltyrhapsody": [
+			582,
+			790,
+			975,
+			null,
+			1185
+		],
+		"signal": [
+			582,
+			824,
+			1151,
+			null,
+			1245
+		],
+		"caramelpop": [
+			610,
+			579,
+			767,
+			null,
+			959
+		],
+		"shinoukyoseki": [
+			582,
+			748,
+			1065
+		],
+		"unknownnum": [
+			486,
+			619,
+			882
+		],
+		"thirdavenue": [
+			529,
+			761,
+			748
+		],
+		"vallista": [
+			548,
+			681,
+			869
+		],
+		"goodrage": [
+			576,
+			702,
+			834,
+			null,
+			1035
+		],
+		"cryogenic": [
+			510,
+			680,
+			831,
+			null,
+			1014
+		],
+		"desertrealm": [
+			843,
+			1000,
+			1460
+		],
+		"spiderdance": [
+			525,
+			526,
+			553,
+			null,
+			666
+		],
+		"spearofjustice": [
+			308,
+			452,
+			607,
+			null,
+			761
+		],
+		"asgore": [
+			797,
+			1044,
+			1006,
+			null,
+			1255
+		],
+		"mirrorrmx": [
+			654,
+			742,
+			972
+		],
+		"riotsystem": [
+			755,
+			782,
+			998,
+			null,
+			1214
+		],
+		"cosmogyral": [
+			547,
+			687,
+			916,
+			null,
+			1049
+		],
+		"flexidefine": [
+			644,
+			842,
+			1055
+		],
+		"altersist": [
+			454,
+			621,
+			803,
+			null,
+			1077
+		],
+		"csqn": [
+			418,
+			625,
+			923,
+			null,
+			1071
+		],
+		"sucromania": [
+			477,
+			731,
+			951,
+			null,
+			1216
+		],
+		"lavie": [
+			598,
+			698,
+			903,
+			null,
+			1125
+		],
+		"kamippoi": [
+			522,
+			645,
+			945,
+			null,
+			1116
+		],
+		"override": [
+			583,
+			723,
+			917,
+			null,
+			1083
+		],
+		"telepathy": [
+			484,
+			766,
+			880,
+			null,
+			1131
+		],
+		"aishite": [
+			676,
+			799,
+			837,
+			null,
+			1039
+		],
+		"synthesis": [
+			764,
+			1109,
+			1192,
+			null,
+			1469
+		],
+		"acidgod": [
+			554,
+			748,
+			1060,
+			null,
+			1379
+		],
+		"chronologia": [
+			790,
+			1051,
+			1230,
+			null,
+			1468
+		],
+		"diein": [
+			806,
+			957,
+			1160,
+			null,
+			1474
+		],
+		"balor": [
+			677,
+			673,
+			900,
+			null,
+			1138
+		],
+		"dreadarea": [
+			858,
+			1002,
+			1405,
+			1663
+		],
+		"un": [
+			853,
+			1040,
+			1502,
+			null,
+			1823
+		],
+		"rivenpilgrim": [
+			889,
+			1052,
+			1503,
+			2032
+		],
+		"cataclysmcry": [
+			920,
+			1137,
+			1614,
+			2119
+		],
+		"deinosphainein": [
+			1008,
+			1178,
+			1888,
+			2228
+		],
+		"ember": [
+			740,
+			824,
+			1070
+		],
+		"sacrosanct": [
+			1256,
+			1385,
+			1888
+		]
+	}
+}
