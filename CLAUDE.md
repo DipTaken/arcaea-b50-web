@@ -9,10 +9,8 @@ explanation over speed — see Working style at the bottom.
 
 | File | Contents |
 |---|---|
-| `docs/todo.txt` | Running project list — features, deploy blockers, stage planning. |
-| `docs/report.md` | Codebase audit: bugs with failure scenarios + fixes, Tailwind dedup, responsive, quality. |
-| `docs/report_todo.md` | The audit as a checklist, with a concept note per item. |
-| `docs/anon_auth_migration.md` | `guest_id` cookie → `signInAnonymously()`. Steps 0–4 done. |
+| `docs/todo.md` | **The** running list — every open bug and task, tiered T0–T4. Replaced `todo.txt`, `report.md`, `report_todo.md`. |
+| `docs/CHART_UPDATE_INSTRUCTIONS.md` | Monthly chart-update runbook: JSON → CSV → staging table → dry run → merge → re-dump seed. |
 | `docs/gotchas.md` | One-line reference of traps hit on this project — TS narrowing, React controlled/uncontrolled, Next 16 API changes, Supabase auth/RLS/CLI, Tailwind. Check here first when something behaves impossibly. |
 | `docs/hours_log.md` | Per-contributor hours table. |
 
@@ -29,6 +27,9 @@ Env vars (`.env.local`, gitignored): `NEXT_PUBLIC_SUPABASE_URL`,
 `.env*` would swallow it, so there is an explicit `!.env.example` negation — without it the
 second-contributor workflow silently breaks.
 
+**Deployed on Vercel.** Google OAuth verified end to end against the live URL, Supabase URL config
+updated, and the RLS three-step check confirmed.
+
 Stage 2 (OCR) is not started. Candidate: `arcaea-offline-ocr` on PyPI (KNN + SIFT; already speaks the
 same `song_id` system used for jackets).
 
@@ -36,7 +37,7 @@ same `song_id` system used for jackets).
 
 | Route | Purpose |
 |---|---|
-| `/` | Landing. Welcome line if signed in, else `<LoginButton>`, plus a hand-maintained `<Panel>` changelog (newest first — the comment in the file notes the order is wrong). |
+| `/` | Landing. Welcome line if signed in, else `<LoginButton>`, plus a hand-maintained `<Panel>` changelog (newest first — the comment in the file notes the order is wrong). **The auth branch is two-way where `NavBar`'s is three-way, so an anonymous user is offered `<LoginButton>` and loses their scores — T0 in `docs/todo.md`.** |
 | `/scores` | B50 view — best score per chart, top 50 by Play Rating, plus the B50 number. |
 | `/browse` | Chart catalog: search, sort, level/difficulty filters, Load More. |
 | `/leaderboard` | Stub — `PageShell` heading only. |
@@ -280,8 +281,9 @@ utils/
 │                 `style` (Tailwind's scanner only sees complete literal class strings, so
 │                 `bg-[${color}]` never generates CSS). getTextSize(title) → a *static* class bucketed
 │                 by length, so interpolating THAT is fine. Also cardHoverAnimation and
-│                 heroBackdropURL. Also `scrollbarStyle` — but those are `tailwind-scrollbar` plugin
-│                 classes and the plugin is NOT installed, so the constant currently emits no CSS.
+│                 heroBackdropURL, and `scrollbarStyle` — `scrollbar-thin` / `scrollbar-thumb-*` /
+│                 `scrollbar-track-*` are core Tailwind v4 utilities (`scrollbar-width`,
+│                 `scrollbar-color`), NOT the old plugin. They work; no plugin needed.
 └── types.ts    — Chart, Score, ScoreWithChart = Score & { charts: Chart },
                   B50Entry = { rank, score, playRating, weight: 1 | 2 }, and the import pair
                   ImportScore / RowError (moved here so actions.ts and the client can share them).
@@ -341,93 +343,22 @@ new file and export names. Already migrated: the root file is `proxy.ts` exporti
 Naming nit (cosmetic): `getPlayRating`/`getScoreModifier` don't match the Sheets' labels ("Play
 Rating" = the delta alone, "Play Potential" = constant + delta).
 
-## Known bugs / rough edges
+## Known bugs / not yet built
 
-Verified against the current tree. Reasoning and fixes are in `docs/report.md`; keep this to the
-headline. Numbering is stable, so fixed entries stay listed.
+**Everything open lives in `docs/todo.md`,** tiered T0 (data loss) to T4 (not built). It is the single
+list; do not mirror it here or the two will drift.
 
-1. ~~Proxy never refreshes the session.~~ **FIXED.** Not yet verified against a real expiring token
-   (shorten the JWT expiry, idle past it, reload).
-2. ~~`getShinyPureCount` wrong on ~half of all scores.~~ **FIXED** — now the integer-arithmetic
-   version from report §1.1. It omits that fix's `if (!noteCount) return 0` guard, so a chart with a
-   null/zero `note_count` yields `NaN`.
-3. ~~`line-clamp-2` never clamped.~~ **RESOLVED BY REMOVAL** — `CardBottomBar` has no clamp at all, so
-   long titles now shrink via `getTextSize` and truncate at `h-10` rather than wrapping to two lines.
-4. ~~`addScore` discards its insert error.~~ **FIXED.**
-5. ~~Unguarded `.toFixed` crashes the grid.~~ **FIXED** — `CardBottomBar` takes `constant` as
-   `number | null | undefined` and writes `constant?.toFixed(1)`.
-6. ~~Cancelling Google login reports success.~~ **FIXED**, including the `forwardedProto ?? 'https'`
-   fallback.
-7. ~~`NaN` passes every validation gate.~~ **FIXED** — `validateScore` now opens with a loop rejecting
-   any non-null `score`/`pure`/`far`/`lost` that fails `Number.isInteger` (stricter than the
-   `Number.isFinite` originally planned; also catches non-integer floats). It runs before the range
-   checks and covers add and edit, since both go through `parseAndValidate`. Still open: the
-   pure+far+lost cross-check only fires when all three are non-null, and `deleteScore` has no
-   equivalent guard on `scoreId` (RLS makes that non-urgent).
-8. **Unknown levels slip through `</<=` filters.** `filterCharts` guards `levelIndex >= 0` for the
-   *filter* value, but a `chart.level` missing from `levelOrder` still yields `-1`, which passes
-   `lt`/`le` against any real level.
-9. ~~B50 double-counts repeat plays.~~ **FIXED** — `getB50FromScores` keeps only the best score per
-   `chart_id`.
-10. **Query errors are invisible on `/scores`.** Neither query destructures `error`, so a denied
-    policy renders as an empty B50 — indistinguishable from "you have no scores". The main debugging
-    hazard now that RLS is on.
-11. ~~Inline Supabase clients.~~ **FIXED.**
-12. **`/leaderboard` is an empty stub.**
-13. ~~`DeleteScoreButton` renders a dead button.~~ **FIXED** — real confirm modal, awaited action,
-    error display, and an `onDeleted` callback that closes the parent modal. All 5 of its lint
-    warnings are gone.
-14. **`ScoreForm`'s heading is hardcoded `"Add Score"`**, so the edit modal is titled "Add Score".
-    Only `submitLabel` varies.
-15. **`heroBackdropURL` hardcodes the full project URL** (`utils/style.ts`) instead of building on
-    `NEXT_PUBLIC_SUPABASE_URL` like `getJacketUrl` does — it breaks for a contributor on another
-    Supabase project.
-16. **A blank `clear_status` in an imported row silently becomes `clearNormal`** (`parseCsv.ts:60-63`,
-    commit 41b114d). `getClearFactor` gives 0 only to exactly `"fail"` and 0.2 to everything else, so
-    a genuine fail imported blank gains 0.2 play rating and inflates the B50 — and it's stored, so a
-    later formula fix can't repair it. Deliberate trade for friction; the alternative is requiring the
-    column. Nothing tells the user the default was applied.
-17. **`importScores` rejects the whole batch on the first bad row**, with a message that names a
-    `chartId` and no row number (`ImportScore` has no `rowNumber`). Low-impact — the client already
-    filtered, so this only fires on tampering or a stale chart list — but the message is unactionable.
-18. **`handleImport` has no `try/catch`** (`ImportCSVButton.tsx`) and reports via `alert()`. A thrown
-    rejection skips `setIsImporting(false)`, leaving the button stuck on "Importing…". Same class as
-    `ScoreForm.handleSubmit`; `finally` fixes it. Every other surface uses inline error state.
-19. **Re-importing the same paste duplicates every row.** `unique_user_score` is
-    `(user_id, chart_id, created_at)` and `created_at` defaults to `now()`, so nothing conflicts.
-    `getB50FromScores` keeps the best per chart, so the B50 looks correct while `scores` doubles.
-20. **`scrollbarStyle` is dead** (`utils/style.ts`) — `tailwind-scrollbar` classes with the plugin
-    uninstalled. Used by the textarea, error list, and preview table.
-21. **`/docs/importing-scores` 404s** — `ImportCSVButton`'s help link points at a route that
-    doesn't exist.
+Two entries worth knowing before reading any code:
+
+- **T0: the homepage sign-in button orphans an anonymous user's scores** — `app/page.tsx` branches two
+  ways where `NavBar` branches three.
+- **T3: queries return `any`,** so `utils/types.ts` can and does disagree with the DB
+  (`chart_constant` / `note_count` are declared non-nullable; the columns are not).
 
 Baselines: `npx tsc --noEmit` is clean. `npx eslint .` is **0 errors, 5 warnings** — 4
 `no-img-element` (blocked on `images.remotePatterns` in `next.config.ts`) and 1 unused
-`getPlayRating` in `ScoreCard.tsx`. The 5 `DeleteScoreButton.tsx` warnings and the unused `Link` in
-`ProfileButton.tsx` are gone. Note `next dev` does not typecheck — a bad import surfaces as a runtime
-"Element type is invalid … got: undefined", so run `tsc` rather than trusting the dev server.
-
-## Not yet built
-
-- **Stage 2 (OCR)** — not started.
-- **Deployment** — the three `auth/callback` code blockers in `docs/anon_auth_migration.md`
-  § Deployment are all fixed; what remains is the configuration checklist there.
-- **RLS verification** — `docs/todo.txt` marks the three-step check done, but no result was recorded
-  anywhere, so treat it as unconfirmed until someone re-runs it. The meaningful test is a private
-  window seeing an *empty* `/scores` (not your scores), `/browse` still loading with no session, and
-  `auth.users` not growing when the same anon user adds a second score. "I can see my own scores" is
-  equally true with no policy at all.
-- **Leaderboard** — route only.
-- **Play/import history** — no history table; each play is just another `scores` row. Needs a schema
-  decision first. CSV import made this concrete: see bug 19.
-- **Import hardening** — the feature works end to end; bugs 16–21 are what's left. The most
-  consequential is the silent `clearNormal` default, since it writes a fabricated fact.
-- **Typed Supabase queries** — `ScoreWithChart` types the components, but the queries still return
-  `any`, so a narrowed `select()` wouldn't fail at compile time. This is why `utils/types.ts`
-  disagrees with the code (`chart_constant` and `charts` are declared non-nullable while ~20 call
-  sites write `charts?.`). `supabase gen types typescript` + `createClient<Database>` closes it.
-- **`handleSubmit` has no `try/catch`** (`ScoreForm`) — a *thrown* rejection (network drop) is
-  unhandled; only returned `{ error }` is displayed.
+`getPlayRating` in `ScoreCard.tsx`. Note `next dev` does not typecheck — a bad import surfaces as a
+runtime "Element type is invalid … got: undefined", so run `tsc` rather than trusting the dev server.
 
 ## Working style notes
 

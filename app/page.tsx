@@ -32,7 +32,7 @@ export default async function LandingPage() {
                         <span className="text-4xl font-bold text-white text-center">Changelog</span>
                     </h1>
 
-                    {/*THIS SHOULD BE REVERSE ORDER*/}
+                    {/*THIS SHOULD BE REVERSE CHRONOLOGICAL ORDER*/}
                     <p className="text-white">
                         <span className="font-bold">v1.1.1</span> {`(2026-09-03) - Bugfixes: Import CSV now correctly matches with title and song_id and ignores empty rows; Add Score now displays charts in correct order.`}
                     </p>

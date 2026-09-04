@@ -5,7 +5,7 @@ Browse charts and track your best scores for the mobile rhythm game [Arcaea](htt
 ## About
 
 A learning project. My first time with TypeScript, Next.js, Supabase, and CSS. It is **not vibecoded**. I write the code myself, but AI is used as a tutor and code reviewer. AI is also used to audit what I've already written.
-The audit in [docs/report.md](docs/report.md) is an example.
+The tiered bug list in [docs/todo.md](docs/todo.md) is an example.
 
 ## Stack
 
@@ -60,13 +60,11 @@ utils/
 └── types.ts       Chart, Score, ScoreWithChart, B50Entry
 proxy.ts           Proxy entry point (Next 16's rename of middleware.ts)
 supabase/          Migrations, seed data, CLI config
-docs/              Project list, audit, migration plan, gotchas
+docs/              Todo list, chart-update runbook, gotchas, hours log
 ```
 
 ## Docs
 
-- [docs/todo.txt](docs/todo.txt) — what's built and what's next
-- [docs/report.md](docs/report.md) — codebase audit: bugs, Tailwind refactor, code quality
-- [docs/report_todo.md](docs/report_todo.md) — the audit as a checklist, with a note per concept
+- [docs/todo.md](docs/todo.md) — every open bug and task, tiered T0 (data loss) to T4 (not built)
+- [docs/CHART_UPDATE_INSTRUCTIONS.md](docs/CHART_UPDATE_INSTRUCTIONS.md) — the monthly chart-update runbook
 - [docs/gotchas.md](docs/gotchas.md) — traps hit on this project, one line each
-- [docs/anon_auth_migration.md](docs/anon_auth_migration.md) — the guest-cookie → anonymous-auth plan
