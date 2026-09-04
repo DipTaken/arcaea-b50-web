@@ -43,4 +43,4 @@ ON CONFLICT (song_id, difficulty) DO UPDATE SET
     jacket_override = EXCLUDED.jacket_override,
     artist = EXCLUDED.artist;
 
-rollback;
+commit;

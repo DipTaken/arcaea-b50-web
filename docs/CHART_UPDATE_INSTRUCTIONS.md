@@ -39,14 +39,11 @@ npx supabase db query -f supabase/scripts/update_charts_dry.sql --linked
 ```
 npx supabase db query -f supabase/scripts/update_charts.sql --linked
 ```
-   First run keeps `rollback;` on the last line: compare the reported counts against the dry run, then change
-   it to `commit;` and run again.
 
 ### 6. **Drop staging**
 ```
 npx supabase db query --linked "drop table public.charts_temp;"
 ```
-
    Kept out of the merge script to allow for verification before deleting the old table.
 
 ### 7. **Re-dump the seed and commit**

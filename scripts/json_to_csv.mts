@@ -3,8 +3,8 @@ import Papa from 'papaparse'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-type ChartRow = Omit<Chart, 'id' | 'chart_constant' | 'note_count'>
-    & { chart_constant: number | null; note_count: number | null }
+type ChartRow = Omit<Chart, 'id' | 'chart_constant' | 'note_count' | 'length' >
+    & { chart_constant: number | null; note_count: number | null; length: string | null }
 
 type SongListFile = {
     songs: SongEntry[]
@@ -40,7 +40,7 @@ type ChartConstantEntry = { constant: number }
 
 type NoteCountFile = { notes: Record<string, (number | null)[]> }
 
-type LengthFile = Record<string, string>
+type LengthFile = Record<string, string | undefined>
 
 const DIFFICULTIES = ['PST', 'PRS', 'FTR', 'BYD', 'ETR'] as const
 
@@ -50,24 +50,26 @@ const noteCounts = readJson<NoteCountFile>('note_count.json').notes
 const lengths = readJson<LengthFile>('length.json')
 
 const charts = songslist.flatMap(song =>
-    song.difficulties?.map<ChartRow>((diff) => {
-        const title = song.title_localized.en
-        const song_id = song.id
-        const difficulty = getDifficultyName(song.set, diff.ratingClass)
-        const level = diff.ratingPlus ? `${diff.rating}+` : `${diff.rating}`
-        const chart_constant = chartConstants[song.id]?.[diff.ratingClass]?.constant ?? null
-        const note_count = noteCounts[song.id]?.[diff.ratingClass] ?? null
-        const artist = diff.artist ?? song.artist
-        const bpm = diff.bpm ?? song.bpm
-        const length = lengths[song.id] ?? null
-        const version = diff.version ?? song.version
-        const chart_designer = diff.chartDesigner || null
-        const jacket_designer = diff.jacketDesigner || null
-        const jacket_override = diff.jacketOverride ?? false
-
-        return { title, song_id, difficulty, level, chart_constant, note_count, artist, bpm, length, version, chart_designer, jacket_designer, jacket_override }
+    song.difficulties?.flatMap<ChartRow>((diff) => {
+        const chart: ChartRow = {
+            title: song.title_localized.en,
+            song_id: song.id,
+            difficulty: getDifficultyName(song.set, diff.ratingClass),
+            level: diff.ratingPlus ? `${diff.rating}+` : `${diff.rating}`,
+            chart_constant: chartConstants[song.id]?.[diff.ratingClass]?.constant ?? null,
+            note_count: noteCounts[song.id]?.[diff.ratingClass] ?? null,
+            artist: diff.artist ?? song.artist,
+            bpm: diff.bpm ?? song.bpm,
+            length: lengths[song.id] ?? null,
+            version: diff.version ?? song.version,
+            chart_designer: diff.chartDesigner || null,
+            jacket_designer: diff.jacketDesigner || null,
+            jacket_override: diff.jacketOverride ?? false,
+        }
+        
+        return shouldDropChart(chart, song.deleted ?? false) ? [] : getChartTitleExceptions(chart)
     }) ?? []
-) 
+)
 
 function getDifficultyName(set: string, ratingClass: number): string {
     const difficulty = DIFFICULTIES[ratingClass]
@@ -77,6 +79,40 @@ function getDifficultyName(set: string, ratingClass: number): string {
     else {
         return difficulty
     }
+}
+
+function getChartTitleExceptions(chart: ChartRow): ChartRow {
+    if (chart.song_id === 'axiumcrisis' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'Axium Divergence' }
+    }
+    else if (chart.song_id === 'dropdead' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'overdead.' }
+    }
+    else if (chart.song_id === 'viciousheroism' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'Vicious [ANTi] Heroism' }
+    }
+    else if (chart.song_id === 'singularity' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'Singularity VVVIP' }
+    }
+    else if (chart.song_id === 'pragmatism' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'PRAGMATISM -RESURRECTION-' }
+    }
+    else if (chart.song_id === 'last' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'Last | Moment' }
+    }
+    else if (chart.song_id === 'ignotus' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'Ignotus Afterburn' }
+    }
+    else if (chart.song_id === 'redandblue' && chart.difficulty === 'BYD') {
+        return { ...chart, title: 'Red and Blue and Green' }
+    }
+
+    return chart
+}
+
+function shouldDropChart(chart: ChartRow, isDeleted: boolean): boolean {
+    const isNotLastEternityBYD = chart.song_id === 'lasteternity' && chart.difficulty !== 'BYD'
+    return isDeleted || isNotLastEternityBYD
 }
 
 function readJson<T>(filename: string): T {
