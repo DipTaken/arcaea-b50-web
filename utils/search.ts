@@ -100,6 +100,7 @@ export function getSortDisplayValue(chart: Chart, sortOption: string | null): st
 
 // converts difficulty string to a number for sorting purposes
 function getDifficultyValue(difficulty: string): number {
+    if (!difficulty) return 0
     switch (difficulty) {
         case "PST":
             return 1
@@ -118,6 +119,7 @@ function getDifficultyValue(difficulty: string): number {
 
 // converts length string to a number for sorting purposes
 function getLengthValue(length: string): number {
+    if (!length) return 0
     const parts = length.split(':')
     if (parts.length === 2) {
         const minutes = parseInt(parts[0], 10)
@@ -129,12 +131,14 @@ function getLengthValue(length: string): number {
 
 // converts bpm string to a number for sorting purposes
 function getBPMValue(bpm: string): number {
+    if (!bpm) return 0
     const bpmValue = parseFloat(bpm)
     return isNaN(bpmValue) ? 0 : bpmValue
 }
 
 // compares two version strings
 function compareVersions(versionA: string, versionB: string): number {
+    if (!versionA || !versionB) return 0
     const partsA = versionA.split('.').map(Number)
     const partsB = versionB.split('.').map(Number)
 
