@@ -1,21 +1,19 @@
+import { DIFFICULTY_ORDER, LEVEL_LIST } from '@/utils/constants'
+
 // returns a color based on the difficulty
 export function getDifficultyColor(difficulty: string): string {
-    switch (difficulty) {
-        case "PST":
-            return "#40A0A0"
-        case "PRS":
-            return "#40A040"
-        case "FTR":
-            return "#A040A0"
-        case "ETR":
-            return "#7340A0"
-        case "BYD":
-            return "#A04040"
-        case "INS":
-            return "#3933b2"
-        default:
-            return "#000000"
+    const DIFFICULTY_COLORS: Record<string, string> = {
+        PST: "#40A0A0",
+        PRS: "#40A040",
+        FTR: "#A040A0",
+        ETR: "#7340A0",
+        BYD: "#A04040",
+        INS: "#3933b2"
     }
+    if (!difficulty || !(DIFFICULTY_ORDER as readonly string[]).includes(difficulty)) {
+        return "#000000" // default color for unknown difficulty
+    }
+    return DIFFICULTY_COLORS[difficulty]
 }
 
 // returns a color based on the grade

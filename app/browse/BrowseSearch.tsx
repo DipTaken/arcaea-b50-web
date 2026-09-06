@@ -7,6 +7,7 @@ import BrowseCard from './BrowseCard'
 import BrowseModal from './BrowseModal'
 import { CardGrid } from '@/app/components/CardGrid'
 import { Button } from '../components/Button'
+import { LEVEL_LIST, DIFFICULTY_ORDER } from '@/utils/constants'
 
 const CARDS_PER_PAGE = 100
 
@@ -96,23 +97,12 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         <select className={`${controlClasses} px-6`}
                             onChange={(e) => setLevelFilter(e.target.value)}>
                             <option value="" >Level</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="7+">7+</option>
-                            <option value="8">8</option>
-                            <option value="8+">8+</option>
-                            <option value="9">9</option>
-                            <option value="9+">9+</option>
-                            <option value="10">10</option>
-                            <option value="10+">10+</option>
-                            <option value="11">11</option>
-                            <option value="11+">11+</option>
-                            <option value="12">12</option>
+                            
+                            {LEVEL_LIST.map((level) => (
+                                <option key={level} value={level}>
+                                    {level}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
@@ -120,11 +110,11 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     <select className={`${controlClasses} px-6`}
                         onChange={(e) => setDifficultyFilter(Number(e.target.value))}>
                         <option value="" >Difficulty</option>
-                        <option value="1">PST</option>
-                        <option value="2">PRS</option>
-                        <option value="3">FTR</option>
-                        <option value="4">ETR</option>
-                        <option value="5">BYD</option>
+                        {DIFFICULTY_ORDER.map((diff) => (
+                            <option key={diff} value={DIFFICULTY_ORDER.indexOf(diff) + 1}>
+                                {diff}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>

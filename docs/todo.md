@@ -22,7 +22,7 @@ config updated). RLS three-step check confirmed.
 
 ## T0 — Data loss
 
-- [ ] **Homepage sign-in orphans an anonymous user's scores.**
+- [X] **Homepage sign-in orphans an anonymous user's scores.**
       `app/page.tsx:18-24` branches two ways (`user && !user.is_anonymous` → welcome, else `<LoginButton>`),
       so an anonymous user gets `signInWithOAuth`, which replaces their session. The anon uid survives with
       no credential and every score under it is unreachable. `NavBar`'s three-way branch is the model —
@@ -43,7 +43,7 @@ config updated). RLS three-step check confirmed.
 
 ## T1 — Broken
 
-- [ ] **Formatted score doesn't reset when the chart changes.**
+- [X] **Formatted score doesn't reset when the chart changes.**
       `ScoreForm.tsx:114` keys the input subtree on `selectedChart?.id`, which remounts the uncontrolled
       inputs — but `scoreText` (line 41) lives in `ScoreForm` *outside* that subtree, so the grey formatted
       number on line 129 survives. Result: empty input, stale number beneath it.
@@ -51,18 +51,18 @@ config updated). RLS three-step check confirmed.
       `scoreText` alongside `setSelectedChart`.
       *Repro: /scores → Add Score → pick a chart → type a score → switch charts.*
 
-- [ ] **Query errors are invisible on `/scores`.** Neither query destructures `error`, so a denied policy
+- [X] **Query errors are invisible on `/scores`.** Neither query destructures `error`, so a denied policy
       renders as an empty B50 — indistinguishable from "no scores yet". Main debugging hazard now RLS is on.
 
-- [ ] **Unknown levels slip through `<`/`<=` filters.** `filterCharts` guards `levelIndex >= 0` for the
+- [DOES NOT NEED FIXING] **Unknown levels slip through `<`/`<=` filters.** `filterCharts` guards `levelIndex >= 0` for the
       filter value, but a `chart.level` missing from `levelOrder` yields `-1`, which passes `lt`/`le`
       against any real level.
 
-- [ ] **`getShinyPureCount` returns `NaN` on a null or zero `note_count`.** Missing the
+- [X] **`getShinyPureCount` returns `NaN` on a null or zero `note_count`.** Missing the
       `if (!noteCount) return 0` guard. Not hypothetical — `lasteternity`'s three placeholder charts carry
       NULL note counts.
 
-- [ ] **`getLengthValue` throws on a null `length`** (`search.ts:120-121` calls `.split(':')`), crashing
+- [X] **`getLengthValue` throws on a null `length`** (`search.ts:120-121` calls `.split(':')`), crashing
       `/browse` when sorted by length. Nine songs in the current songlist have no length. Guard the
       function or fill the values in.
 
@@ -83,10 +83,10 @@ config updated). RLS three-step check confirmed.
 ## T3 — Debt
 
 **Duplication**
-- [ ] Difficulty list lives in 3 places — `style.ts:2-19`, `search.ts:102-117`, `BrowseSearch.tsx:123-127`.
+- [X] Difficulty list lives in 3 places — `style.ts:2-19`, `search.ts:102-117`, `BrowseSearch.tsx:123-127`.
       Already drifted: `INS` exists only in `style.ts`, so Inscribed charts sort before PST and match no
       difficulty filter.
-- [ ] Level list lives in 2 — `search.ts:7` vs 17 hand-written `<option>`s in `BrowseSearch.tsx`.
+- [X] Level list lives in 2 — `search.ts:7` vs 17 hand-written `<option>`s in `BrowseSearch.tsx`.
 - [ ] Sort keys live in 3 — `BrowseSearch.tsx`, `search.ts` (sort), `search.ts` (display).
 - [ ] `MAX_BASE_SCORE` — `10000000` inlined in 5 places.
 - [ ] Extract `useDialogSelection<T>()` — `ScoreGrid.tsx` and `BrowseSearch.tsx` hold the same

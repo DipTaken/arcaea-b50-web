@@ -1,11 +1,12 @@
 import { Chart } from '@/utils/types'
+import { LEVEL_LIST, DIFFICULTY_ORDER } from '@/utils/constants'
 
 // takes in a list of charts and filters them based on search, level, and difficulty
 export function filterCharts(charts: Chart[], search: string, levelFilter?: string | null, filterComparison: string | null = "ge", difficultyFilter?: number | null): Chart[] {
     const query = search.toLowerCase()
     //using this to compare levels since they are strings 
-    const levelOrder = ['1', '2', '3', '4', '5', '6', '7', '7+', '8', '8+', '9', '9+', '10', '10+', '11', '11+', '12']
-    const levelIndex = levelFilter ? levelOrder.indexOf(levelFilter) : -1
+
+    const levelIndex = levelFilter ? LEVEL_LIST.indexOf(levelFilter) : -1
     const comparisonOp = filterComparison ? getComparisonOp(filterComparison) : null
 
     return charts.filter((chart) => {
@@ -15,7 +16,7 @@ export function filterCharts(charts: Chart[], search: string, levelFilter?: stri
             chart.song_id.toLowerCase().includes(query)
 
         //matching level and difficulty filters
-        const chartIndex = levelOrder.indexOf(chart.level)
+        const chartIndex = LEVEL_LIST.indexOf(chart.level)
         const matchesLevel = comparisonOp && levelIndex >= 0 ? comparisonOp(chartIndex, levelIndex) : true
         const matchesDifficulty = difficultyFilter ? getDifficultyValue(chart.difficulty) === difficultyFilter : true
 
@@ -99,26 +100,13 @@ export function getSortDisplayValue(chart: Chart, sortOption: string | null): st
 }
 
 // converts difficulty string to a number for sorting purposes
-function getDifficultyValue(difficulty: string): number {
-    if (!difficulty) return 0
-    switch (difficulty) {
-        case "PST":
-            return 1
-        case "PRS":
-            return 2
-        case "FTR":
-            return 3
-        case "ETR":
-            return 4
-        case "BYD":
-            return 5
-        default:
-            return 0
-    }
+function getDifficultyValue(difficulty: string ): number {
+    if (!difficulty || !(DIFFICULTY_ORDER as readonly string[]).includes(difficulty)) return 0
+    else return (DIFFICULTY_ORDER as readonly string[]).indexOf(difficulty) + 1 // +1 to make it 1-based instead of 0-based
 }
 
 // converts length string to a number for sorting purposes
-function getLengthValue(length: string): number {
+function getLengthValue(length: string | null): number {
     if (!length) return 0
     const parts = length.split(':')
     if (parts.length === 2) {
@@ -130,7 +118,7 @@ function getLengthValue(length: string): number {
 }
 
 // converts bpm string to a number for sorting purposes
-function getBPMValue(bpm: string): number {
+function getBPMValue(bpm: string | null): number {
     if (!bpm) return 0
     const bpmValue = parseFloat(bpm)
     return isNaN(bpmValue) ? 0 : bpmValue
@@ -138,7 +126,6 @@ function getBPMValue(bpm: string): number {
 
 // compares two version strings
 function compareVersions(versionA: string, versionB: string): number {
-    if (!versionA || !versionB) return 0
     const partsA = versionA.split('.').map(Number)
     const partsB = versionB.split('.').map(Number)
 
