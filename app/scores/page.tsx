@@ -22,7 +22,7 @@ export default async function Page() {
     .order('id')
 
   //if the user is signed in, get their scores, otherwise return an empty array
-  const { data: scores } = user ? await supabase
+  const { data: scores, error: error } = user ? await supabase
     .from('scores')
     .select('*, charts(*)')
     .eq('user_id', user.id)
@@ -50,7 +50,19 @@ export default async function Page() {
         <p className="font-bold text-xl border-2 border-gray-400 rounded-md bg-gray-800 text-white px-4 py-2">
           B50: {getB50Rating(b50Scores).toFixed(3)} </p>
       </div>
-      <ScoreGrid entries={b50Scores} />
+
+      {/*Display scores if there are: no errors, more than 0 scores*/}
+      {!error && scores && scores.length > 0 && (
+        <ScoreGrid entries={b50Scores} />
+      )}
+      {/*Display a message if there are: no errors, 0 scores*/}
+      {!error && scores && scores.length === 0 && (
+        <p className="text-2xl font-light">Add a score to begin!</p>
+      )}
+      {/*Display an error message*/}
+      {error && (
+        <p className="text-2xl font-light">Error loading scores: {error.message}</p>
+      )}
 
     </PageShell>
   )
