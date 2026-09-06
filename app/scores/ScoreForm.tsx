@@ -73,6 +73,11 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
         }
     };
 
+    const handleSelectChart = (chart: Chart | null) => {
+        setSelectedChart(chart)
+        setScoreText('') 
+    }
+
     const chartInfoElement = (
         <div className="flex items-center justify-start gap-4 ">
             <img src={getJacketUrl(selectedChart?.song_id || "", selectedChart?.difficulty || "", selectedChart?.jacket_override || false)}
@@ -101,7 +106,7 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
     const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
 
     return (
-        <SelectedChartContext.Provider value={setSelectedChart}>
+        <SelectedChartContext.Provider value={handleSelectChart}>
             <form onSubmit={handleSubmit}
                 className={`flex flex-col gap-4 gap-y-7 p-10 justify-center rounded-lg bg-gray-800 border-2 border-gray-400 w-full max-w-5xl`}
             >
