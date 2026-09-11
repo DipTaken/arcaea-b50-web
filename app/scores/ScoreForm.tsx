@@ -5,6 +5,7 @@ import { ChangeEvent, SubmitEvent, createContext, useContext, useState } from "r
 import { Button } from "../components/Button"
 import { getDifficultyColor } from "@/utils/style"
 import { getJacketUrl } from "@/utils/jacket"
+import { MAX_BASE_SCORE } from "@/utils/constants"
 
 type InitialValues = {
     score?: number
@@ -103,7 +104,7 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
         className: "no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
     } as const
 
-    const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
+    const max = selectedChart ? MAX_BASE_SCORE + selectedChart.note_count : MAX_BASE_SCORE
 
     return (
         <SelectedChartContext.Provider value={handleSelectChart}>

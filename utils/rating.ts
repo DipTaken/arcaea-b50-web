@@ -1,7 +1,8 @@
+import { MAX_BASE_SCORE } from "./constants"
 import { ScoreWithChart, B50Entry } from "./types"
 
 export function getGrade(score: number, noteCount: number, pure: number | null, far: number | null, lost: number | null): string {
-    if (score >= 10000000 && (isPM(score, noteCount, far, lost) || noteCount < 2237)) return "PM"
+    if (score >= MAX_BASE_SCORE && (isPM(score, noteCount, far, lost) || noteCount < 2237)) return "PM"
     else if (score >= 9900000) return "EX+"
     else if (score >= 9800000) return "EX"
     else if (score >= 9500000) return "AA"
@@ -32,7 +33,7 @@ export function getClearStatus(clearStatus: string, length: 'short' | 'long' = '
 
 // returns score modifier (ex. cc = 10.0, scoreModifier = 1.274, so playRating = 11.274)
 export function getScoreModifier(score: number): number {
-    if (score >= 10000000) return 2
+    if (score >= MAX_BASE_SCORE) return 2
     else if (score >= 9800000) return 1 + (score - 9800000) / 200000
     else return (score - 9500000) / 300000
 }
@@ -69,7 +70,7 @@ const MAX_NOTES_SAFE_PM_THRESHOLD = 2237  //theorically if there is a chart with
 
 // checks if a score is a PM (Pure Memory) and is future-proofed for charts with a high number of notes
 export function isPM(score: number, noteCount: number, far: number | null, lost: number | null): boolean {
-    if (score < 10000000) return false
+    if (score < MAX_BASE_SCORE) return false
     else if (noteCount < MAX_NOTES_SAFE_PM_THRESHOLD) return true
     else if (far === null || lost === null) return false
     else return far === 0 && lost === 0
