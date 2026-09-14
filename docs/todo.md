@@ -66,19 +66,19 @@ config updated). RLS three-step check confirmed.
       `/browse` when sorted by length. Nine songs in the current songlist have no length. Guard the
       function or fill the values in.
 
-- [ ] **`handleImport` has no `try/catch`** (`ImportCSVButton.tsx`) and reports via `alert()`. A thrown
+- [X] **`handleImport` has no `try/catch`** (`ImportCSVButton.tsx`) and reports via `alert()`. A thrown
       rejection skips `setIsImporting(false)`, leaving the button stuck on "Importing…". `finally` fixes it.
 
-- [ ] **`ScoreForm.handleSubmit` has no `try/catch`.** Only a returned `{ error }` is displayed; a thrown
+- [X] **`ScoreForm.handleSubmit` has no `try/catch`.** Only a returned `{ error }` is displayed; a thrown
       rejection (network drop) is unhandled. Same class as above.
 
-- [ ] **`importScores` rejects the whole batch on the first bad row**, with a message naming a `chartId`
+- [NOT NEEDED] **`importScores` rejects the whole batch on the first bad row**, with a message naming a `chartId`
       and no row number (`ImportScore` has no `rowNumber`). Only fires on tampering or a stale chart list,
       but the message is unactionable.
 
 ## T2 — Papercuts
 
-- [ ] `/docs/importing-scores` 404s — `ImportCSVButton`'s help link points at a route that doesn't exist.
+- [put to todo list; to be built] `/docs/importing-scores` 404s — `ImportCSVButton`'s help link points at a route that doesn't exist.
 
 ## T3 — Debt
 

@@ -49,13 +49,20 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
         const formData = new FormData(form)
         setErrorMessage(null) // Clear any previous error message
 
-        const result = await onSubmit(formData)
+        try {
+            const result = await onSubmit(formData)
 
-        if (result?.error) {
-            setErrorMessage(result.error)
-            return
+            if (result?.error) {
+                setErrorMessage(result.error)
+                return
+            }
+            else {
+                onClose() // close the modal
+            }
         }
-        onClose() // close the modal
+        catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred.')
+        }
     }
 
     // Handle input validation for the input fields
@@ -76,7 +83,7 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
 
     const handleSelectChart = (chart: Chart | null) => {
         setSelectedChart(chart)
-        setScoreText('') 
+        setScoreText('')
     }
 
     const chartInfoElement = (

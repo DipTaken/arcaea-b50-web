@@ -23,14 +23,21 @@ export default function ImportCSVButton({ charts }: { charts: Chart[] }) {
 
     async function handleImport() {
         setIsImporting(true)
-        const result = await importScores(scores)
-        setIsImporting(false)
-        if (result?.error) {
-            setImportResult(result.error)
+        try {
+            const result = await importScores(scores)
+            if (result?.error) {
+                setImportResult(result.error)
+            }
+            else {
+                setImportResult(`Successfully imported ${result.imported} scores.`)
+                dialogRef.current?.close()
+            }
         }
-        else {
-            setImportResult(`Successfully imported ${result.imported} scores.`)
-            dialogRef.current?.close()
+        catch (error) {
+            setImportResult(error instanceof Error ? error.message : 'An unexpected error occurred.')
+        }
+        finally {
+            setIsImporting(false)
         }
     }
 
