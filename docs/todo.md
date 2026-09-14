@@ -91,7 +91,7 @@ config updated). RLS three-step check confirmed.
 - [X] `MAX_BASE_SCORE` — `10000000` inlined in 5 places.
 - [ ] Extract `useDialogSelection<T>()` — `ScoreGrid.tsx` and `BrowseSearch.tsx` hold the same
       selection + `dialogRef` + effect.
-- [ ] `ScoreModal` and `BrowseModal` are the same 30 lines; `ScoreModal` only adds `<ScoreInfo>`.
+- [X] `ScoreModal` and `BrowseModal` are the same 30 lines; `ScoreModal` only adds `<ScoreInfo>`.
 
 **Types**
 - [ ] **Generated Supabase types** (`supabase gen types typescript` + `createClient<Database>`). Root cause
@@ -118,7 +118,7 @@ config updated). RLS three-step check confirmed.
 - [ ] Clickable `<li>`s with no keyboard path — `ScoreCard.tsx`, `BrowseCard.tsx`.
 - [ ] No labels on any form input — `ScoreForm`, `ChartSearch`, `BrowseSearch`.
 - [ ] `ProfileButton` — no `aria-expanded`/`aria-haspopup`, no outside-click or Escape handling.
-- [ ] `alt="Song jacket"` on every card; `SongInfo.tsx:65` does it right — copy that.
+- [X] `alt="Song jacket"` on every card; `SongInfo.tsx:65` does it right — copy that.
 
 **Perf / polish**
 - [ ] `BrowseSearch`'s five `<select>`s are uncontrolled, so state and UI can disagree after a reset.
