@@ -1,6 +1,6 @@
 'use client'
 
-import { getGrade, getPlayRating, getClearStatus } from '@/utils/rating'
+import { getGrade, getClearStatus } from '@/utils/rating'
 import { getDifficultyColor, getClearStatusColor, getGradeColor } from '@/utils/style'
 import { getJacketUrl } from '@/utils/jacket'
 import { B50Entry } from '@/utils/types'

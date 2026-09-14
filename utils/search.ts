@@ -1,5 +1,6 @@
 import { Chart } from '@/utils/types'
-import { LEVEL_LIST, DIFFICULTY_ORDER } from '@/utils/constants'
+import { LEVEL_LIST, SORT_OPTIONS } from '@/utils/constants'
+import { getDifficultyValue, getComparisonOp } from '@/utils/sortOptions'
 
 // takes in a list of charts and filters them based on search, level, and difficulty
 export function filterCharts(charts: Chart[], search: string, levelFilter?: string | null, filterComparison: string | null = "ge", difficultyFilter?: number | null): Chart[] {
@@ -25,113 +26,20 @@ export function filterCharts(charts: Chart[], search: string, levelFilter?: stri
 }
 
 export function sortCharts(charts: Chart[], sortOption: string | null = 'chartConstant', sortDirection: 'asc' | 'desc' = 'desc'): Chart[] {
-    let sortedCharts: Chart[]
     //sorting the charts based on the selected sort option and direction
-    switch (sortOption) {
-        case 'title':
-            sortedCharts = charts.slice().sort((a, b) => a.title.localeCompare(b.title))
-            break
-        case 'chartConstant':
-            sortedCharts = charts.slice().sort((a, b) => (a.chart_constant ?? 0) - (b.chart_constant ?? 0))
-            break
-        case 'difficulty':
-            sortedCharts = charts.slice().sort((a, b) => getDifficultyValue(a.difficulty) - getDifficultyValue(b.difficulty))
-            break
-        case 'artist':
-            sortedCharts = charts.slice().sort((a, b) => a.artist.localeCompare(b.artist))
-            break
-        case 'length':
-            sortedCharts = charts.slice().sort((a, b) => getLengthValue(a.length) - getLengthValue(b.length))
-            break
-        case 'bpm':
-            sortedCharts = charts.slice().sort((a, b) => getBPMValue(a.bpm) - getBPMValue(b.bpm))
-            break
-        case 'noteCount':
-            sortedCharts = charts.slice().sort((a, b) => a.note_count - b.note_count)
-            break
-        case 'version':
-            sortedCharts = charts.slice().sort((a, b) => compareVersions(a.version, b.version))
-            break
-        default:
-            sortedCharts = charts.slice()
+    const found = SORT_OPTIONS.find((option) => option.key === sortOption)
+    if (!found) {
+        return charts
     }
+    const sortedCharts = charts.slice().sort(found.sortFn)
     return sortDirection === 'asc' ? sortedCharts : sortedCharts.reverse()
-}
-
-// converts the filterComparison string into a comparison function
-function getComparisonOp(filterComparison: string | null): ((a: number, b: number) => boolean) | null {
-    switch (filterComparison) {
-        case 'lt':
-            return (a: number, b: number) => a < b
-        case 'le':
-            return (a: number, b: number) => a <= b
-        case 'eq':
-            return (a: number, b: number) => a === b
-        case 'ge':
-            return (a: number, b: number) => a >= b
-        case 'gt':
-            return (a: number, b: number) => a > b
-        default:
-            return null
-    }
 }
 
 // returns a string representation of the chart's value based on the sort option
 export function getSortDisplayValue(chart: Chart, sortOption: string | null): string {
-    switch (sortOption) {
-        case 'chartConstant':
-            return "Chart Constant: " + (chart.chart_constant ? chart.chart_constant.toFixed(1) : "N/A") // some charts may not have a cc
-        case 'difficulty':
-            return "Difficulty: " + chart.difficulty
-        case 'artist':
-            return "Artist: " + chart.artist
-        case 'bpm':
-            return "BPM: " + chart.bpm
-        case 'length':
-            return "Length: " + chart.length
-        case 'noteCount':
-            const noteCount = chart.note_count ? chart.note_count.toString() : "N/A"
-            return "Note Count: " + noteCount
-        case 'version':
-            return "Version: " + chart.version
-        default:
-            return ""
+    const displayValue = SORT_OPTIONS.find((option) => option.key === sortOption)
+    if (!displayValue) {
+        return ''
     }
-}
-
-// converts difficulty string to a number for sorting purposes
-function getDifficultyValue(difficulty: string ): number {
-    if (!difficulty || !(DIFFICULTY_ORDER as readonly string[]).includes(difficulty)) return 0
-    else return (DIFFICULTY_ORDER as readonly string[]).indexOf(difficulty) + 1 // +1 to make it 1-based instead of 0-based
-}
-
-// converts length string to a number for sorting purposes
-function getLengthValue(length: string | null): number {
-    if (!length) return 0
-    const parts = length.split(':')
-    if (parts.length === 2) {
-        const minutes = parseInt(parts[0], 10)
-        const seconds = parseInt(parts[1], 10)
-        return minutes * 60 + seconds
-    }
-    return 0
-}
-
-// converts bpm string to a number for sorting purposes
-function getBPMValue(bpm: string | null): number {
-    if (!bpm) return 0
-    const bpmValue = parseFloat(bpm)
-    return isNaN(bpmValue) ? 0 : bpmValue
-}
-
-// compares two version strings
-function compareVersions(versionA: string, versionB: string): number {
-    const partsA = versionA.split('.').map(Number)
-    const partsB = versionB.split('.').map(Number)
-
-    for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
-        const diff = (partsA[i] || 0) - (partsB[i] || 0)
-        if (diff !== 0) return diff
-    }
-    return 0
+    return displayValue.displayFn(chart)
 }

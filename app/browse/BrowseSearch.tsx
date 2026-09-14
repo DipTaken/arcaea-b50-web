@@ -7,7 +7,7 @@ import BrowseCard from './BrowseCard'
 import BrowseModal from './BrowseModal'
 import { CardGrid } from '@/app/components/CardGrid'
 import { Button } from '../components/Button'
-import { LEVEL_LIST, DIFFICULTY_ORDER } from '@/utils/constants'
+import { LEVEL_LIST, DIFFICULTY_ORDER, SORT_OPTIONS } from '@/utils/constants'
 
 const CARDS_PER_PAGE = 100
 
@@ -62,15 +62,11 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     <div className="flex items-center justify-center gap-1">
                         <select className={`${controlClasses} px-6`}
                             onChange={(e) => setSortOption(e.target.value)}>
-                            <option value="" hidden >Sort by...</option>
-                            <option value="title">Title</option>
-                            <option value="chartConstant">Chart Constant</option>
-                            <option value="difficulty">Difficulty</option>
-                            <option value="artist">Artist</option>
-                            <option value="bpm">BPM</option>
-                            <option value="length">Length</option>
-                            <option value="noteCount">Note Count</option>
-                            <option value="version">Version</option>
+                            {SORT_OPTIONS.map((option) => (
+                                <option key={option.key} value={option.key}>
+                                    {option.label}
+                                </option>
+                            ))}
                         </select>
 
                         {/* Sort Direction Button */}

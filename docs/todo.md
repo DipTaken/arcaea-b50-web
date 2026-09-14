@@ -87,8 +87,8 @@ config updated). RLS three-step check confirmed.
       Already drifted: `INS` exists only in `style.ts`, so Inscribed charts sort before PST and match no
       difficulty filter.
 - [X] Level list lives in 2 — `search.ts:7` vs 17 hand-written `<option>`s in `BrowseSearch.tsx`.
-- [ ] Sort keys live in 3 — `BrowseSearch.tsx`, `search.ts` (sort), `search.ts` (display).
-- [ ] `MAX_BASE_SCORE` — `10000000` inlined in 5 places.
+- [X] Sort keys live in 3 — `BrowseSearch.tsx`, `search.ts` (sort), `search.ts` (display).
+- [X] `MAX_BASE_SCORE` — `10000000` inlined in 5 places.
 - [ ] Extract `useDialogSelection<T>()` — `ScoreGrid.tsx` and `BrowseSearch.tsx` hold the same
       selection + `dialogRef` + effect.
 - [ ] `ScoreModal` and `BrowseModal` are the same 30 lines; `ScoreModal` only adds `<ScoreInfo>`.

@@ -1,4 +1,4 @@
-import { DIFFICULTY_ORDER, LEVEL_LIST } from '@/utils/constants'
+import { DIFFICULTY_ORDER } from '@/utils/constants'
 
 // returns a color based on the difficulty
 export function getDifficultyColor(difficulty: string): string {
