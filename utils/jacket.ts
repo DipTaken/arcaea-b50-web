@@ -1,6 +1,6 @@
 // Get the filename for a jacket based on its song ID, difficulty, and override flag.
 function getJacketFileName(songId: string, difficulty: string, jacketOverride: boolean): string {
-    if (jacketOverride) return `${songId}_${difficulty.toLocaleLowerCase()}.jpg` // append _{difficulty} if jacketOverride is true
+    if (jacketOverride) return `${songId}_${difficulty.toLowerCase()}.jpg` // append _{difficulty} if jacketOverride is true
     else return `${songId}.jpg`
 }
 

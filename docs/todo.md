@@ -99,19 +99,19 @@ config updated). RLS three-step check confirmed.
       (`chart_constant` / `note_count` declared non-nullable while the columns are nullable).
 
 **Correctness nits**
-- [ ] `parseAndValidate` cross-check only runs when pure, far and lost are all non-null.
-- [ ] `deleteScore` has no integer guard on `scoreId` (RLS makes it non-urgent).
-- [ ] `jacket.ts:3` — `toLocaleLowerCase()` → `toLowerCase()`. Locale-aware casing on an ASCII slug.
-- [ ] `rating.ts:4` — `isPM(...) || noteCount < 2237` is redundant; `isPM` already covers it.
+- [X] `parseAndValidate` cross-check only runs when pure, far and lost are all non-null.
+- [X] `deleteScore` has no integer guard on `scoreId` (RLS makes it non-urgent).
+- [X] `jacket.ts:3` — `toLocaleLowerCase()` → `toLowerCase()`. Locale-aware casing on an ASCII slug.
+- [X] `rating.ts:4` — `isPM(...) || noteCount < 2237` is redundant; `isPM` already covers it.
 - [X] `search.ts:57` — descending sort uses `.reverse()` rather than negating the comparator, which
       inverts ties as well.
-- [ ] `ScoreCard.tsx:3` — unused `getPlayRating` import (1 of the 5 lint warnings).
-- [ ] `heroBackdropURL` (`utils/style.ts:77`) hardcodes the full project URL while `getJacketUrl` builds
+- [X] `ScoreCard.tsx:3` — unused `getPlayRating` import (1 of the 5 lint warnings).
+- [X] `heroBackdropURL` (`utils/style.ts:77`) hardcodes the full project URL while `getJacketUrl` builds
       on `NEXT_PUBLIC_SUPABASE_URL`. Consistency only — contributors share the one project, so this breaks
       nothing until the project itself moves.
 - [ ] Rename `utils/supabase/middleware.ts` → `proxy.ts` and its `createClient` → `updateSession`
       (it returns a `NextResponse`, not a client).
-- [ ] No cleanup plan for accumulated anonymous users — old, zero-score, no linked identity. Grows
+- [X] No cleanup plan for accumulated anonymous users — old, zero-score, no linked identity. Grows
       forever; worse once the CAPTCHA gap (T0) has been open a while.
 
 **Accessibility**

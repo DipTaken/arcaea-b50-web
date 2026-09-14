@@ -2,7 +2,7 @@ import { MAX_BASE_SCORE } from "./constants"
 import { ScoreWithChart, B50Entry } from "./types"
 
 export function getGrade(score: number, noteCount: number, pure: number | null, far: number | null, lost: number | null): string {
-    if (score >= MAX_BASE_SCORE && (isPM(score, noteCount, far, lost) || noteCount < 2237)) return "PM"
+    if (score >= MAX_BASE_SCORE && isPM(score, noteCount, far, lost)) return "PM"
     else if (score >= 9900000) return "EX+"
     else if (score >= 9800000) return "EX"
     else if (score >= 9500000) return "AA"

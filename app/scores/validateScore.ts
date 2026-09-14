@@ -36,7 +36,11 @@ export function validateScore(
     if (lost !== null && (lost < 0 || lost > noteCount)) {
         return `Invalid lost value. Must be between 0 and ${noteCount}`
     }
-    if (pure !== null && far !== null && lost !== null && (pure + far + lost > noteCount)) {
+
+    const pureVal = pure ?? 0
+    const farVal = far ?? 0
+    const lostVal = lost ?? 0
+    if (pureVal + farVal + lostVal > noteCount) {
         return `Invalid values. The sum of pure, far, and lost must not exceed ${noteCount}`
     }
 

@@ -72,4 +72,4 @@ export const cardHoverAnimation = "cursor-pointer hover:scale-105 transition-tra
 
 export const scrollbarStyle = "scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700"
 
-export const heroBackdropURL = "https://jkdyzmjuiojlitzvslmx.supabase.co/storage/v1/object/public/images/Partner_saya_konzetsu.png"
+export const heroBackdropURL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/Partner_saya_konzetsu.png`
