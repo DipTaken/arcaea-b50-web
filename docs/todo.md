@@ -103,7 +103,7 @@ config updated). RLS three-step check confirmed.
 - [ ] `deleteScore` has no integer guard on `scoreId` (RLS makes it non-urgent).
 - [ ] `jacket.ts:3` — `toLocaleLowerCase()` → `toLowerCase()`. Locale-aware casing on an ASCII slug.
 - [ ] `rating.ts:4` — `isPM(...) || noteCount < 2237` is redundant; `isPM` already covers it.
-- [ ] `search.ts:57` — descending sort uses `.reverse()` rather than negating the comparator, which
+- [X] `search.ts:57` — descending sort uses `.reverse()` rather than negating the comparator, which
       inverts ties as well.
 - [ ] `ScoreCard.tsx:3` — unused `getPlayRating` import (1 of the 5 lint warnings).
 - [ ] `heroBackdropURL` (`utils/style.ts:77`) hardcodes the full project URL while `getJacketUrl` builds

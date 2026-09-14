@@ -31,8 +31,9 @@ export function sortCharts(charts: Chart[], sortOption: string | null = 'chartCo
     if (!found) {
         return charts
     }
-    const sortedCharts = charts.slice().sort(found.sortFn)
-    return sortDirection === 'asc' ? sortedCharts : sortedCharts.reverse()
+    const sortOrder = sortDirection === 'asc' ? 1 : -1
+    const sortedCharts = charts.slice().sort((a, b) => sortOrder * found.sortFn(a, b)) //using sortOrder to reverse the sort direction
+    return sortedCharts
 }
 
 // returns a string representation of the chart's value based on the sort option
