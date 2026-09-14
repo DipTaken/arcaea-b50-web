@@ -1,5 +1,3 @@
-@AGENTS.md
-
 # Arcaea Score Viewer — Project Context
 
 Personal project + learning exercise (first time with TypeScript, Next.js, Supabase/SQL). Prioritize
@@ -9,7 +7,7 @@ explanation over speed — see Working style at the bottom.
 
 | File | Contents |
 |---|---|
-| `docs/todo.md` | **The** running list — every open bug and task, tiered T0–T4. Replaced `todo.txt`, `report.md`, `report_todo.md`. |
+| `docs/todo.md` | **The** running list — every open bug and task, tiered T0–T4, plus a "Decided, don't revisit" section. Finished items are deleted rather than checked off; git history is the record. |
 | `docs/CHART_UPDATE_INSTRUCTIONS.md` | Monthly chart-update runbook: JSON → CSV → staging table → dry run → merge → re-dump seed. |
 | `docs/gotchas.md` | One-line reference of traps hit on this project — TS narrowing, React controlled/uncontrolled, Next 16 API changes, Supabase auth/RLS/CLI, Tailwind. Check here first when something behaves impossibly. |
 | `docs/hours_log.md` | Per-contributor hours table. |
@@ -30,14 +28,11 @@ second-contributor workflow silently breaks.
 **Deployed on Vercel.** Google OAuth verified end to end against the live URL, Supabase URL config
 updated, and the RLS three-step check confirmed.
 
-Stage 2 (OCR) is not started. Candidate: `arcaea-offline-ocr` on PyPI (KNN + SIFT; already speaks the
-same `song_id` system used for jackets).
-
 ## Routes
 
 | Route | Purpose |
 |---|---|
-| `/` | Landing. Welcome line if signed in, else `<LoginButton>`, plus a hand-maintained `<Panel>` changelog (newest first — the comment in the file notes the order is wrong). **The auth branch is two-way where `NavBar`'s is three-way, so an anonymous user is offered `<LoginButton>` and loses their scores — T0 in `docs/todo.md`.** |
+| `/` | Landing. Same three-way auth branch as `NavBar`, plus a hand-maintained `<Panel>` changelog (newest first — the comment in the file says the order is wrong; it isn't). |
 | `/scores` | B50 view — best score per chart, top 50 by Play Rating, plus the B50 number. |
 | `/browse` | Chart catalog: search, sort, level/difficulty filters, Load More. |
 | `/leaderboard` | Stub — `PageShell` heading only. |
@@ -61,15 +56,15 @@ Google OAuth + anonymous auth are both live. There is exactly one kind of identi
   failures in a `try/catch`, so from a Server Component this would create a user, fail to persist the
   session, and repeat every render. Read paths (`/scores`, `NavBar`, `/`) use plain `getUser()` and
   treat `!user` as "no scores yet".
-- **`getUser()` reports "no session" as an `AuthSessionMissingError`**, not `{ user: null, error: null }`.
-  Branch on `user`, never on `error` — testing `error` sends every first-time visitor down the
-  failure path.
-- **`user.is_anonymous` is the "really signed in" test.** `NavBar` branches three ways:
-  `ProfileButton` (real user) / "Sign in" link to `/auth/link` (anonymous) / `LoginButton` (no user).
-  This is not cosmetic — an anonymous user handed Sign Out loses their identity **irreversibly**: the
-  `auth.users` row survives with no credential, and every score under that uid is orphaned.
+- **`user.is_anonymous` is the "really signed in" test.** `NavBar` and `app/page.tsx` both branch
+  three ways: `ProfileButton` (real user) / "Sign in" link to `/auth/link` (anonymous) /
+  `LoginButton` (no user). Any new auth-aware surface must copy that shape — handing an anonymous
+  user Sign Out or `signInWithOAuth` orphans every score under their uid, irreversibly.
 - **No merge on upgrade.** Step 4 chose link-or-lose, not identity merging. RLS had already made a
   copy impossible: `scores_select_own` filters `where user_id = <other uid>` to zero rows.
+
+The `getUser()`/`AuthSessionMissingError`, `linkIdentity`, and provider-error traps are one-liners in
+`docs/gotchas.md` → *Supabase — auth*.
 
 ## Database schema (Supabase/Postgres)
 
@@ -101,10 +96,11 @@ backdrop.
 
 ### RLS / Grants
 
-Schema is version-controlled under `supabase/migrations/` (a `db pull` baseline plus
-`add_scores_rls.sql`). **Change policies and grants by writing a migration, not in the dashboard.**
-`supabase/seed.sql` is a `--data-only` dump of `charts` (1799 rows) — both the backup for the one
-table that can't be regenerated and what `db reset` loads locally.
+Schema is version-controlled under `supabase/migrations/`: a `db pull` baseline, `add_scores_rls.sql`,
+and `add_charts_natural_key.sql` (the `unique (song_id, difficulty)` the chart-update merge's
+`ON CONFLICT` targets). **Change policies and grants by writing a migration, not in the dashboard.**
+`supabase/seed.sql` is a `--data-only` dump of `charts` (1830 rows as of Arcaea 7.0) — both the backup
+for the one table that can't be regenerated and what `db reset` loads locally.
 
 Both tables have RLS on, via a `rls_auto_enable` event trigger installed by the project's automatic-RLS setting.
 
@@ -115,21 +111,12 @@ Both tables have RLS on, via a `rls_auto_enable` event trigger installed by the 
   DELETE` to `authenticated` only. `anon` deliberately has no grant — an anonymous *user* carries
   `role: authenticated`; `anon` means no JWT at all.
 
-Learned the hard way:
-
-- **Grants and policies are independent; a policy cannot take back a grant.** The pre-migration
-  baseline granted everything including `TRUNCATE` and `DELETE` on both tables to `anon`. Nothing
-  exploited it only because RLS denies commands with no matching policy — protection by absence, one
-  careless `using (true)` from failing. Invisible in the dashboard; only the `db pull` output showed it.
-- **`TRUNCATE` is not subject to RLS at all**, so no policy could ever have covered that grant.
-- A missing GRANT is `42501` even behind a perfect policy. Grants and policies fail differently.
-- Write `(select auth.uid())`, not bare `auth.uid()` — the subquery is an InitPlan evaluated once
-  instead of per row, which matters on the `scores → charts(*)` join.
-- **`UPDATE` needs both `USING` and `WITH CHECK`.** `USING` picks targetable rows; `WITH CHECK`
-  validates the produced row. With only `USING`, a user could reassign `user_id` on the way out.
-- Don't run `db pull` after your own `db push` — pull captures out-of-band changes, and re-diffing a
-  schema you already described emitted a bare `DROP TABLE chartsoldold` that broke replay from
-  scratch. Undone with `migration repair --status reverted <version>`.
+The generic RLS lessons (grants vs. policies, `TRUNCATE`, `(select auth.uid())`, `USING` +
+`WITH CHECK`, not running `db pull` after your own `db push`) are one-liners in `docs/gotchas.md` →
+*Supabase — data* / *Supabase CLI*. The project-specific part worth repeating: the pre-migration
+baseline granted everything including `TRUNCATE` and `DELETE` on both tables to `anon`, and nothing
+exploited it only because RLS denies commands with no matching policy — protection by absence, one
+careless `using (true)` from failing. It was invisible in the dashboard; only `db pull` showed it.
 
 No FK from `scores.user_id` → `auth.users(id)`; still deferred.
 
@@ -167,6 +154,10 @@ app/
 │   │                      fires on Esc too. `width` defaults to w-[min(60vw,60rem)] because a <dialog>
 │   │                      otherwise keeps `width: fit-content` and shrink-wraps, which made
 │   │                      `w-full max-w-5xl` on the children inert.
+│   ├── ChartViewModal.tsx — the one modal both grids render: Panel(SongInfo + `detailPanel`) plus a
+│   │                      button bar. `detailPanel` and `buttonBar` are the entire variation surface;
+│   │                      with no `buttonBar` it falls back to a lone AddScoreButton, which is the
+│   │                      /browse case. ScoreModal and BrowseModal are now thin wrappers over it.
 │   ├── NavBar.tsx       — server; 3-col grid, 3-way auth branch (see Auth).
 │   ├── LoginButton.tsx  — client; signInWithOAuth. size 'sm'|'md'|'lg'.
 │   ├── LinkButton.tsx   — client; linkIdentity — attaches Google to the CURRENT anonymous user, so
@@ -185,9 +176,9 @@ app/
 │   │                      null. `setSelectedId(null)` alone would leave the <dialog> open and empty.
 │   ├── ScoreCard.tsx    — one B50 cell from a B50Entry: rank pill, grade, playRating, clear lamp,
 │   │                      jacket + score, title bar. Owns no modal — calls onSelect(entry).
-│   ├── ScoreModal.tsx   — Panel(SongInfo + ScoreInfo) plus an Add / Edit / Delete button bar.
-│   │                      Pure pass-through for `onDeleted`: it forwards ScoreGrid's callback to
-│   │                      DeleteScoreButton and does nothing with it itself.
+│   ├── ScoreModal.tsx   — ChartViewModal with `detailPanel={<ScoreInfo>}` and an Add / Edit / Delete
+│   │                      button bar. Pure pass-through for `onDeleted`: it forwards ScoreGrid's
+│   │                      callback to DeleteScoreButton and does nothing with it itself.
 │   ├── ScoreInfo.tsx    — score + PM distance, Play Rating, colored grade, pure/far/lost, shiny
 │   │                      pures, lamp, created_at.
 │   ├── ScoreForm.tsx    — client; THE form, shared by add and edit. Props are the entire variation
@@ -196,7 +187,9 @@ app/
 │   │                      errorMessage, the setCustomValidity handler, and the local ClearInfo.
 │   │                      Inputs are UNCONTROLLED (defaultValue + FormData), so initialValues seeds on
 │   │                      mount only — which is why both parents key it on resetKey.
-│   │                      Exposes SelectedChartContext so ChartSearch can push the picked chart up.
+│   │                      Exposes SelectedChartContext, whose value is `handleSelectChart` rather than
+│   │                      the bare setter: picking a chart must also clear `scoreText`, which lives
+│   │                      outside the `key={selectedChart?.id}` subtree and so survives the remount.
 │   ├── AddScoreButton.tsx  — Button + Modal + <ScoreForm onSubmit={addScore}>. size 'md'|'lg'.
 │   │                      Modal's onClose bumps resetKey; key={resetKey} remounts ScoreForm, resetting
 │   │                      all its state including ClearInfo's.
@@ -219,9 +212,10 @@ app/
 │   │                      `showTable`: ImportTextArea (paste box + ImportErrorList + row counts) then
 │   │                      ImportPreview (PreviewTable + Import / Go back). `scores`/`errors` are
 │   │                      DERIVED during render from `text` — no second useState, so the preview can't
-│   │                      go stale. ~0.3ms per keystroke including the 1799-chart map, so no memo.
+│   │                      go stale. ~0.3ms per keystroke including the 1830-chart map, so no memo.
 │   │                      `isImporting` is separate from `showTable`: one is "which screen", the other
-│   │                      "request in flight". Modal's onClose resets both and clears `text`.
+│   │                      "request in flight". Modal's onClose resets both and clears `text` — but NOT
+│   │                      `importResult`, which is the stale-error bug in docs/todo.md T3.
 │   ├── parseCsv.ts      — pure module, NO 'use server' (same reason as validateScore.ts): the browser
 │   │                      needs it for the live preview and the action reuses it. parseCsv wraps Papa
 │   │                      with header:true + skipEmptyLines + lowercasing transformHeader, and NO
@@ -236,6 +230,9 @@ app/
 │   │                      whitelist — it only compares clearStatus to "fullRecall"/"pureMemory" for the
 │   │                      cross-checks — so every caller must check membership itself. parseCsv and
 │   │                      importScores both do.
+│   │                      **getClearStatus is currently broken** — its middle branch can never be
+│   │                      false, so every non-PM score is stored as clearNormal on BOTH write paths.
+│   │                      Top T1 in docs/todo.md; read that before touching clear-status code.
 │   └── actions.ts       — addScore / editScore / deleteScore / importScores, all returning `{ error }`
 │                          not throwing. add/edit take FormData; **deleteScore takes `scoreId: number`**
 │                          and **importScores takes `ImportScore[]`** — neither has a form behind it, so
@@ -274,9 +271,19 @@ utils/
 │                            file (Next moved the convention to `proxy`) and the export `createClient`
 │                            (it returns a NextResponse; `updateSession` would be honest).
 ├── auth.ts     — getOrCreateUser. SERVER ACTIONS / ROUTE HANDLERS ONLY — see Auth.
+├── constants.ts— the one source for each list that used to be copy-pasted: DIFFICULTY_ORDER,
+│                 LEVEL_LIST, MAX_BASE_SCORE, and SORT_OPTIONS. SORT_OPTIONS is the interesting one —
+│                 each entry carries its own key, label, sortFn and displayFn, so adding a sort touches
+│                 one array instead of a <select>, a switch in sortCharts, and a switch in the display
+│                 helper. Anything that needs a difficulty or level list imports from here.
 ├── jacket.ts   — getJacketUrl(songId, difficulty, jacketOverride) → Storage public URL.
 ├── rating.ts   — all score math. See below.
-├── search.ts   — filterCharts, sortCharts, getSortDisplayValue + comparison/coercion helpers.
+├── search.ts   — filterCharts, sortCharts, getSortDisplayValue. All three are thin now: sortCharts and
+│                 getSortDisplayValue just look the key up in SORT_OPTIONS. Descending multiplies the
+│                 comparator by -1 rather than calling .reverse(), which would invert ties too.
+├── sortOptions.ts — the coercion helpers SORT_OPTIONS is built from: getComparisonOp,
+│                 getDifficultyValue, getLengthValue, getBPMValue, compareVersions. Every one returns a
+│                 number and guards its null/unparseable case, because the columns really are nullable.
 ├── style.ts    — getDifficultyColor / getGradeColor / getClearStatusColor → hex, applied via inline
 │                 `style` (Tailwind's scanner only sees complete literal class strings, so
 │                 `bg-[${color}]` never generates CSS). getTextSize(title) → a *static* class bucketed
@@ -285,12 +292,18 @@ utils/
 │                 `scrollbar-track-*` are core Tailwind v4 utilities (`scrollbar-width`,
 │                 `scrollbar-color`), NOT the old plugin. They work; no plugin needed.
 └── types.ts    — Chart, Score, ScoreWithChart = Score & { charts: Chart },
-                  B50Entry = { rank, score, playRating, weight: 1 | 2 }, and the import pair
-                  ImportScore / RowError (moved here so actions.ts and the client can share them).
+                  B50Entry = { rank, score, playRating, weight: 1 | 2 }, SortOption, and the import
+                  pair ImportScore / RowError (here so actions.ts and the client can share them).
                   Hand-written, NOT generated — so it can and does disagree with the DB.
 
 proxy.ts        — Next 16's rename of middleware.ts; delegates to utils/supabase/middleware.ts.
+scripts/        — the chart-update converter. json_to_csv.mts reads the four JSON files in
+                  scripts/data/ (songlist, cc, note_count, length) and writes charts.csv. Run it with
+                  bare `node` — Node 24 strips types from .mts directly. Runbook:
+                  docs/CHART_UPDATE_INSTRUCTIONS.md; source-data traps: docs/gotchas.md.
 supabase/       — CLI project; the CLI is a devDependency, so every command is `npx supabase ...`.
+                  scripts/update_charts{,_dry}.sql are the staging-table merge, run via
+                  `db query -f … --linked` — which executes PRIVILEGED, so RLS won't catch a typo.
                   config.toml is COMMITTED but does NOT mirror the dashboard — it shipped with
                   enable_anonymous_sign_ins = false while the live project had it on, and
                   `config push` would have silently disabled the feature. Kept in sync by hand.
@@ -313,17 +326,17 @@ should copy the current shape:
   going through the click handler, and without the reset the same card couldn't be reopened.
 - `AddScoreButton` is keyed on the chart id, because it seeds `useState(defaultChart)` on mount only.
 
-### Next.js 16: `middleware.ts` is now `proxy.ts`
-
-Next 16 deprecated the `middleware.js` convention and renamed it to `proxy.js` — same functionality,
-new file and export names. Already migrated: the root file is `proxy.ts` exporting `proxy()`. Only
-`utils/supabase/middleware.ts` still carries the old name.
+Both modals now go through `ChartViewModal`; a third grid should render that rather than a new
+`<Modal>`. Note that the two live bugs in `docs/todo.md` T1 are both wiring mistakes in exactly this
+seam — a renamed prop and a guard on the wrong variable — so check the modal actually opens.
 
 ## `utils/rating.ts`
 
 - `getGrade(score, noteCount, pure, far, lost)` → "PM"|"EX+"|"EX"|"AA"|"A"|"B"|"C"|"D". Bare `"PM"`
   with no "MAX-n" suffix, so it fits the small ScoreCard cell.
 - `getClearStatus(clearStatus, 'short'|'long')` → lamp label; 'short' is the one-letter card badge.
+  **Not the same function as `validateScore.ts`'s `getClearStatus`**, which derives which status to
+  store. Same name, different module, different job — check the import before editing either.
 - `getScoreModifier(score)` → the delta added to chart_constant.
 - `getPlayRating(score, chartConstant, clearStatus)` → `max(modifier + clearFactor + constant, 0)`,
   where `clearFactor` is `0` on a fail and `0.2` otherwise. **The clear factor is a deliberate
@@ -350,15 +363,16 @@ list; do not mirror it here or the two will drift.
 
 Two entries worth knowing before reading any code:
 
-- **T0: the homepage sign-in button orphans an anonymous user's scores** — `app/page.tsx` branches two
-  ways where `NavBar` branches three.
+- **T1: `getClearStatus` collapses every non-PM score to `clearNormal`** on both the form and the
+  import path, so stored clear statuses — and therefore the B50 number — are wrong right now.
 - **T3: queries return `any`,** so `utils/types.ts` can and does disagree with the DB
-  (`chart_constant` / `note_count` are declared non-nullable; the columns are not).
+  (`chart_constant` / `note_count` / `length` are declared non-nullable; the columns are not).
 
-Baselines: `npx tsc --noEmit` is clean. `npx eslint .` is **0 errors, 5 warnings** — 4
-`no-img-element` (blocked on `images.remotePatterns` in `next.config.ts`) and 1 unused
-`getPlayRating` in `ScoreCard.tsx`. Note `next dev` does not typecheck — a bad import surfaces as a
-runtime "Element type is invalid … got: undefined", so run `tsc` rather than trusting the dev server.
+Baselines (2026-09-13): `npx tsc --noEmit` has **1 error** — `ScoreGrid.tsx:28`, the renamed-prop bug
+in T1. `npx eslint .` is **0 errors, 4 warnings**, all `no-img-element` (blocked on
+`images.remotePatterns` in `next.config.ts`). Note `next dev` does not typecheck — a bad import
+surfaces as a runtime "Element type is invalid … got: undefined", so run `tsc` rather than trusting
+the dev server. That is exactly how the `ScoreGrid` error survived a commit.
 
 ## Working style notes
 

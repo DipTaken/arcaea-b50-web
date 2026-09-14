@@ -16,7 +16,7 @@ interface ChartViewModalProps {
 export default function ChartViewModal({ chart, score, ref, onClose, detailPanel, buttonBar }: ChartViewModalProps) {
     return (
         <Modal ref={ref} onClose={onClose}>
-            {score && (
+            {chart && (
                 <div>
                     {/* Modal content */}
                     <Panel>

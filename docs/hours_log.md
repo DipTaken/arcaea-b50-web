@@ -22,4 +22,4 @@ holy do not judge my working hours; all hours exclude breaks, however, are fille
 | Sep 5 | N/A | 0 | 77 | 
 | Sep 6 | 5am-6am, 6:30pm-7:00pm | 1.5 | 78.5 |
 | Sep 7 - 12 | N/A | 0 | 78.5 | 
-| Sep 13 | 9pm - | N/A | TBC | |
+| Sep 13 | 9pm - 11pm | 2 | 80.5 |

@@ -23,7 +23,7 @@ export default function ScoreModal({ scoreWithChart, ref, onClose, onDeleted }: 
             onClose={onClose}
             detailPanel={<ScoreInfo score={scoreWithChart} />}
             buttonBar={
-                <div>
+                <div className="flex justify-between w-full gap-2">
                     <AddScoreButton key={scoreWithChart.charts.id} defaultChart={scoreWithChart.charts}>
                         <input type="hidden" name="chart_id" value={scoreWithChart.charts.id} />
                     </AddScoreButton>
