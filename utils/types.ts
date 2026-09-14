@@ -51,3 +51,10 @@ export type ImportScore = {
     lost: number | null;
     clear_status: string;
 }
+
+export type SortOption = {
+    key: string
+    label: string
+    sortFn: (a: Chart, b: Chart) => number
+    displayFn: (chart: Chart) => string
+}

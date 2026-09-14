@@ -1,6 +1,6 @@
 # TODO
 
-Single running list. Replaces `todo.txt`, `report.md`, `report_todo.md`.
+Single running list. Completed items are deleted, not checked off — git history is the record.
 
 **Tiers**
 
@@ -12,22 +12,12 @@ Single running list. Replaces `todo.txt`, `report.md`, `report_todo.md`.
 | **T3** | Debt — dedup, a11y, perf, nits. No user impact. |
 | **T4** | Not built yet. |
 
-Baselines: `npx tsc --noEmit` clean · `npx eslint .` 0 errors, 5 warnings (4 `no-img-element`, blocked on
-`images.remotePatterns`; 1 unused `getPlayRating` in `ScoreCard.tsx`).
-
-**Shipped:** deployed on Vercel. Google OAuth verified end to end (redirect back works; Supabase URL
-config updated). RLS three-step check confirmed.
+Baselines (2026-09-13): `npx tsc --noEmit` **1 error** (ScoreGrid.tsx:28, see T1) · `npx eslint .` 0
+errors, 4 warnings (all `no-img-element`, blocked on `images.remotePatterns`).
 
 ---
 
 ## T0 — Data loss
-
-- [ ] **Homepage sign-in orphans an anonymous user's scores.**
-      `app/page.tsx:18-24` branches two ways (`user && !user.is_anonymous` → welcome, else `<LoginButton>`),
-      so an anonymous user gets `signInWithOAuth`, which replaces their session. The anon uid survives with
-      no credential and every score under it is unreachable. `NavBar`'s three-way branch is the model —
-      anonymous users belong on `/auth/link`.
-      *Repro: incognito → add a score → homepage → Sign in.*
 
 - [ ] **No CAPTCHA on anonymous sign-ins, and the site is public.** Bots can mint permanent `auth.users`
       rows; Supabase's only backstop is 30/hr per IP.
@@ -39,112 +29,80 @@ config updated). RLS three-step check confirmed.
       Cloudflare's always-pass / always-fail dummy sitekeys let you build the whole path before touching a
       real domain. Budget half a day.
 
-*(See "Decided, don't revisit" for the blank-`clear_status` default.)*
-
 ## T1 — Broken
 
-- [ ] **Formatted score doesn't reset when the chart changes.**
-      `ScoreForm.tsx:114` keys the input subtree on `selectedChart?.id`, which remounts the uncontrolled
-      inputs — but `scoreText` (line 41) lives in `ScoreForm` *outside* that subtree, so the grey formatted
-      number on line 129 survives. Result: empty input, stale number beneath it.
-      Fix at the single place the chart changes — wrap the context value on line 104 so it clears
-      `scoreText` alongside `setSelectedChart`.
-      *Repro: /scores → Add Score → pick a chart → type a score → switch charts.*
-
-- [ ] **Query errors are invisible on `/scores`.** Neither query destructures `error`, so a denied policy
-      renders as an empty B50 — indistinguishable from "no scores yet". Main debugging hazard now RLS is on.
-
-- [ ] **Unknown levels slip through `<`/`<=` filters.** `filterCharts` guards `levelIndex >= 0` for the
-      filter value, but a `chart.level` missing from `levelOrder` yields `-1`, which passes `lt`/`le`
-      against any real level.
-
-- [ ] **`getShinyPureCount` returns `NaN` on a null or zero `note_count`.** Missing the
-      `if (!noteCount) return 0` guard. Not hypothetical — `lasteternity`'s three placeholder charts carry
-      NULL note counts.
-
-- [ ] **`getLengthValue` throws on a null `length`** (`search.ts:120-121` calls `.split(':')`), crashing
-      `/browse` when sorted by length. Nine songs in the current songlist have no length. Guard the
-      function or fill the values in.
-
-- [ ] **`handleImport` has no `try/catch`** (`ImportCSVButton.tsx`) and reports via `alert()`. A thrown
-      rejection skips `setIsImporting(false)`, leaving the button stuck on "Importing…". `finally` fixes it.
-
-- [ ] **`ScoreForm.handleSubmit` has no `try/catch`.** Only a returned `{ error }` is displayed; a thrown
-      rejection (network drop) is unhandled. Same class as above.
-
-- [ ] **`importScores` rejects the whole batch on the first bad row**, with a message naming a `chartId`
-      and no row number (`ImportScore` has no `rowNumber`). Only fires on tampering or a stale chart list,
-      but the message is unactionable.
+- [ ] **`getClearStatus` throws away every clear status except Pure Memory.** `validateScore.ts:79-91`.
+      The first branch handles `pm === true`, so inside the `else if` `!pm` is *always* true and
+      `rawClearStatus || !pm` can never be false — the third branch is dead code. Every non-PM score is
+      written as `clearNormal`, whatever the user picked.
+      Hits **both** write paths: the Add/Edit form (via `parseAndValidate`) and CSV import
+      (`parseCsv.ts:111` calls the same function), so a CSV column reading `fail` / `clearEasy` /
+      `clearHard` / `fullRecall` is validated, then discarded. A fail stored as `clearNormal` silently
+      gains the 0.2 clear factor in `getPlayRating`, so the B50 number is wrong too.
+      Introduced by `3996d66` — the intent (revert PM → non-PM when the score is edited down) was right,
+      the condition overshot. Needs `rawClearStatus` to be honoured when it is a real user choice.
+      *Repro: Add Score → any non-PM score → set Clear Status to Fail → save → the card shows a C lamp.*
+      *Existing rows are already wrong; a backfill is not possible — the original status wasn't stored.*
 
 ## T2 — Papercuts
 
-- [ ] `/docs/importing-scores` 404s — `ImportCSVButton`'s help link points at a route that doesn't exist.
+- [ ] `/docs/importing-scores` 404s — `ImportCSVButton.tsx:102` links a route that doesn't exist. Write the
+      page (T4) or drop the link.
 
 ## T3 — Debt
 
 **Duplication**
-- [ ] Difficulty list lives in 3 places — `style.ts:2-19`, `search.ts:102-117`, `BrowseSearch.tsx:123-127`.
-      Already drifted: `INS` exists only in `style.ts`, so Inscribed charts sort before PST and match no
-      difficulty filter.
-- [ ] Level list lives in 2 — `search.ts:7` vs 17 hand-written `<option>`s in `BrowseSearch.tsx`.
-- [ ] Sort keys live in 3 — `BrowseSearch.tsx`, `search.ts` (sort), `search.ts` (display).
-- [ ] `MAX_BASE_SCORE` — `10000000` inlined in 5 places.
 - [ ] Extract `useDialogSelection<T>()` — `ScoreGrid.tsx` and `BrowseSearch.tsx` hold the same
       selection + `dialogRef` + effect.
-- [ ] `ScoreModal` and `BrowseModal` are the same 30 lines; `ScoreModal` only adds `<ScoreInfo>`.
 
 **Types**
 - [ ] **Generated Supabase types** (`supabase gen types typescript` + `createClient<Database>`). Root cause
       of several items — queries still return `any`, which is why `utils/types.ts` can disagree with the DB
-      (`chart_constant` / `note_count` declared non-nullable while the columns are nullable).
+      (`chart_constant` / `note_count` / `length` declared non-nullable while the columns are nullable).
+      The `?? 0` scattered through `constants.ts` and `rating.ts` is the workaround.
 
 **Correctness nits**
-- [ ] `parseAndValidate` cross-check only runs when pure, far and lost are all non-null.
-- [ ] `deleteScore` has no integer guard on `scoreId` (RLS makes it non-urgent).
-- [ ] `jacket.ts:3` — `toLocaleLowerCase()` → `toLowerCase()`. Locale-aware casing on an ASCII slug.
-- [ ] `rating.ts:4` — `isPM(...) || noteCount < 2237` is redundant; `isPM` already covers it.
-- [ ] `search.ts:57` — descending sort uses `.reverse()` rather than negating the comparator, which
-      inverts ties as well.
-- [ ] `ScoreCard.tsx:3` — unused `getPlayRating` import (1 of the 5 lint warnings).
-- [ ] `heroBackdropURL` (`utils/style.ts:77`) hardcodes the full project URL while `getJacketUrl` builds
-      on `NEXT_PUBLIC_SUPABASE_URL`. Consistency only — contributors share the one project, so this breaks
-      nothing until the project itself moves.
+- [ ] `ImportCSVButton`'s `importResult` isn't cleared by `Modal`'s `onClose` (only `showTable`, `text`,
+      `isImporting` are). Close after a failed import, reopen, advance to the preview → the old error is
+      still there. Same class as the bug already fixed in `DeleteScoreButton`.
+- [ ] `/scores` destructures `error` from the scores query but not the charts query
+      (`page.tsx:18-23`), so a failed charts fetch renders an empty chart picker with no explanation.
 - [ ] Rename `utils/supabase/middleware.ts` → `proxy.ts` and its `createClient` → `updateSession`
       (it returns a `NextResponse`, not a client).
-- [ ] No cleanup plan for accumulated anonymous users — old, zero-score, no linked identity. Grows
-      forever; worse once the CAPTCHA gap (T0) has been open a while.
 
 **Accessibility**
-- [ ] Clickable `<li>`s with no keyboard path — `ScoreCard.tsx`, `BrowseCard.tsx`.
-- [ ] No labels on any form input — `ScoreForm`, `ChartSearch`, `BrowseSearch`.
+- [ ] Clickable `<li>`s with no keyboard path — the `onClick` lives on `Card.tsx:12` with no `tabIndex`,
+      `role`, or key handler, so neither grid is reachable without a mouse.
+- [ ] No labels on any form input — `ScoreForm` (only the `is_cleared` checkbox has one), `ChartSearch`,
+      `BrowseSearch`.
 - [ ] `ProfileButton` — no `aria-expanded`/`aria-haspopup`, no outside-click or Escape handling.
-- [ ] `alt="Song jacket"` on every card; `SongInfo.tsx:65` does it right — copy that.
+- [ ] Generic `alt` text on jackets — `ScoreCard.tsx:41` and `ScoreForm.tsx:92`. `SongInfo.tsx:50` does it
+      right (`alt={chart.title}`); copy that.
 
 **Perf / polish**
-- [ ] `BrowseSearch`'s five `<select>`s are uncontrolled, so state and UI can disagree after a reset.
-- [ ] `useMemo` the filter+sort in `BrowseSearch`; it re-runs on every render.
-- [ ] Both pages ship ~1800 charts to the browser.
-- [ ] Five `!` env assertions across `client.ts`, `server.ts`, `middleware.ts`, `LoginButton.tsx`.
+- [ ] `BrowseSearch`'s four `<select>`s are uncontrolled (no `value` prop), so state and UI can disagree
+      after a reset. The search `<input>` is already controlled.
+- [ ] `useMemo` the filter+sort in `BrowseSearch:42`; it re-runs on every render.
+- [ ] Both pages ship ~1830 charts to the browser.
+- [ ] Five `!` env assertions across `client.ts`, `server.ts`, `middleware.ts`.
 - [ ] Add Prettier + a `format` script. Indentation is 4 spaces except `app/scores/page.tsx`.
-- [ ] `next.config.ts` — `images.remotePatterns` for the Supabase storage host, which unblocks the 4
+- [ ] `next.config.ts` is empty — `images.remotePatterns` for the Supabase storage host unblocks the 4
       `no-img-element` warnings.
 - [ ] `tsconfig.json` — drop `allowJs`; consider `noUncheckedIndexedAccess` (would have caught two bugs in
       the converter).
 
 ## T4 — Not built
 
-- [ ] **Monthly chart update pipeline** — *in progress.*
-      `scripts/json_to_csv.mts` converts songlist + cc + note_count + length JSON into a 13-column CSV;
-      `supabase/scripts/update_charts{,_dry}.sql` merge it. Remaining: the `INS` rename via `song.set`, the
-      warning pass, the CSV write, then the first dry run. Setup still needed: a `unique (song_id,
-      difficulty)` migration on `charts` — the merge's `ON CONFLICT` requires it. Full runbook in
-      `docs/CHART_UPDATE_INSTRUCTIONS.md`.
+- [ ] **Chart-update converter has no validation pass.** `docs/CHART_UPDATE_INSTRUCTIONS.md` step 2 claims
+      `json_to_csv.mts` "fails on charts with a missing constant or note count that isn't a `rating: 0`
+      placeholder" — it does not. It writes `?? null` and says nothing, so a truncated `cc.json` produces a
+      CSV full of NULL constants that merges cleanly. Either build the check or correct the runbook.
+      The rest of the pipeline is done and has shipped once (v1.1.2, Arcaea 7.0): the `INS` rename via
+      `song.set`, the CSV write, the `unique (song_id, difficulty)` migration, and a full dry-run → merge.
+- [ ] **`/docs/importing-scores`** — the import help page linked from `ImportCSVButton`.
 - [ ] **Leaderboard** — route + heading only.
-- [ ] **Play / import history, and an import undo.** No history table; each play is just another `scores`
-      row. Note re-import can't be solved with a constraint — the same score on the same chart is a
-      legitimate repeat play, so there is nothing safe to dedupe on. The real gap is that a mistaken import
-      can't be removed: a `batch_id` (or an `imports` table) would make one importable *and* undoable.
-      Schema decision first.
+- [ ] **Play** No history table; each play is just another `scores`
+      row.
 - [ ] **Stage 2 (OCR)** — not started. Candidate: `arcaea-offline-ocr` on PyPI (KNN + SIFT), already speaks
       the same `song_id` system used for jackets.
 - [ ] Next/prev buttons in Score/Browse modals to step through charts without closing.
@@ -155,7 +113,8 @@ config updated). RLS three-step check confirmed.
 
 - **A blank `clear_status` on import defaults to `clearNormal`.** Deliberate: the overwhelming majority of
   plays are not fails, so defaulting costs less friction than requiring the column. A genuine fail imported
-  blank gains 0.2 play rating; accepted.
+  blank gains 0.2 play rating; accepted. *(Currently moot — the T1 `getClearStatus` bug defaults
+  every row, not just blank ones. Re-read this once that's fixed.)*
 - **Re-import inserts duplicates, and that stays.** The same score on the same chart is a legitimate repeat
   play, so no unique constraint can tell a duplicate import from a real one. Undo, not prevention — see T4.
 - **Adding a score from inside a modal leaves the outer modal open.** `close()` only closes the inner dialog.
@@ -165,3 +124,9 @@ config updated). RLS three-step check confirmed.
 - **No identity merge on anon → Google upgrade.** `/auth/link` offers link-or-lose. RLS had already made the
   cross-uid copy impossible, and a merge would need proof of ownership.
 - **Load More is not an updater form.** Wontfix.
+- **Unknown `chart.level` slipping through `<`/`<=` filters is unreachable.** `filterCharts` compares
+  `indexOf(chart.level)`, which is `-1` for a level outside `LEVEL_LIST` — but every one of the 1830 seed
+  rows uses a level that *is* in the list (`1`–`12` plus the `+` variants). Revisit only if Arcaea ships
+  a new level notation.
+- **Anonymous-user cleanup is handled outside the repo.** No migration or script in-tree; if that changes,
+  record where it runs.

@@ -1,43 +1,36 @@
-import Modal from '@/app/components/Modal'
-import SongInfo from '@/app/components/SongInfo'
+import ChartViewModal from '@/app/components/ChartViewModal'
 import { ScoreWithChart } from '@/utils/types'
 import AddScoreButton from '../scores/AddScoreButton';
 import ScoreInfo from './ScoreInfo';
-import { Panel } from '@/app/components/Panel';
 import EditScoreButton from './EditScoreButton';
 import DeleteScoreButton from './DeleteScoreButton';
 
 interface ScoreModalProps {
-    score: ScoreWithChart | null
+    scoreWithChart: ScoreWithChart | null
     ref: React.RefObject<HTMLDialogElement | null>
     onClose: () => void
     onDeleted: () => void
 }
 
 // One shared modal for the whole score grid.
-export default function ScoreModal({ score, ref, onClose, onDeleted }: ScoreModalProps) {
+export default function ScoreModal({ scoreWithChart, ref, onClose, onDeleted }: ScoreModalProps) {
+    if (!scoreWithChart) return null
     return (
-        <Modal ref={ref} onClose={onClose}>
-            {score && (
-                <>
-                    {/* Modal content */}
-                    <Panel>
-                        <SongInfo chart={score.charts} />
-                        <ScoreInfo score={score} />
-                    </Panel>
-
-                    {/* Button Bar */}
-                    <div className="flex justify-between gap-2 mt-4">
-                        <AddScoreButton key={score.charts.id} defaultChart={score.charts}>
-                            <input type="hidden" name="chart_id" value={score.charts.id} />
-                        </AddScoreButton>
-
-                        <EditScoreButton key={`edit-${score.id}`} defaultChart={score.charts} score={score} />
-
-                        <DeleteScoreButton key={`delete-${score.id}`} score={score} onDeleted={onDeleted} />
-                    </div>
-                </>
-            )}
-        </Modal>
+        <ChartViewModal
+            chart={scoreWithChart.charts}
+            score={scoreWithChart}
+            ref={ref}
+            onClose={onClose}
+            detailPanel={<ScoreInfo score={scoreWithChart} />}
+            buttonBar={
+                <div className="flex justify-between w-full gap-2">
+                    <AddScoreButton key={scoreWithChart.charts.id} defaultChart={scoreWithChart.charts}>
+                        <input type="hidden" name="chart_id" value={scoreWithChart.charts.id} />
+                    </AddScoreButton>
+                    <EditScoreButton key={`edit-${scoreWithChart.id}`} defaultChart={scoreWithChart.charts} score={scoreWithChart} />
+                    <DeleteScoreButton key={`delete-${scoreWithChart.id}`} score={scoreWithChart} onDeleted={onDeleted} />
+                </div>
+            }
+        />
     )
 }

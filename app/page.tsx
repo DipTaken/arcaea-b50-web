@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import LoginButton from '@/app/components/LoginButton'
 import { PageShell } from './components/PageShell'
 import { Panel } from './components/Panel'
+import Link from 'next/link'
 
 export default async function LandingPage() {
     const cookieStore = await cookies()
@@ -14,17 +15,30 @@ export default async function LandingPage() {
             title="Arcaea B50 Web"
             subtitle="">
 
-            {/* Display a welcome message if the user is logged in, or a login prompt if not */}
-            {user && !user.is_anonymous ? (
+            {/*Show Welcome message if user is logged in*/}
+            {user && !user.is_anonymous && (
                 <span>Welcome, {user.email?.split('@')[0]}</span>
-            ) : (
+            )}
+            {/*Show Link Account button if user is not logged in (and has submitted one or more scores) */}
+            {user && user.is_anonymous && (
+                <div className="flex flex-col items-center gap-4">
+                    <h2 className="text-xl font-light">Login to begin</h2>
+                    <Link href="/auth/link"
+                        className="text-base font-light border-2 p-2 rounded-md"
+                    >
+                        Sign in
+                    </Link>
+                </div>
+            )}
+            {/*Show LoginButton if user is not logged in*/}
+            {!user && (
                 <div className="flex flex-col items-center gap-4">
                     <h2 className="text-xl font-light">Login to begin</h2>
                     <LoginButton />
                 </div>
             )}
-            
-            
+
+
             {/*CHANGELOG*/}
             <Panel>
                 <div className="flex flex-col gap-6 p-4">

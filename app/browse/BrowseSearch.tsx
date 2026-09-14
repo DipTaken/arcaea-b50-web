@@ -7,6 +7,7 @@ import BrowseCard from './BrowseCard'
 import BrowseModal from './BrowseModal'
 import { CardGrid } from '@/app/components/CardGrid'
 import { Button } from '../components/Button'
+import { LEVEL_LIST, DIFFICULTY_ORDER, SORT_OPTIONS } from '@/utils/constants'
 
 const CARDS_PER_PAGE = 100
 
@@ -61,15 +62,11 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     <div className="flex items-center justify-center gap-1">
                         <select className={`${controlClasses} px-6`}
                             onChange={(e) => setSortOption(e.target.value)}>
-                            <option value="" hidden >Sort by...</option>
-                            <option value="title">Title</option>
-                            <option value="chartConstant">Chart Constant</option>
-                            <option value="difficulty">Difficulty</option>
-                            <option value="artist">Artist</option>
-                            <option value="bpm">BPM</option>
-                            <option value="length">Length</option>
-                            <option value="noteCount">Note Count</option>
-                            <option value="version">Version</option>
+                            {SORT_OPTIONS.map((option) => (
+                                <option key={option.key} value={option.key}>
+                                    {option.label}
+                                </option>
+                            ))}
                         </select>
 
                         {/* Sort Direction Button */}
@@ -96,23 +93,12 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                         <select className={`${controlClasses} px-6`}
                             onChange={(e) => setLevelFilter(e.target.value)}>
                             <option value="" >Level</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="7+">7+</option>
-                            <option value="8">8</option>
-                            <option value="8+">8+</option>
-                            <option value="9">9</option>
-                            <option value="9+">9+</option>
-                            <option value="10">10</option>
-                            <option value="10+">10+</option>
-                            <option value="11">11</option>
-                            <option value="11+">11+</option>
-                            <option value="12">12</option>
+                            
+                            {LEVEL_LIST.map((level) => (
+                                <option key={level} value={level}>
+                                    {level}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
@@ -120,11 +106,11 @@ export default function BrowseSearch({ charts }: { charts: Chart[] }) {
                     <select className={`${controlClasses} px-6`}
                         onChange={(e) => setDifficultyFilter(Number(e.target.value))}>
                         <option value="" >Difficulty</option>
-                        <option value="1">PST</option>
-                        <option value="2">PRS</option>
-                        <option value="3">FTR</option>
-                        <option value="4">ETR</option>
-                        <option value="5">BYD</option>
+                        {DIFFICULTY_ORDER.map((diff) => (
+                            <option key={diff} value={DIFFICULTY_ORDER.indexOf(diff) + 1}>
+                                {diff}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>

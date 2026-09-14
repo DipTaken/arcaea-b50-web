@@ -5,6 +5,7 @@ import { ChangeEvent, SubmitEvent, createContext, useContext, useState } from "r
 import { Button } from "../components/Button"
 import { getDifficultyColor } from "@/utils/style"
 import { getJacketUrl } from "@/utils/jacket"
+import { MAX_BASE_SCORE } from "@/utils/constants"
 
 type InitialValues = {
     score?: number
@@ -48,13 +49,20 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
         const formData = new FormData(form)
         setErrorMessage(null) // Clear any previous error message
 
-        const result = await onSubmit(formData)
+        try {
+            const result = await onSubmit(formData)
 
-        if (result?.error) {
-            setErrorMessage(result.error)
-            return
+            if (result?.error) {
+                setErrorMessage(result.error)
+                return
+            }
+            else {
+                onClose() // close the modal
+            }
         }
-        onClose() // close the modal
+        catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred.')
+        }
     }
 
     // Handle input validation for the input fields
@@ -72,6 +80,11 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
             input.setCustomValidity("");
         }
     };
+
+    const handleSelectChart = (chart: Chart | null) => {
+        setSelectedChart(chart)
+        setScoreText('')
+    }
 
     const chartInfoElement = (
         <div className="flex items-center justify-start gap-4 ">
@@ -98,10 +111,10 @@ export default function ScoreForm({ defaultChart, initialValues, onSubmit, onClo
         className: "no-spinner flex-auto bg-gray-700 text-xl text-center text-white rounded-md border-2 border-gray-400"
     } as const
 
-    const max = selectedChart ? 10000000 + selectedChart.note_count : 10000000
+    const max = selectedChart ? MAX_BASE_SCORE + selectedChart.note_count : MAX_BASE_SCORE
 
     return (
-        <SelectedChartContext.Provider value={setSelectedChart}>
+        <SelectedChartContext.Provider value={handleSelectChart}>
             <form onSubmit={handleSubmit}
                 className={`flex flex-col gap-4 gap-y-7 p-10 justify-center rounded-lg bg-gray-800 border-2 border-gray-400 w-full max-w-5xl`}
             >

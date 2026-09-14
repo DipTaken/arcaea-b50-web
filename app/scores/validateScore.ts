@@ -1,3 +1,4 @@
+import { MAX_BASE_SCORE } from "@/utils/constants"
 import { isPM } from "@/utils/rating"
 
 export const CLEAR_STATUS_VALUES = [
@@ -20,7 +21,7 @@ export function validateScore(
     }
 
     // Validate the score
-    const maxScore = 10000000 + (noteCount ?? 0)
+    const maxScore = MAX_BASE_SCORE + (noteCount ?? 0)
     if (score < 0 || score > maxScore) {
         return `Invalid score. Must be between 0 and ${maxScore}`
     }
@@ -35,7 +36,11 @@ export function validateScore(
     if (lost !== null && (lost < 0 || lost > noteCount)) {
         return `Invalid lost value. Must be between 0 and ${noteCount}`
     }
-    if (pure !== null && far !== null && lost !== null && (pure + far + lost > noteCount)) {
+
+    const pureVal = pure ?? 0
+    const farVal = far ?? 0
+    const lostVal = lost ?? 0
+    if (pureVal + farVal + lostVal > noteCount) {
         return `Invalid values. The sum of pure, far, and lost must not exceed ${noteCount}`
     }
 

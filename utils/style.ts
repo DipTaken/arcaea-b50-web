@@ -1,21 +1,19 @@
+import { DIFFICULTY_ORDER } from '@/utils/constants'
+
 // returns a color based on the difficulty
 export function getDifficultyColor(difficulty: string): string {
-    switch (difficulty) {
-        case "PST":
-            return "#40A0A0"
-        case "PRS":
-            return "#40A040"
-        case "FTR":
-            return "#A040A0"
-        case "ETR":
-            return "#7340A0"
-        case "BYD":
-            return "#A04040"
-        case "INS":
-            return "#3933b2"
-        default:
-            return "#000000"
+    const DIFFICULTY_COLORS: Record<string, string> = {
+        PST: "#40A0A0",
+        PRS: "#40A040",
+        FTR: "#A040A0",
+        ETR: "#7340A0",
+        BYD: "#A04040",
+        INS: "#3933b2"
     }
+    if (!difficulty || !(DIFFICULTY_ORDER as readonly string[]).includes(difficulty)) {
+        return "#000000" // default color for unknown difficulty
+    }
+    return DIFFICULTY_COLORS[difficulty]
 }
 
 // returns a color based on the grade
@@ -74,4 +72,4 @@ export const cardHoverAnimation = "cursor-pointer hover:scale-105 transition-tra
 
 export const scrollbarStyle = "scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-700"
 
-export const heroBackdropURL = "https://jkdyzmjuiojlitzvslmx.supabase.co/storage/v1/object/public/images/Partner_saya_konzetsu.png"
+export const heroBackdropURL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/Partner_saya_konzetsu.png`
